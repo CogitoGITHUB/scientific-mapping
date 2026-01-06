@@ -84,6 +84,9 @@
 ;; Load context awareness
 (require 'context-awareness)
 
+;; Load startup automation
+(require 'startup-automation)
+
 (defconst scientific-mapping-version "1.0.0"
   "Version of the scientific-mapping system.")
 

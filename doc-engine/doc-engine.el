@@ -57,6 +57,213 @@
 ;; Associate .orgtex with org-mode
 (add-to-list 'auto-mode-alist '("\\.orgtex\\'" . org-mode))
 
+;;;; Internal ID Mapping System
+
+(defvar doc-engine-id-map (make-hash-table :test 'equal)
+  "Internal mapping from document IDs to file paths.")
+
+(defvar doc-engine-id-map-file (expand-file-name "doc-engine-id-map.el" user-emacs-directory)
+  "File to persist ID mappings.")
+
+(defun doc-engine-register-file (id filepath)
+  "Register ID to file path mapping."
+  (puthash id filepath doc-engine-id-map)
+  (doc-engine-save-id-map))
+
+(defun doc-engine-find-file-by-id (id)
+  "Find file path for given ID."
+  (gethash id doc-engine-id-map))
+
+(defun doc-engine-get-file-id (filepath)
+  "Get ID for given file path."
+  (let ((filepath (expand-file-name filepath)))
+    (catch 'found
+      (maphash (lambda (id path)
+                 (when (string= (expand-file-name path) filepath)
+                   (throw 'found id)))
+               doc-engine-id-map)
+      nil)))
+
+(defun doc-engine-save-id-map ()
+  "Save ID mapping to disk."
+  (with-temp-file doc-engine-id-map-file
+    (insert ";; doc-engine ID to file mapping - Auto-generated\n")
+    (insert "(setq doc-engine-id-map ")
+    (prin1 doc-engine-id-map (current-buffer))
+    (insert ")\n")))
+
+(defun doc-engine-load-id-map ()
+  "Load ID mapping from disk."
+  (when (file-exists-p doc-engine-id-map-file)
+    (load doc-engine-id-map-file)))
+
+;; Load mappings on startup
+(doc-engine-load-id-map)
+
+;;;; Frictionless Automation System
+
+(defcustom doc-engine-auto-process-on-open t
+  "Automatically process documents when opened."
+  :group 'doc-engine
+  :type 'boolean)
+
+(defcustom doc-engine-auto-process-on-save t
+  "Automatically process documents when saved."
+  :group 'doc-engine
+  :type 'boolean)
+
+(defcustom doc-engine-auto-sync-citations t
+  "Automatically sync citations when document changes."
+  :group 'doc-engine
+  :type 'boolean)
+
+(defcustom doc-engine-auto-extract-concepts t
+  "Automatically extract concepts from document content."
+  :group 'doc-engine
+  :type 'boolean)
+
+;; Hooks for automatic processing
+(add-hook 'find-file-hook #'doc-engine-auto-process-on-open)
+(add-hook 'after-save-hook #'doc-engine-auto-process-on-save)
+
+(defun doc-engine-auto-process-on-open ()
+  "Automatically process document when opened."
+  (when (and doc-engine-auto-process-on-open
+             (doc-engine-is-scientific-document-p))
+    (run-with-timer 0.5 nil #'doc-engine-process-opened-document)))
+
+(defun doc-engine-auto-process-on-save ()
+  "Automatically process document when saved."
+  (when (and doc-engine-auto-process-on-save
+             (doc-engine-is-scientific-document-p))
+    (run-with-timer 0.1 nil #'doc-engine-process-saved-document)))
+
+(defun doc-engine-is-scientific-document-p ()
+  "Check if current buffer is a scientific document."
+  (and (buffer-file-name)
+       (member (buffer-file-name) (doc-engine-all-files))))
+
+(defun doc-engine-process-opened-document ()
+  "Process document that was just opened."
+  (when (doc-engine-is-scientific-document-p)
+    ;; Ensure file is registered in ID map
+    (let ((id (org-entry-get nil "IDENTIFIER"))
+          (filepath (buffer-file-name)))
+      (when (and id filepath)
+        (doc-engine-register-file id filepath)))
+
+    ;; Auto-sync citations if enabled
+    (when doc-engine-auto-sync-citations
+      (run-with-timer 1.0 nil #'doc-engine-sync-citations-for-buffer))))
+
+(defun doc-engine-process-saved-document ()
+  "Process document that was just saved."
+  (when (doc-engine-is-scientific-document-p)
+    ;; Update ID mapping
+    (let ((id (org-entry-get nil "IDENTIFIER"))
+          (filepath (buffer-file-name)))
+      (when id
+        (doc-engine-register-file id filepath)))
+
+    ;; Auto-sync citations
+    (when doc-engine-auto-sync-citations
+      (doc-engine-sync-citations-for-buffer))
+
+    ;; Auto-extract concepts
+    (when doc-engine-auto-extract-concepts
+      (run-with-timer 0.5 nil #'doc-engine-auto-extract-concepts-from-buffer))))
+
+(defun doc-engine-sync-citations-for-buffer ()
+  "Sync citations for current buffer."
+  (when (and (featurep 'citation-database)
+             citation-database-autosync-mode)
+    (let ((doi (org-entry-get nil "DOI")))
+      (when doi
+        (citation-database-index-file (buffer-file-name))))))
+
+(defun doc-engine-auto-extract-concepts-from-buffer ()
+  "Automatically extract concepts from current buffer."
+  (when (featurep 'ai-integration)
+    (let ((content (buffer-substring-no-properties (point-min) (point-max))))
+      (when (> (length content) 100) ; Only process substantial content
+        (condition-case err
+            (ai-integration-extract-concepts content)
+          (error (message "Auto concept extraction failed: %s" (error-message-string err))))))))
+
+;;;; Quick Document Creation (Ultra-Frictionless)
+
+;;;###autoload
+(defun doc-engine-quick-note (title)
+  "Create a quick note with just a title - everything else automated."
+  (interactive "sNote title: ")
+  (let* ((signature (doc-engine-sluggify-title title))
+         (filename (format "%s.org" signature))
+         (target-dir (car (if (listp doc-engine-directory)
+                             doc-engine-directory
+                           (list doc-engine-directory))))
+         (filepath (expand-file-name filename target-dir)))
+
+    ;; Handle conflicts
+    (let ((counter 1))
+      (while (file-exists-p filepath)
+        (setq filename (format "%s-%d.org" signature counter))
+        (setq filepath (expand-file-name filename target-dir))
+        (setq counter (1+ counter))))
+
+    ;; Create minimal document
+    (with-temp-file filepath
+      (insert (format "#+TITLE: %s\n" title))
+      (insert (format "#+DATE: %s\n" (format-time-string "[%Y-%m-%d %a %H:%M]")))
+      (insert (format "#+IDENTIFIER: %s\n" (doc-engine-generate-identifier nil (current-time))))
+      (insert "\n* Notes\n\n"))
+
+    ;; Register in ID map
+    (let ((id (format-time-string "%Y%m%dT%H%M%S" (current-time))))
+      (doc-engine-register-file id filepath))
+
+    ;; Open file
+    (find-file filepath)
+    (message "Created quick note: %s" title)))
+
+;;;###autoload
+(defun doc-engine-smart-import (source)
+  "Smart import from various sources with automatic processing."
+  (interactive
+   (list (completing-read "Import from: " '("clipboard" "url" "doi" "file") nil t)))
+  (cond
+   ((string= source "clipboard")
+    (doc-engine-import-from-clipboard))
+   ((string= source "url")
+    (doc-engine-import-from-url))
+   ((string= source "doi")
+    (call-interactively #'academic-apis-resolve-doi))
+   ((string= source "file")
+    (doc-engine-import-from-file))))
+
+(defun doc-engine-import-from-clipboard ()
+  "Import content from clipboard as new document."
+  (let ((content (current-kill 0)))
+    (if (string-empty-p content)
+        (message "Clipboard is empty")
+      (let ((title (read-string "Document title: " (doc-engine-extract-title-from-content content))))
+        (doc-engine-create :title title :abstract content)))))
+
+(defun doc-engine-extract-title-from-content (content)
+  "Extract potential title from content."
+  (let ((lines (split-string content "\n" t)))
+    (or (car (seq-filter (lambda (line) (> (length line) 10)) lines))
+        "Imported Document")))
+
+(defun doc-engine-import-from-url (url)
+  "Import content from URL."
+  (interactive "sURL to import: ")
+  (message "URL import not yet implemented - use academic APIs for now"))
+
+(defun doc-engine-import-from-file (file)
+  "Import and convert external file."
+  (interactive "fFile to import: ")
+  (message "File import not yet implemented - copy content manually for now"))
+
 (defgroup doc-engine ()
   "Document and paper management system."
   :group 'files
@@ -209,15 +416,23 @@ When called interactively, prompt for information based on
     
     (let* ((identifier (doc-engine-generate-identifier doi date))
            (signature (doc-engine-sluggify-title title))
-           (filename (doc-engine-format-filename identifier signature keywords file-type))
+           (filename (doc-engine-format-filename signature keywords file-type))
            (filepath (expand-file-name filename target-dir))
            (front-matter (doc-engine-format-front-matter
                           title doi keywords identifier date
                           citation abstract methodology results file-type)))
-      
-      (when (file-exists-p filepath)
-        (error "File already exists: %s" filepath))
-      
+
+      ;; Handle filename conflicts by adding number suffix
+      (let ((counter 1)
+            (base-filename filename))
+        (while (file-exists-p filepath)
+          (setq filename (format "%s-%d.%s"
+                                (file-name-sans-extension base-filename)
+                                counter
+                                (file-name-extension base-filename)))
+          (setq filepath (expand-file-name filename target-dir))
+          (setq counter (1+ counter))))
+
       (with-temp-file filepath
         (insert front-matter)
         (unless (eq file-type 'text)
@@ -227,9 +442,12 @@ When called interactively, prompt for information based on
           (insert "* Citations\n\n")
           (insert "* Questions\n\n")
           (insert "* Future Work\n\n")))
-      
+
+      ;; Store ID-to-file mapping for internal use
+      (doc-engine-register-file identifier filepath)
+
       (find-file filepath)
-      (message "Created scientific document: %s" filepath)
+      (message "Created scientific document: %s" (file-name-nondirectory filepath))
       filepath)))
 
 (defun doc-engine-read-prompt (prompt)
@@ -269,15 +487,14 @@ If DOI is provided, use DOI-based identifier. Otherwise use timestamp format."
 
 ;;;; Scientific Document Filenames
 
-(defun doc-engine-format-filename (identifier signature keywords file-type)
-  "Format filename for scientific document.
-Format: IDENTIFIER--SIGNATURE__KEYWORDS.EXTENSION"
+(defun doc-engine-format-filename (signature keywords file-type)
+  "Format clean filename for scientific document.
+Format: SIGNATURE__KEYWORDS.EXTENSION (no visible IDs)"
   (let ((keyword-str (if keywords
-                       (concat "__"
-                               (mapconcat 'downcase keywords "-"))
-                     "")))
-    (format "%s--%s%s.%s"
-            identifier
+                        (concat "__"
+                                (mapconcat 'downcase keywords "-"))
+                      "")))
+    (format "%s%s.%s"
             (downcase signature)
             keyword-str
             (doc-engine-file-extension file-type))))

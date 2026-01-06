@@ -29,6 +29,8 @@
 
     ;; Document management
     (define-key map (kbd "C-c s i") 'scientific-mapping-import-paper)
+    (define-key map (kbd "C-c s q") 'doc-engine-quick-note)
+    (define-key map (kbd "C-c s m") 'doc-engine-smart-import)
     (define-key map (kbd "C-c s c") 'concept-relationships-create-entry)
     (define-key map (kbd "C-c s v") 'viz-engine-open)
     (define-key map (kbd "C-c s n") 'viz-engine-set-mode)
@@ -76,6 +78,8 @@
     (define-key map (kbd "C-c s W") 'workflow-integration-show-workflow-status)
     (define-key map (kbd "C-c s U") 'workflow-integration-unified-search)
     (define-key map (kbd "C-c s F") 'workflow-integration-import-paper-complete)
+    (define-key map (kbd "C-c s R") 'workflow-integration-frictionless-research-session)
+    (define-key map (kbd "C-c s P") 'workflow-integration-smart-process-buffer)
 
     ;; Data synchronization
     (define-key map (kbd "C-c s Y") 'data-synchronization-full-sync)

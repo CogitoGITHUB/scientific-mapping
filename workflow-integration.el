@@ -40,6 +40,11 @@
   :group 'workflow-integration
   :type 'boolean)
 
+(defcustom workflow-integration-frictionless-mode t
+  "If non-nil, enable maximum automation and frictionless workflow."
+  :group 'workflow-integration
+  :type 'boolean)
+
 ;;;###autoload
 (defun workflow-integration-import-paper-complete (doi title keywords)
   "Complete automated workflow for importing a paper.
@@ -368,6 +373,174 @@ RESULTS: Search results to import"
 (defun workflow-integration-initialize ()
   "Initialize workflow integration."
   (message "Workflow integration initialized"))
+
+;;;; Frictionless Mode - Maximum Automation
+
+(when workflow-integration-frictionless-mode
+  (message "Enabling frictionless research workflow mode...")
+
+  ;; Auto-enable all automation features
+  (setq workflow-integration-auto-import-workflow t)
+  (setq workflow-integration-auto-analyze-new-documents t)
+  (setq workflow-integration-auto-schedule-reviews t)
+
+  ;; Enable doc-engine automation
+  (when (featurep 'doc-engine)
+    (setq doc-engine-auto-process-on-open t)
+    (setq doc-engine-auto-process-on-save t)
+    (setq doc-engine-auto-sync-citations t)
+    (setq doc-engine-auto-extract-concepts t))
+
+  ;; Enable AI automation
+  (when (featurep 'ai-integration)
+    (setq ai-integration-auto-analyze-new-documents t))
+
+  ;; Enable data synchronization
+  (when (featurep 'data-synchronization)
+    (data-synchronization-start-auto-sync))
+
+  ;; Enable context awareness
+  (when (featurep 'context-awareness)
+    (context-awareness-enable-proactive-suggestions))
+
+  (message "Frictionless mode activated - maximum automation enabled!"))
+
+;;;; Ultra-Automated Research Workflow
+
+;;;###autoload
+(defun workflow-integration-frictionless-research-session ()
+  "Start a completely automated research session."
+  (interactive)
+  (message "🌊 Starting frictionless research session...")
+
+  ;; 1. Auto-sync everything
+  (when (featurep 'data-synchronization)
+    (data-synchronization-full-sync))
+
+  ;; 2. Check for new content to process
+  (workflow-integration-process-pending-items)
+
+  ;; 3. Show smart suggestions
+  (when (featurep 'context-awareness)
+    (run-with-timer 1 nil #'context-awareness-show-suggestions))
+
+  ;; 4. Open unified search interface
+  (run-with-timer 2 nil #'workflow-integration-unified-search "")
+
+  (message "🎯 Frictionless research session ready!"))
+
+(defun workflow-integration-process-pending-items ()
+  "Process any pending items automatically."
+  (let ((processed 0))
+
+    ;; Process unanalyzed documents
+    (when (and (featurep 'ai-integration) workflow-integration-auto-analyze-new-documents)
+      (dolist (file (doc-engine-all-files))
+        (when (and (not (org-entry-get nil "AI_ANALYZED" file))
+                   (> (length (with-temp-buffer
+                               (insert-file-contents file)
+                               (buffer-string))) 500)) ; Substantial content
+          (run-with-timer (* processed 0.5) nil
+                         (lambda (f) (workflow-integration-analyze-new-document f)) file)
+          (setq processed (1+ processed)))))
+
+    ;; Process unscheduled reviews
+    (when workflow-integration-auto-schedule-reviews
+      (dolist (file (doc-engine-all-files))
+        (when (and (org-entry-get nil "DOI" file)
+                   (not (workflow-integration-has-scheduled-review-p file)))
+          (run-with-timer (* processed 0.3) nil
+                         #'workflow-integration-schedule-document-review
+                         (org-entry-get nil "DOI" file)
+                         (org-entry-get nil "TITLE" file))
+          (setq processed (1+ processed)))))
+
+    (when (> processed 0)
+      (message "Auto-processing %d pending items..." processed))))
+
+(defun workflow-integration-has-scheduled-review-p (file)
+  "Check if document already has a scheduled review."
+  (catch 'found
+    (dolist (agenda-file scientific-mapping-agenda-files)
+      (when (file-exists-p agenda-file)
+        (with-current-buffer (find-file-noselect agenda-file)
+          (goto-char (point-min))
+          (when (search-forward (file-name-nondirectory file) nil t)
+            (throw 'found t)))))
+    nil))
+
+;;;; Smart Document Processing
+
+;;;###autoload
+(defun workflow-integration-smart-process-buffer ()
+  "Automatically process the current buffer with all available intelligence."
+  (interactive)
+  (message "🧠 Smart processing current buffer...")
+
+  (cond
+   ;; Scientific document
+   ((and (eq major-mode 'org-mode)
+         (doc-engine-is-scientific-document-p))
+    (workflow-integration-process-scientific-document))
+
+   ;; Agenda item
+   ((and (eq major-mode 'org-mode)
+         (member (buffer-file-name) scientific-mapping-agenda-files))
+    (workflow-integration-process-agenda-item))
+
+   ;; General text
+   (t (workflow-integration-process-general-text)))
+
+  (message "✨ Smart processing complete!"))
+
+(defun workflow-integration-process-scientific-document ()
+  "Process scientific document with full automation."
+  (let ((actions '()))
+
+    ;; AI Analysis
+    (when (and (featurep 'ai-integration)
+               (not (org-entry-get nil "AI_ANALYZED")))
+      (push "AI analysis" actions)
+      (ai-integration-analyze-document))
+
+    ;; Citation sync
+    (when (and (featurep 'citation-database)
+               (org-entry-get nil "DOI"))
+      (push "Citation sync" actions)
+      (doc-engine-sync-citations-for-buffer))
+
+    ;; Concept extraction
+    (when (and (featurep 'ai-integration)
+               (not (org-entry-get nil "CONCEPTS_EXTRACTED")))
+      (push "Concept extraction" actions)
+      (ai-integration-extract-concepts (buffer-string))
+      (org-set-property "CONCEPTS_EXTRACTED" (format-time-string "%Y-%m-%d")))
+
+    ;; Schedule review
+    (when (and (featurep 'scientific-mapping)
+               (not (workflow-integration-has-scheduled-review-p (buffer-file-name))))
+      (push "Review scheduling" actions)
+      (let ((doi (org-entry-get nil "DOI"))
+            (title (org-entry-get nil "TITLE")))
+        (when doi
+          (scientific-mapping-schedule-paper-review doi title))))
+
+    (if actions
+        (message "Applied smart processing: %s" (string-join actions ", "))
+      (message "Document already fully processed"))))
+
+(defun workflow-integration-process-agenda-item ()
+  "Process agenda item intelligently."
+  (message "Processing agenda item...")
+
+  ;; Could add smart scheduling, deadline analysis, etc.
+  (message "Agenda item processing not yet implemented"))
+
+(defun workflow-integration-process-general-text ()
+  "Process general text content."
+  (when (and (featurep 'ai-integration)
+             (> (buffer-size) 100))
+    (ai-integration-analyze-document)))
 
 ;; Auto-initialize
 (workflow-integration-initialize)
