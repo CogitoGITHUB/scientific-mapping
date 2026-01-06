@@ -60,6 +60,9 @@
 (require 'scientific-concept-tree)
 (require 'yasnippet)
 
+(defconst scientific-mapping-version "1.0.0"
+  "Version of the scientific-mapping system.")
+
 (defgroup scientific-mapping ()
   "Integrated scientific knowledge mapping system."
   :group 'applications
@@ -199,14 +202,18 @@
 (defun scientific-mapping-import-paper ()
   "Quick workflow: Import a scientific paper from DOI."
   (interactive)
-  (let* ((doi (read-string "Enter DOI: "))
-         (title (read-string "Enter paper title: "))
-         (keywords (split-string (read-string "Enter keywords (comma-separated): ") ",")))
-    (scientific-document-create
-     :title title
-     :doi doi
-     :keywords keywords)
-    (message "Paper imported. Add concepts and citations with C-c c and C-c p.")))
+  (condition-case err
+      (let* ((doi (read-string "Enter DOI: "))
+             (title (read-string "Enter paper title: "))
+             (keywords (split-string (read-string "Enter keywords (comma-separated): ") ",")))
+        (unless (and doi title)
+          (error "DOI and title are required"))
+        (scientific-document-create
+         :title title
+         :doi doi
+         :keywords keywords)
+        (message "Paper imported. Add concepts and citations with C-c c and C-c p."))
+    (error (message "Error importing paper: %s" (error-message-string err)))))
 
 ;;;###autoload
 (defun scientific-mapping-create-concept-map ()

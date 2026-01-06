@@ -40,12 +40,11 @@ The system is designed for academics, scientists, and researchers who need to:
 - Hierarchical knowledge organization
 - Cross-disciplinary connections
 
-*** 3D Visualization
-- Web-based interactive graphs
-- Force-directed layouts
+*** Emacs-based Visualization
+- Text-based graph visualization in Emacs buffers
 - Citation, concept, and author networks
-- Real-time synchronization with Emacs
 - Multiple visualization modes
+- Interactive navigation
 
 *** Academic Writing Standards
 - Template library for research articles, reviews, conference papers, theses
@@ -89,14 +88,7 @@ The system is designed for academics, scientists, and researchers who need to:
    (scientific-mapping-mode 1)
    #+end_src
 
-3. Install Node.js dependencies for the visualizer:
-   #+begin_src bash
-   cd scientific-visualizer
-   npm install
-   npm run build
-   #+end_src
-
-4. Configure document directory:
+3. Configure document directory:
    #+begin_src elisp
    (setq scientific-document-directory "~/scientific-documents/")
    #+end_src
@@ -369,12 +361,7 @@ The system enforces academic standards:
 
 *** Common Issues
 
-1. *Visualizer not loading*: Ensure Node.js dependencies are installed
-   #+begin_src bash
-   cd scientific-visualizer
-   npm install
-   npm run build
-   #+end_src
+1. *Visualizer not opening*: Ensure scientific-visualizer-mode is enabled
 
 2. *Database errors*: Check SQLite installation and permissions
 
