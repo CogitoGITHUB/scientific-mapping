@@ -16,13 +16,52 @@ class ScientificVisualizer {
     }
 
     init() {
-        // Initialize 3D Force Graph
+        // Initialize 3D Force Graph with NO mouse controls
         this.graph = ForceGraph3D({
-            controlType: 'orbit',
+            controlType: false, // Disable all mouse controls
             rendererConfig: {
                 antialias: true,
                 alpha: true
             }
+        })
+        (document.getElementById('3d-graph'))
+
+        // Configure graph appearance and behavior
+        .nodeLabel(node => `${node.title || node.id}<br/>Type: ${node.type || 'unknown'}`)
+        .nodeColor(node => this.getNodeColor(node))
+        .nodeVal(node => Math.sqrt((node.weight || 1) + 1))
+        .nodeResolution(16)
+        .linkColor(link => this.getLinkColor(link))
+        .linkWidth(link => Math.max(1, Math.min(5, link.weight || 1)))
+        .linkDirectionalArrowLength(3)
+        .linkDirectionalArrowRelPos(1)
+        .linkOpacity(0.8);
+
+        // Initialize keyboard control state
+        this.keyboardState = {
+            moveForward: false,
+            moveBackward: false,
+            moveLeft: false,
+            moveRight: false,
+            moveUp: false,
+            moveDown: false,
+            rotateLeft: false,
+            rotateRight: false,
+            rotateUp: false,
+            rotateDown: false,
+            zoomIn: false,
+            zoomOut: false
+        };
+
+        this.selectedNodeIndex = -1;
+        this.cameraSpeed = 1;
+        this.rotationSpeed = 0.02;
+        this.zoomSpeed = 0.1;
+
+        // Setup comprehensive keyboard controls
+        this.setupKeyboardControls();
+        this.startKeyboardAnimationLoop();
+    }
         })
         (document.getElementById('3d-graph'))
 
@@ -58,47 +97,166 @@ class ScientificVisualizer {
         this.setupAdvancedControls();
     }
 
-    setupAdvancedControls() {
-        // Custom controls for precise manipulation
-        const controls = this.graph.controls();
-
-        // Add keyboard shortcuts
+    setupKeyboardControls() {
+        // Comprehensive keyboard event handlers
         document.addEventListener('keydown', (event) => {
-            switch(event.key) {
-                case 'r':
-                case 'R':
-                    this.resetCamera();
-                    break;
-                case 'f':
-                case 'F':
-                    this.fitToScreen();
-                    break;
-                case 'p':
-                case 'P':
-                    this.pauseResumeAnimation();
-                    break;
-                case 'l':
-                case 'L':
-                    this.toggleLabels();
-                    break;
+            this.handleKeyDown(event);
+        });
+
+        document.addEventListener('keyup', (event) => {
+            this.handleKeyUp(event);
+        });
+
+        // Prevent default behavior for our keys
+        document.addEventListener('keydown', (event) => {
+            const keys = ['w', 'a', 's', 'd', 'q', 'e', 'i', 'k', 'j', 'l', 'u', 'o',
+                         'r', 'f', 'p', 'z', 'x', 'n', 'm', 'h', 'ArrowUp', 'ArrowDown',
+                         'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'];
+            if (keys.includes(event.key.toLowerCase())) {
+                event.preventDefault();
             }
         });
+    }
 
-        // Mouse wheel for zoom with finer control
-        controls.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            const zoomSpeed = 0.1;
-            const delta = event.deltaY > 0 ? 1 + zoomSpeed : 1 - zoomSpeed;
-            controls.dollyInOut(delta);
-        });
+    handleKeyDown(event) {
+        const key = event.key.toLowerCase();
+
+        // Camera movement (WASD + QE for up/down)
+        switch(key) {
+            case 'w': this.keyboardState.moveForward = true; break;
+            case 's': this.keyboardState.moveBackward = true; break;
+            case 'a': this.keyboardState.moveLeft = true; break;
+            case 'd': this.keyboardState.moveRight = true; break;
+            case 'q': this.keyboardState.moveUp = true; break;
+            case 'e': this.keyboardState.moveDown = true; break;
+
+            // Camera rotation (IJKL)
+            case 'i': this.keyboardState.rotateUp = true; break;
+            case 'k': this.keyboardState.rotateDown = true; break;
+            case 'j': this.keyboardState.rotateLeft = true; break;
+            case 'l': this.keyboardState.rotateRight = true; break;
+
+            // Zoom (UO)
+            case 'u': this.keyboardState.zoomIn = true; break;
+            case 'o': this.keyboardState.zoomOut = true; break;
+
+            // Camera controls
+            case 'r': this.resetCamera(); break;
+            case 'f': this.fitToScreen(); break;
+            case 'p': this.pauseResumeAnimation(); break;
+            case 'z': this.toggleLabels(); break;
+
+            // Node navigation (Arrow keys)
+            case 'arrowup': this.selectNextNode(); break;
+            case 'arrowdown': this.selectPreviousNode(); break;
+            case 'arrowleft': this.selectPreviousConnection(); break;
+            case 'arrowright': this.selectNextConnection(); break;
+
+            // Node actions
+            case 'enter': this.activateSelectedNode(); break;
+            case ' ': this.highlightSelectedNode(); event.preventDefault(); break;
+
+            // Search and navigation
+            case 'x': this.clearSearch(); break;
+            case 'n': this.focusOnSelectedNode(); break;
+            case 'm': this.zoomToSelectedNode(); break;
+
+            // Speed controls
+            case 'pageup': this.increaseSpeed(); break;
+            case 'pagedown': this.decreaseSpeed(); break;
+            case 'home': this.maxSpeed(); break;
+            case 'end': this.minSpeed(); break;
+
+            // Help
+            case 'h': this.showHelp(); break;
+        }
+    }
+
+    handleKeyUp(event) {
+        const key = event.key.toLowerCase();
+
+        // Reset movement states
+        switch(key) {
+            case 'w': this.keyboardState.moveForward = false; break;
+            case 's': this.keyboardState.moveBackward = false; break;
+            case 'a': this.keyboardState.moveLeft = false; break;
+            case 'd': this.keyboardState.moveRight = false; break;
+            case 'q': this.keyboardState.moveUp = false; break;
+            case 'e': this.keyboardState.moveDown = false; break;
+            case 'i': this.keyboardState.rotateUp = false; break;
+            case 'k': this.keyboardState.rotateDown = false; break;
+            case 'j': this.keyboardState.rotateLeft = false; break;
+            case 'l': this.keyboardState.rotateRight = false; break;
+            case 'u': this.keyboardState.zoomIn = false; break;
+            case 'o': this.keyboardState.zoomOut = false; break;
+        }
+    }
+
+    startKeyboardAnimationLoop() {
+        const animate = () => {
+            this.updateCameraFromKeyboard();
+            requestAnimationFrame(animate);
+        };
+        animate();
+    }
+
+    updateCameraFromKeyboard() {
+        const camera = this.graph.camera();
+        const speed = this.cameraSpeed;
+
+        // Calculate movement vector
+        const moveVector = { x: 0, y: 0, z: 0 };
+
+        if (this.keyboardState.moveForward) moveVector.z -= speed;
+        if (this.keyboardState.moveBackward) moveVector.z += speed;
+        if (this.keyboardState.moveLeft) moveVector.x -= speed;
+        if (this.keyboardState.moveRight) moveVector.x += speed;
+        if (this.keyboardState.moveUp) moveVector.y += speed;
+        if (this.keyboardState.moveDown) moveVector.y -= speed;
+
+        // Apply camera rotation to movement
+        const rotation = camera.rotation;
+        const cosY = Math.cos(rotation.y);
+        const sinY = Math.sin(rotation.y);
+
+        const rotatedX = moveVector.x * cosY - moveVector.z * sinY;
+        const rotatedZ = moveVector.x * sinY + moveVector.z * cosY;
+
+        // Update camera position
+        camera.position.x += rotatedX;
+        camera.position.y += moveVector.y;
+        camera.position.z += rotatedZ;
+
+        // Handle rotation
+        if (this.keyboardState.rotateLeft) camera.rotation.y += this.rotationSpeed;
+        if (this.keyboardState.rotateRight) camera.rotation.y -= this.rotationSpeed;
+        if (this.keyboardState.rotateUp) camera.rotation.x += this.rotationSpeed;
+        if (this.keyboardState.rotateDown) camera.rotation.x -= this.rotationSpeed;
+
+        // Handle zoom
+        if (this.keyboardState.zoomIn) {
+            camera.position.x *= (1 - this.zoomSpeed);
+            camera.position.y *= (1 - this.zoomSpeed);
+            camera.position.z *= (1 - this.zoomSpeed);
+        }
+        if (this.keyboardState.zoomOut) {
+            camera.position.x *= (1 + this.zoomSpeed);
+            camera.position.y *= (1 + this.zoomSpeed);
+            camera.position.z *= (1 + this.zoomSpeed);
+        }
+
+        // Clamp rotation limits
+        camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
     }
 
     resetCamera() {
         this.graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 2000);
+        console.log('Camera reset');
     }
 
     fitToScreen() {
         this.graph.zoomToFit(1000, 50);
+        console.log('Fitted to screen');
     }
 
     pauseResumeAnimation() {
@@ -110,6 +268,199 @@ class ScientificVisualizer {
     toggleLabels() {
         const showLabels = this.graph.nodeLabel() !== null;
         this.graph.nodeLabel(showLabels ? null : node => `${node.title || node.id}`);
+        console.log(`Labels ${showLabels ? 'hidden' : 'shown'}`);
+    }
+
+    selectNextNode() {
+        const nodes = this.nodes;
+        if (nodes.length === 0) return;
+
+        this.selectedNodeIndex = (this.selectedNodeIndex + 1) % nodes.length;
+        this.updateNodeSelection();
+    }
+
+    selectPreviousNode() {
+        const nodes = this.nodes;
+        if (nodes.length === 0) return;
+
+        this.selectedNodeIndex = this.selectedNodeIndex <= 0 ? nodes.length - 1 : this.selectedNodeIndex - 1;
+        this.updateNodeSelection();
+    }
+
+    selectNextConnection() {
+        if (this.selectedNodeIndex < 0) return;
+
+        const selectedNode = this.nodes[this.selectedNodeIndex];
+        const connections = this.links.filter(link =>
+            link.source.id === selectedNode.id || link.target.id === selectedNode.id
+        );
+
+        if (connections.length === 0) return;
+
+        // Find next connection in the list
+        const currentConnectionIndex = connections.findIndex(conn =>
+            conn.source.id === selectedNode.id || conn.target.id === selectedNode.id
+        );
+
+        const nextConnection = connections[(currentConnectionIndex + 1) % connections.length];
+        const targetNodeId = nextConnection.source.id === selectedNode.id ?
+                            nextConnection.target.id : nextConnection.source.id;
+
+        const targetIndex = this.nodes.findIndex(node => node.id === targetNodeId);
+        if (targetIndex >= 0) {
+            this.selectedNodeIndex = targetIndex;
+            this.updateNodeSelection();
+        }
+    }
+
+    selectPreviousConnection() {
+        if (this.selectedNodeIndex < 0) return;
+
+        const selectedNode = this.nodes[this.selectedNodeIndex];
+        const connections = this.links.filter(link =>
+            link.source.id === selectedNode.id || link.target.id === selectedNode.id
+        );
+
+        if (connections.length === 0) return;
+
+        const currentConnectionIndex = connections.findIndex(conn =>
+            conn.source.id === selectedNode.id || conn.target.id === selectedNode.id
+        );
+
+        const prevConnection = connections[currentConnectionIndex <= 0 ? connections.length - 1 : currentConnectionIndex - 1];
+        const targetNodeId = prevConnection.source.id === selectedNode.id ?
+                            prevConnection.target.id : prevConnection.source.id;
+
+        const targetIndex = this.nodes.findIndex(node => node.id === targetNodeId);
+        if (targetIndex >= 0) {
+            this.selectedNodeIndex = targetIndex;
+            this.updateNodeSelection();
+        }
+    }
+
+    updateNodeSelection() {
+        // Reset all node colors
+        this.refreshGraph();
+
+        if (this.selectedNodeIndex >= 0 && this.selectedNodeIndex < this.nodes.length) {
+            const selectedNode = this.nodes[this.selectedNodeIndex];
+
+            // Highlight selected node
+            this.graph.nodeColor(node => node.id === selectedNode.id ? '#ff0000' : this.getNodeColor(node));
+
+            console.log(`Selected: ${selectedNode.title || selectedNode.id}`);
+        }
+    }
+
+    activateSelectedNode() {
+        if (this.selectedNodeIndex >= 0 && this.selectedNodeIndex < this.nodes.length) {
+            const selectedNode = this.nodes[this.selectedNodeIndex];
+            this.sendMessage('open-paper', { identifier: selectedNode.id });
+            console.log(`Activated: ${selectedNode.title || selectedNode.id}`);
+        }
+    }
+
+    highlightSelectedNode() {
+        if (this.selectedNodeIndex >= 0 && this.selectedNodeIndex < this.nodes.length) {
+            const selectedNode = this.nodes[this.selectedNodeIndex];
+
+            // Highlight node and its connections
+            this.graph.nodeColor(node => {
+                if (node.id === selectedNode.id) return '#ff0000';
+                const connected = this.links.some(link =>
+                    (link.source.id || link.source) === selectedNode.id && (link.target.id || link.target) === node.id ||
+                    (link.target.id || link.target) === selectedNode.id && (link.source.id || link.source) === node.id
+                );
+                return connected ? '#ff8800' : this.getNodeColor(node);
+            });
+
+            // Reset after 3 seconds
+            setTimeout(() => this.updateNodeSelection(), 3000);
+            console.log(`Highlighted connections for: ${selectedNode.title || selectedNode.id}`);
+        }
+    }
+
+    focusOnSelectedNode() {
+        if (this.selectedNodeIndex >= 0 && this.selectedNodeIndex < this.nodes.length) {
+            const selectedNode = this.nodes[this.selectedNodeIndex];
+            this.focusNode(selectedNode.id);
+        }
+    }
+
+    zoomToSelectedNode() {
+        if (this.selectedNodeIndex >= 0 && this.selectedNodeIndex < this.nodes.length) {
+            const selectedNode = this.nodes[this.selectedNodeIndex];
+            this.zoomToNode(selectedNode.id);
+        }
+    }
+
+    clearSearch() {
+        document.getElementById('search-input').value = '';
+        this.refreshGraph();
+        console.log('Search cleared');
+    }
+
+    increaseSpeed() {
+        this.cameraSpeed = Math.min(5, this.cameraSpeed + 0.2);
+        this.rotationSpeed = Math.min(0.1, this.rotationSpeed + 0.002);
+        this.zoomSpeed = Math.min(0.5, this.zoomSpeed + 0.01);
+        console.log(`Speed increased: ${this.cameraSpeed.toFixed(1)}`);
+    }
+
+    decreaseSpeed() {
+        this.cameraSpeed = Math.max(0.1, this.cameraSpeed - 0.2);
+        this.rotationSpeed = Math.max(0.001, this.rotationSpeed - 0.002);
+        this.zoomSpeed = Math.max(0.01, this.zoomSpeed - 0.01);
+        console.log(`Speed decreased: ${this.cameraSpeed.toFixed(1)}`);
+    }
+
+    maxSpeed() {
+        this.cameraSpeed = 5;
+        this.rotationSpeed = 0.1;
+        this.zoomSpeed = 0.5;
+        console.log('Maximum speed set');
+    }
+
+    minSpeed() {
+        this.cameraSpeed = 0.1;
+        this.rotationSpeed = 0.001;
+        this.zoomSpeed = 0.01;
+        console.log('Minimum speed set');
+    }
+
+    showHelp() {
+        const helpText = `
+KEYBOARD CONTROLS (No Mouse Required):
+
+CAMERA MOVEMENT:
+  W/S: Forward/Back     A/D: Left/Right     Q/E: Up/Down
+  I/K: Rotate Up/Down   J/L: Rotate Left/Right
+  U/O: Zoom In/Out
+
+NODE NAVIGATION:
+  ↑/↓: Select Next/Previous Node
+  ←/→: Navigate Connections
+  Enter: Activate Selected Node
+  Space: Highlight Connections
+
+CAMERA CONTROLS:
+  R: Reset Camera       F: Fit to Screen
+  P: Pause/Resume       Z: Toggle Labels
+
+SEARCH & FOCUS:
+  N: Focus on Selected   M: Zoom to Selected
+  X: Clear Search
+
+SPEED CONTROL:
+  PageUp: Increase Speed   PageDown: Decrease Speed
+  Home: Maximum Speed      End: Minimum Speed
+
+OTHER:
+  H: Show This Help
+
+All controls work without mouse - pure keyboard navigation!`;
+        console.log(helpText);
+        alert(helpText);
     }
 
     connectWebSocket() {
@@ -316,14 +667,6 @@ class ScientificVisualizer {
             this.requestGraphData();
         });
 
-        // Control buttons
-        document.getElementById('reset-view').addEventListener('click', () => this.resetCamera());
-        document.getElementById('fit-view').addEventListener('click', () => this.fitToScreen());
-        document.getElementById('toggle-labels').addEventListener('click', () => this.toggleLabels());
-
-        // Advanced controls
-        document.getElementById('pause-animation').addEventListener('click', () => this.pauseResumeAnimation());
-
         // Search functionality
         document.getElementById('search-input').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
@@ -341,35 +684,15 @@ class ScientificVisualizer {
             }
         });
 
-        // Keyboard shortcuts info
-        this.setupKeyboardHints();
+        // Update status
+        this.updateStatus('Ready - Press H for keyboard controls');
     }
 
-    setupKeyboardHints() {
-        const hints = document.createElement('div');
-        hints.id = 'keyboard-hints';
-        hints.innerHTML = `
-            <div class="hint-group">
-                <strong>Camera:</strong> Mouse drag • Wheel zoom • Right-click pan
-            </div>
-            <div class="hint-group">
-                <strong>Shortcuts:</strong> R (reset) • F (fit) • P (pause) • L (labels)
-            </div>
-        `;
-        hints.style.cssText = `
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-family: monospace;
-            z-index: 1000;
-        `;
-
-        document.body.appendChild(hints);
+    updateStatus(message) {
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
     }
 
     sendMessage(command, data) {
