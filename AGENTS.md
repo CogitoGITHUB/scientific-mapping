@@ -27,11 +27,11 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 
 ## Visualization Framework Migration
 
-**3D Force Graph with Keyboard-Only Controls**: Complete keyboard navigation for 3D visualization
-- **Why**: User required ALL control from keyboard (hard rule)
-- **Benefits**: Pure keyboard workflow, precise 3D navigation, accessibility, power user control
-- **Dependencies**: 3d-force-graph and three.js with disabled mouse controls
-- **Features**: WASD movement, IJKL rotation, UO zoom, arrow key navigation, Enter/Space actions, speed controls
+**3D Force Graph with Universal Controls**: Keyboard + Touchscreen support for all devices
+- **Why**: User required touchscreen support as must-have for laptop and mobile (hard rule)
+- **Benefits**: Works on desktop, laptop touchscreens, tablets, and smartphones
+- **Dependencies**: 3d-force-graph and three.js with custom control system
+- **Features**: WASD/IJKL/UO keys, touch gestures (drag/rotate/pinch/tap), virtual controls on mobile, device-optimized performance
 
 ## Git Workflow
 
