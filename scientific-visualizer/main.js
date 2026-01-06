@@ -159,11 +159,33 @@ class ScientificVisualizer {
             ]);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-            const material = new THREE.LineBasicMaterial({ color: 0x666666 });
+            const edgeType = edgeData[2] || 'default';
+            const edgeWeight = edgeData[3] || 1;
+            const material = new THREE.LineBasicMaterial({
+                color: this.getEdgeColor(edgeType),
+                linewidth: edgeWeight
+            });
             const edge = new THREE.Line(geometry, material);
+            edge.userData = { type: edgeType, weight: edgeWeight };
 
             this.edgeObjects.push(edge);
             this.scene.add(edge);
+        }
+    }
+
+    getEdgeColor(edgeType) {
+        if (!this.showRelationships) return 0x666666;
+
+        switch (edgeType) {
+            case 'citation': return 0x4a90e2; // Blue
+            case 'parent': return 0xff6b6b;   // Red
+            case 'child': return 0x50c878;   // Green
+            case 'sibling': return 0xffa500; // Orange
+            case 'friend': return 0x9b59b6;  // Purple
+            case 'evidence': return 0xe74c3c; // Dark red
+            case 'method': return 0x3498db;  // Light blue
+            case 'evolution': return 0x2ecc71; // Light green
+            default: return 0x666666;        // Gray
         }
     }
 
@@ -274,6 +296,14 @@ class ScientificVisualizer {
         });
     }
 
+    updateEdgeColors() {
+        this.edgeObjects.forEach((edge, index) => {
+            const edgeData = this.edges[index];
+            const edgeType = edgeData[2] || 'default';
+            edge.material.color.setHex(this.getEdgeColor(edgeType));
+        });
+    }
+
     updateLabels() {
         this.labels.forEach((label, index) => {
             const node = this.nodeObjects[index];
@@ -299,6 +329,51 @@ class ScientificVisualizer {
             this.currentMode = vars.visualizationMode;
             document.getElementById('mode-select').value = this.currentMode;
         }
+        if (vars.theme) {
+            this.applyTheme(vars.theme);
+        }
+        if (typeof vars.showRelationships !== 'undefined') {
+            this.showRelationships = vars.showRelationships;
+        }
+    }
+
+    applyTheme(theme) {
+        if (!theme) return;
+
+        // Apply theme colors to the web interface
+        document.body.style.background = theme.background || '#0a0a0a';
+        document.body.style.color = theme.foreground || '#ffffff';
+
+        const ui = document.getElementById('ui');
+        if (ui) {
+            ui.style.background = theme.background ? `rgba(${this.hexToRgb(theme.background)}, 0.9)` : 'rgba(0, 0, 0, 0.8)';
+            ui.style.borderBottom = `1px solid ${theme.border || '#333'}`;
+        }
+
+        // Update scene background
+        if (this.scene && theme.background) {
+            this.scene.background = new THREE.Color(theme.background);
+        }
+
+        // Update UI elements
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (theme.accent) {
+                button.style.background = theme.accent;
+            }
+        });
+
+        const select = document.getElementById('mode-select');
+        if (select) {
+            select.style.background = theme.background || '#2a2a2a';
+            select.style.border = `1px solid ${theme.border || '#444'}`;
+            select.style.color = theme.foreground || '#ffffff';
+        }
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
     }
 
     handleCommand(command) {
@@ -346,6 +421,14 @@ class ScientificVisualizer {
                 this.labels.forEach(label => this.scene.remove(label));
                 this.labels = [];
             }
+        });
+
+        document.getElementById('toggle-relationships').addEventListener('click', () => {
+            this.showRelationships = !this.showRelationships;
+            document.getElementById('relationship-filters').style.display =
+                this.showRelationships ? 'block' : 'none';
+            this.updateEdgeColors();
+            this.sendMessage('set-visualization-mode', { mode: this.currentMode });
         });
     }
 

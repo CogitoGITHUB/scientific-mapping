@@ -77,6 +77,11 @@
   :group 'scientific-visualizer
   :type 'boolean)
 
+(defcustom scientific-visualizer-show-relationships t
+  "If true, show detailed relationship types in visualization."
+  :group 'scientific-visualizer
+  :type 'boolean)
+
 (defcustom scientific-visualizer-follow t
   "If true, `scientific-visualizer' will follow you around in the graph."
   :group 'scientific-visualizer
@@ -220,7 +225,9 @@ Takes _WS and FRAME as arguments."
   "Get citation network data for visualization."
   (let* ((network (citation-database-citation-network 3 1000))
           (nodes (plist-get network :nodes))
-          (edges (plist-get network :edges)))
+          (edges (mapcar (lambda (edge)
+                          (list (elt edge 0) (elt edge 1) "citation" 1))
+                        (plist-get network :edges))))
     (list
      :nodes nodes
      :edges edges
@@ -235,12 +242,44 @@ Takes _WS and FRAME as arguments."
                                (elt c 1)          ; name
                                (elt c 4)))        ; frequency
                        concepts))
-          (edges '())) ; Concept relationships would be added here
+          (edges (scientific-visualizer--get-concept-relationships)))
     (list
      :nodes nodes
      :edges edges
      :mode 'concept
      :layout 'hierarchical)))
+
+(defun scientific-visualizer--get-concept-relationships ()
+  "Get concept relationships for visualization."
+  (let ((relationships '()))
+    ;; Get relationships from concept-relationships system
+    (when (and (boundp 'concept-relationships-files) concept-relationships-files)
+      (dolist (file (concept-relationships-files))
+        (with-current-buffer (find-file-noselect file)
+          (let ((id (org-id-get)))
+            (when id
+              ;; Get different relationship types
+              (let ((parents (org-entry-get (point-min) concept-relationships-parents-property-name))
+                    (children (org-entry-get (point-min) concept-relationships-children-property-name))
+                    (siblings (org-entry-get (point-min) concept-relationships-siblings-property-name))
+                    (friends (org-entry-get (point-min) concept-relationships-friends-property-name))
+                    (evidence (org-entry-get (point-min) concept-relationships-evidence-property-name)))
+                (dolist (rel-id (split-string (or parents "") " "))
+                  (when (and rel-id (> (length rel-id) 0))
+                    (push (list id rel-id "parent" 2) relationships)))
+                (dolist (rel-id (split-string (or children "") " "))
+                  (when (and rel-id (> (length rel-id) 0))
+                    (push (list id rel-id "child" 2) relationships)))
+                (dolist (rel-id (split-string (or siblings "") " "))
+                  (when (and rel-id (> (length rel-id) 0))
+                    (push (list id rel-id "sibling" 1) relationships)))
+                (dolist (rel-id (split-string (or friends "") " "))
+                  (when (and rel-id (> (length rel-id) 0))
+                    (push (list id rel-id "friend" 1) relationships)))
+                (dolist (rel-id (split-string (or evidence "") " "))
+                  (when (and rel-id (> (length rel-id) 0))
+                    (push (list id rel-id "evidence" 3) relationships))))))))
+    relationships))
 
 (defun scientific-visualizer--get-author-network ()
   "Get author collaboration network data for visualization."
@@ -270,18 +309,37 @@ Takes _WS and FRAME as arguments."
      :mode 'journal
      :layout 'circular)))
 
+(defun scientific-visualizer--get-modus-theme-colors ()
+  "Get current Modus theme colors."
+  (when (and (boundp 'modus-themes-mode) modus-themes-mode)
+    (let ((bg (face-attribute 'default :background))
+          (fg (face-attribute 'default :foreground))
+          (accent (face-attribute 'modus-themes-accent :foreground))
+          (border (face-attribute 'border :background))
+          (highlight (face-attribute 'highlight :background)))
+      `((background . ,bg)
+        (foreground . ,fg)
+        (accent . ,accent)
+        (border . ,border)
+        (highlight . ,highlight)))))
+
 (defun scientific-visualizer--send-variables (ws)
   "Send miscellaneous scientific-visualizer variables through websocket WS."
-  (websocket-send-text ws
-                       (json-encode
-                        `((type . "variables")
-                          (data .
-                                (("visualizationMode" .
-                                  ,scientific-visualizer-visualization-mode)
-                                 ("syncTheme" .
-                                  ,scientific-visualizer-sync-theme)
-                                 ("followMode" .
-                                  ,scientific-visualizer-follow)))))))
+  (let ((theme-colors (when scientific-visualizer-sync-theme
+                        (scientific-visualizer--get-modus-theme-colors))))
+    (websocket-send-text ws
+                         (json-encode
+                          `((type . "variables")
+                            (data .
+                                  (("visualizationMode" .
+                                    ,scientific-visualizer-visualization-mode)
+                                   ("syncTheme" .
+                                    ,scientific-visualizer-sync-theme)
+                                   ("followMode" .
+                                    ,scientific-visualizer-follow)
+                                   ("showRelationships" .
+                                    ,scientific-visualizer-show-relationships)
+                                   ("theme" . ,theme-colors))))))))
 
 ;;;; Follow Mode
 

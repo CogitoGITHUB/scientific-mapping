@@ -40,11 +40,15 @@ The system is designed for academics, scientists, and researchers who need to:
 - Hierarchical knowledge organization
 - Cross-disciplinary connections
 
-*** Emacs-based Visualization
-- Text-based graph visualization in Emacs buffers
-- Citation, concept, and author networks
-- Multiple visualization modes
-- Interactive navigation
+*** 3D Web Visualization
+- Interactive 3D graphs with Three.js and force-directed layouts
+- Citation, concept, author, and journal networks
+- Real-time synchronization with Emacs via WebSocket
+- Modus theme integration for consistent colors
+- Relationship type visualization with color coding
+- Interactive controls (orbit, zoom, pan, reset view)
+- Node/edge statistics and relationship legends
+- Physics-based graph layout with repulsion/attraction
 
 *** Academic Writing Standards
 - Template library for research articles, reviews, conference papers, theses
