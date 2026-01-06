@@ -72,6 +72,19 @@
       (define-key ai-map (kbd "b") 'ai-integration-batch-analyze)
       (define-key map (kbd "C-c s A") ai-map))
 
+    ;; Workflow integration
+    (define-key map (kbd "C-c s W") 'workflow-integration-show-workflow-status)
+    (define-key map (kbd "C-c s U") 'workflow-integration-unified-search)
+    (define-key map (kbd "C-c s F") 'workflow-integration-import-paper-complete)
+
+    ;; Data synchronization
+    (define-key map (kbd "C-c s Y") 'data-synchronization-full-sync)
+    (define-key map (kbd "C-c s C") 'data-synchronization-consistency-check)
+
+    ;; Context awareness
+    (define-key map (kbd "C-c s S") 'context-awareness-show-suggestions)
+    (define-key map (kbd "C-c s Q") 'context-awareness-quick-actions)
+
     map)
   "Keymap for scientific-mapping-mode with all centralized key bindings.")
 

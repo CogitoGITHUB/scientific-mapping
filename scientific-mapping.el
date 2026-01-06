@@ -75,6 +75,15 @@
 ;; Load centralized key bindings
 (require 'keybindings)
 
+;; Load workflow integration
+(require 'workflow-integration)
+
+;; Load data synchronization
+(require 'data-synchronization)
+
+;; Load context awareness
+(require 'context-awareness)
+
 (defconst scientific-mapping-version "1.0.0"
   "Version of the scientific-mapping system.")
 
