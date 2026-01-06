@@ -1,20 +1,18 @@
-// Scientific Knowledge Mapping 3D Visualizer
-// Inspired by org-roam-ui
+// Scientific Knowledge Mapping Network Visualizer
+// Using Cytoscape.js for better scientific network visualization
 
 class ScientificVisualizer {
     constructor() {
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.controls = null;
-        this.nodes = [];
-        this.edges = [];
-        this.nodeObjects = [];
-        this.edgeObjects = [];
-        this.labels = [];
+        this.cy = null;
         this.ws = null;
         this.currentMode = 'citation';
-        this.showLabels = true;
+        this.layouts = {
+            'cose': 'cose-bilkent',
+            'fcose': 'fcose',
+            'cola': 'cola',
+            'euler': 'euler'
+        };
+        this.currentLayout = 'fcose';
 
         this.init();
         this.connectWebSocket();
@@ -22,49 +20,75 @@ class ScientificVisualizer {
     }
 
     init() {
-        // Scene setup
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
+        // Initialize Cytoscape
+        this.cy = cytoscape({
+            container: document.getElementById('cy'),
 
-        // Camera setup
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.set(0, 0, 50);
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': this.getNodeColor(),
+                        'label': 'data(label)',
+                        'color': '#ffffff',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'font-size': '12px',
+                        'width': '40px',
+                        'height': '40px',
+                        'border-width': '2px',
+                        'border-color': '#ffffff'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 'data(weight)',
+                        'line-color': 'data(color)',
+                        'target-arrow-color': 'data(color)',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'label': 'data(label)',
+                        'font-size': '10px',
+                        'text-background-color': '#000000',
+                        'text-background-opacity': 0.7
+                    }
+                },
+                {
+                    selector: '.highlighted',
+                    style: {
+                        'background-color': '#ff0000',
+                        'line-color': '#ff0000',
+                        'target-arrow-color': '#ff0000',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': '0.5s'
+                    }
+                }
+            ],
 
-        // Renderer setup
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('scene-container').appendChild(this.renderer.domElement);
+            layout: {
+                name: this.currentLayout,
+                animate: true,
+                animationDuration: 1000,
+                fit: true,
+                padding: 30
+            }
+        });
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-        this.scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(1, 1, 1);
-        this.scene.add(directionalLight);
-
-        // Controls
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
-
-        // Animation loop
-        this.animate();
-
-        // Handle window resize
-        window.addEventListener('resize', () => this.onWindowResize());
+        // Event handlers
+        this.setupEventHandlers();
     }
 
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
-    }
+    setupEventHandlers() {
+        this.cy.on('tap', 'node', (evt) => {
+            const node = evt.target;
+            this.sendMessage('open-paper', { identifier: node.data('id') });
+        });
 
-    onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.cy.on('tap', 'edge', (evt) => {
+            const edge = evt.target;
+            console.log('Edge tapped:', edge.data());
+        });
     }
 
     connectWebSocket() {
@@ -72,6 +96,7 @@ class ScientificVisualizer {
 
         this.ws.onopen = () => {
             console.log('Connected to Emacs');
+            this.requestGraphData();
         };
 
         this.ws.onmessage = (event) => {
@@ -100,247 +125,130 @@ class ScientificVisualizer {
     }
 
     updateGraph(data) {
-        this.clearGraph();
-        this.nodes = data.nodes || [];
-        this.edges = data.edges || [];
-
-        // Create nodes
-        this.nodes.forEach(node => {
-            this.createNode(node);
-        });
-
-        // Create edges
-        this.edges.forEach(edge => {
-            this.createEdge(edge);
-        });
+        const elements = this.convertToCytoscapeFormat(data);
+        this.cy.elements().remove();
+        this.cy.add(elements);
+        this.runLayout();
 
         // Update stats
-        document.getElementById('node-count').textContent = `Nodes: ${this.nodes.length}`;
-        document.getElementById('edge-count').textContent = `Edges: ${this.edges.length}`;
-
-        // Auto-layout
-        this.layoutGraph();
+        document.getElementById('node-count').textContent = `Nodes: ${this.cy.nodes().length}`;
+        document.getElementById('edge-count').textContent = `Edges: ${this.cy.edges().length}`;
     }
 
-    createNode(nodeData) {
-        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-        const material = new THREE.MeshPhongMaterial({
-            color: this.getNodeColor(nodeData),
-            transparent: true,
-            opacity: 0.8
-        });
+    convertToCytoscapeFormat(data) {
+        const elements = [];
 
-        const node = new THREE.Mesh(geometry, material);
-        node.position.set(
-            (Math.random() - 0.5) * 40,
-            (Math.random() - 0.5) * 40,
-            (Math.random() - 0.5) * 40
-        );
-
-        node.userData = nodeData;
-        this.nodeObjects.push(node);
-        this.scene.add(node);
-
-        // Create label
-        if (this.showLabels) {
-            this.createLabel(node, nodeData);
-        }
-    }
-
-    createEdge(edgeData) {
-        const sourceNode = this.nodeObjects.find(n => n.userData[0] === edgeData[0]);
-        const targetNode = this.nodeObjects.find(n => n.userData[0] === edgeData[1]);
-
-        if (sourceNode && targetNode) {
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array([
-                sourceNode.position.x, sourceNode.position.y, sourceNode.position.z,
-                targetNode.position.x, targetNode.position.y, targetNode.position.z
-            ]);
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-            const edgeType = edgeData[2] || 'default';
-            const edgeWeight = edgeData[3] || 1;
-            const material = new THREE.LineBasicMaterial({
-                color: this.getEdgeColor(edgeType),
-                linewidth: edgeWeight
+        // Add nodes
+        if (data.nodes) {
+            data.nodes.forEach(node => {
+                elements.push({
+                    data: {
+                        id: node[0], // identifier
+                        label: node[1] || node[0], // title or identifier
+                        type: node[2] || 'default', // node type
+                        weight: node[3] || 1 // node weight/size
+                    }
+                });
             });
-            const edge = new THREE.Line(geometry, material);
-            edge.userData = { type: edgeType, weight: edgeWeight };
+        }
 
-            this.edgeObjects.push(edge);
-            this.scene.add(edge);
+        // Add edges
+        if (data.edges) {
+            data.edges.forEach((edge, index) => {
+                const edgeType = edge[2] || 'default';
+                const edgeWeight = edge[3] || 1;
+
+                elements.push({
+                    data: {
+                        id: `edge_${index}`,
+                        source: edge[0],
+                        target: edge[1],
+                        color: this.getEdgeColor(edgeType),
+                        weight: Math.max(1, Math.min(5, edgeWeight)),
+                        label: edgeType,
+                        type: edgeType
+                    }
+                });
+            });
+        }
+
+        return elements;
+    }
+
+    getNodeColor() {
+        switch (this.currentMode) {
+            case 'citation': return '#4a90e2'; // Blue
+            case 'concept': return '#50c878'; // Green
+            case 'author': return '#ff6b6b'; // Red
+            case 'journal': return '#ffa500'; // Orange
+            default: return '#ffffff';
         }
     }
 
     getEdgeColor(edgeType) {
-        if (!this.showRelationships) return 0x666666;
-
         switch (edgeType) {
-            case 'citation': return 0x4a90e2; // Blue
-            case 'parent': return 0xff6b6b;   // Red
-            case 'child': return 0x50c878;   // Green
-            case 'sibling': return 0xffa500; // Orange
-            case 'friend': return 0x9b59b6;  // Purple
-            case 'evidence': return 0xe74c3c; // Dark red
-            case 'method': return 0x3498db;  // Light blue
-            case 'evolution': return 0x2ecc71; // Light green
-            default: return 0x666666;        // Gray
+            case 'citation': return '#4a90e2'; // Blue
+            case 'parent': return '#ff6b6b';   // Red
+            case 'child': return '#50c878';   // Green
+            case 'sibling': return '#ffa500'; // Orange
+            case 'friend': return '#9b59b6';  // Purple
+            case 'evidence': return '#e74c3c'; // Dark red
+            case 'method': return '#3498db';  // Light blue
+            case 'evolution': return '#2ecc71'; // Light green
+            default: return '#666666';        // Gray
         }
     }
 
-    createLabel(node, nodeData) {
-        // Simple text label using CSS3D
-        const element = document.createElement('div');
-        element.className = 'node-label';
-        element.textContent = nodeData[1] || nodeData[0];
-        element.style.color = 'white';
-        element.style.fontSize = '12px';
-        element.style.pointerEvents = 'none';
+    runLayout(layoutName = null) {
+        const layout = layoutName || this.currentLayout;
+        const layoutOptions = {
+            name: layout,
+            animate: true,
+            animationDuration: 1000,
+            fit: true,
+            padding: 30
+        };
 
-        const label = new THREE.CSS3DObject(element);
-        label.position.copy(node.position);
-        label.position.y += 1;
-
-        this.labels.push(label);
-        this.scene.add(label);
-    }
-
-    getNodeColor(nodeData) {
-        // Color based on node type/mode
-        switch (this.currentMode) {
-            case 'citation':
-                return 0x4a90e2; // Blue
-            case 'concept':
-                return 0x50c878; // Green
-            case 'author':
-                return 0xff6b6b; // Red
-            case 'journal':
-                return 0xffa500; // Orange
-            default:
-                return 0xffffff;
-        }
-    }
-
-    layoutGraph() {
-        // Simple force-directed layout simulation
-        const iterations = 100;
-        const repulsion = 1;
-        const attraction = 0.01;
-
-        for (let iter = 0; iter < iterations; iter++) {
-            // Calculate forces
-            this.nodeObjects.forEach((node, i) => {
-                let forceX = 0, forceY = 0, forceZ = 0;
-
-                // Repulsion from other nodes
-                this.nodeObjects.forEach((otherNode, j) => {
-                    if (i !== j) {
-                        const dx = node.position.x - otherNode.position.x;
-                        const dy = node.position.y - otherNode.position.y;
-                        const dz = node.position.z - otherNode.position.z;
-                        const distance = Math.sqrt(dx*dx + dy*dy + dz*dz) || 1;
-
-                        const force = repulsion / (distance * distance);
-                        forceX += (dx / distance) * force;
-                        forceY += (dy / distance) * force;
-                        forceZ += (dz / distance) * force;
-                    }
-                });
-
-                // Attraction to connected nodes
-                this.edges.forEach(edge => {
-                    if (edge[0] === node.userData[0]) {
-                        const targetNode = this.nodeObjects.find(n => n.userData[0] === edge[1]);
-                        if (targetNode) {
-                            const dx = targetNode.position.x - node.position.x;
-                            const dy = targetNode.position.y - node.position.y;
-                            const dz = targetNode.position.z - node.position.z;
-                            const distance = Math.sqrt(dx*dx + dy*dy + dz*dz) || 1;
-
-                            forceX += dx * attraction;
-                            forceY += dy * attraction;
-                            forceZ += dz * attraction;
-                        }
-                    }
-                });
-
-                // Apply force
-                node.position.x += forceX * 0.01;
-                node.position.y += forceY * 0.01;
-                node.position.z += forceZ * 0.01;
-            });
+        // Add layout-specific options
+        switch (layout) {
+            case 'fcose':
+                layoutOptions.quality = 'proof';
+                layoutOptions.randomize = false;
+                break;
+            case 'cola':
+                layoutOptions.maxSimulationTime = 3000;
+                break;
         }
 
-        // Update edge positions
-        this.updateEdges();
-        this.updateLabels();
-    }
-
-    updateEdges() {
-        this.edgeObjects.forEach((edge, index) => {
-            const edgeData = this.edges[index];
-            const sourceNode = this.nodeObjects.find(n => n.userData[0] === edgeData[0]);
-            const targetNode = this.nodeObjects.find(n => n.userData[0] === edgeData[1]);
-
-            if (sourceNode && targetNode) {
-                const positions = edge.geometry.attributes.position.array;
-                positions[0] = sourceNode.position.x;
-                positions[1] = sourceNode.position.y;
-                positions[2] = sourceNode.position.z;
-                positions[3] = targetNode.position.x;
-                positions[4] = targetNode.position.y;
-                positions[5] = targetNode.position.z;
-                edge.geometry.attributes.position.needsUpdate = true;
-            }
-        });
-    }
-
-    updateEdgeColors() {
-        this.edgeObjects.forEach((edge, index) => {
-            const edgeData = this.edges[index];
-            const edgeType = edgeData[2] || 'default';
-            edge.material.color.setHex(this.getEdgeColor(edgeType));
-        });
-    }
-
-    updateLabels() {
-        this.labels.forEach((label, index) => {
-            const node = this.nodeObjects[index];
-            if (node) {
-                label.position.copy(node.position);
-                label.position.y += 1;
-            }
-        });
-    }
-
-    clearGraph() {
-        this.nodeObjects.forEach(node => this.scene.remove(node));
-        this.edgeObjects.forEach(edge => this.scene.remove(edge));
-        this.labels.forEach(label => this.scene.remove(label));
-
-        this.nodeObjects = [];
-        this.edgeObjects = [];
-        this.labels = [];
+        const layoutInstance = this.cy.layout(layoutOptions);
+        layoutInstance.run();
     }
 
     updateVariables(vars) {
         if (vars.visualizationMode) {
             this.currentMode = vars.visualizationMode;
             document.getElementById('mode-select').value = this.currentMode;
+            this.updateNodeColors();
+        }
+        if (vars.layout) {
+            this.currentLayout = vars.layout;
+            this.runLayout();
         }
         if (vars.theme) {
             this.applyTheme(vars.theme);
         }
-        if (typeof vars.showRelationships !== 'undefined') {
-            this.showRelationships = vars.showRelationships;
-        }
+    }
+
+    updateNodeColors() {
+        this.cy.style()
+            .selector('node')
+            .style('background-color', this.getNodeColor())
+            .update();
     }
 
     applyTheme(theme) {
         if (!theme) return;
 
-        // Apply theme colors to the web interface
         document.body.style.background = theme.background || '#0a0a0a';
         document.body.style.color = theme.foreground || '#ffffff';
 
@@ -348,26 +256,6 @@ class ScientificVisualizer {
         if (ui) {
             ui.style.background = theme.background ? `rgba(${this.hexToRgb(theme.background)}, 0.9)` : 'rgba(0, 0, 0, 0.8)';
             ui.style.borderBottom = `1px solid ${theme.border || '#333'}`;
-        }
-
-        // Update scene background
-        if (this.scene && theme.background) {
-            this.scene.background = new THREE.Color(theme.background);
-        }
-
-        // Update UI elements
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            if (theme.accent) {
-                button.style.background = theme.accent;
-            }
-        });
-
-        const select = document.getElementById('mode-select');
-        if (select) {
-            select.style.background = theme.background || '#2a2a2a';
-            select.style.border = `1px solid ${theme.border || '#444'}`;
-            select.style.color = theme.foreground || '#ffffff';
         }
     }
 
@@ -381,54 +269,85 @@ class ScientificVisualizer {
             case 'focus':
                 this.focusNode(command.identifier);
                 break;
-            case 'zoom':
-                this.zoomToNode(command.identifier);
+            case 'highlight':
+                this.highlightNode(command.identifier);
                 break;
         }
     }
 
     focusNode(identifier) {
-        const node = this.nodeObjects.find(n => n.userData[3] === identifier);
-        if (node) {
-            this.controls.target.copy(node.position);
-            this.camera.position.copy(node.position);
-            this.camera.position.z += 10;
+        const node = this.cy.$(`node[id="${identifier}"]`);
+        if (node.length > 0) {
+            this.cy.animate({
+                center: { eles: node },
+                zoom: 2,
+                duration: 1000
+            });
         }
     }
 
-    zoomToNode(identifier) {
-        this.focusNode(identifier);
+    highlightNode(identifier) {
+        // Remove previous highlights
+        this.cy.elements().removeClass('highlighted');
+
+        const node = this.cy.$(`node[id="${identifier}"]`);
+        if (node.length > 0) {
+            node.addClass('highlighted');
+
+            // Highlight connected edges and nodes
+            const connected = node.neighborhood();
+            connected.addClass('highlighted');
+        }
+    }
+
+    requestGraphData() {
+        this.sendMessage('request-graphdata', { mode: this.currentMode });
     }
 
     setupUI() {
+        // Mode selector
         document.getElementById('mode-select').addEventListener('change', (e) => {
             this.currentMode = e.target.value;
             this.sendMessage('set-visualization-mode', { mode: this.currentMode });
+            this.updateNodeColors();
+            this.requestGraphData();
         });
 
+        // Layout selector
+        document.getElementById('layout-select').addEventListener('change', (e) => {
+            this.currentLayout = e.target.value;
+            this.runLayout();
+        });
+
+        // Reset view
         document.getElementById('reset-view').addEventListener('click', () => {
-            this.camera.position.set(0, 0, 50);
-            this.controls.target.set(0, 0, 0);
+            this.cy.fit();
+            this.cy.zoom(1);
+            this.cy.center();
         });
 
+        // Toggle labels
         document.getElementById('toggle-labels').addEventListener('click', () => {
-            this.showLabels = !this.showLabels;
-            if (this.showLabels) {
-                this.nodeObjects.forEach((node, index) => {
-                    this.createLabel(node, node.userData);
-                });
-            } else {
-                this.labels.forEach(label => this.scene.remove(label));
-                this.labels = [];
-            }
+            const showLabels = document.getElementById('toggle-labels').textContent === 'Hide Labels';
+            this.cy.style()
+                .selector('node')
+                .style('label', showLabels ? 'data(label)' : '')
+                .update();
+            document.getElementById('toggle-labels').textContent = showLabels ? 'Show Labels' : 'Hide Labels';
         });
 
-        document.getElementById('toggle-relationships').addEventListener('click', () => {
-            this.showRelationships = !this.showRelationships;
-            document.getElementById('relationship-filters').style.display =
-                this.showRelationships ? 'block' : 'none';
-            this.updateEdgeColors();
-            this.sendMessage('set-visualization-mode', { mode: this.currentMode });
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if (query) {
+                const matchingNodes = this.cy.nodes().filter(node =>
+                    node.data('label').toLowerCase().includes(query)
+                );
+                this.cy.elements().removeClass('highlighted');
+                matchingNodes.addClass('highlighted');
+            } else {
+                this.cy.elements().removeClass('highlighted');
+            }
         });
     }
 

@@ -1,7 +1,7 @@
 {
   "name": "scientific-visualizer",
   "version": "1.0.0",
-  "description": "3D visualization for scientific knowledge networks",
+  "description": "Network visualization for scientific knowledge mapping",
   "main": "index.html",
   "scripts": {
     "build": "cp index.html out/ && cp main.js out/ && cp style.css out/",
@@ -9,13 +9,17 @@
     "dev": "python3 -m http.server 35901"
   },
   "dependencies": {
-    "three": "^0.150.0"
+    "cytoscape": "^3.28.1",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "cytoscape-fcose": "^2.2.0",
+    "cytoscape-cola": "^2.5.1",
+    "cytoscape-euler": "^1.2.2"
   },
   "devDependencies": {
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0"
   },
-  "keywords": ["visualization", "3d", "scientific", "emacs"],
+  "keywords": ["visualization", "network", "scientific", "emacs", "cytoscape"],
   "author": "Scientific Tools Development Team",
   "license": "GPL-3.0"
 }
