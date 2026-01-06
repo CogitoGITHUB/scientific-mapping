@@ -11,6 +11,7 @@
 (depends-on "emacsql")
 (depends-on "emacsql-sqlite")
 (depends-on "org")
+(depends-on "org-agenda")
 (depends-on "yasnippet")
 (depends-on "eaf-browser" :git "https://github.com/emacs-eaf/eaf-browser.git")
 (depends-on "org-mcp" :git "https://github.com/laurynas-biveinis/org-mcp.git")

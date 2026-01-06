@@ -60,6 +60,9 @@
 (require 'concept-tree)
 (require 'yasnippet)
 
+;; Load org-agenda for research task management
+(require 'org-agenda)
+
 ;; Load AI integration (optional)
 (require 'ai-integration nil t)
 
@@ -80,16 +83,29 @@
   :type 'boolean)
 
 (defcustom scientific-mapping-components
-  '(doc-engine citation-database viz-engine concept-relationships timeline-engine concept-tree yas)
-  "List of components to load and enable."
-  :group 'scientific-mapping
-  :type '(set (const :tag "Document Engine" doc-engine)
-                   (const :tag "Citation Database" citation-database)
-                   (const :tag "Visualization Engine" viz-engine)
-                   (const :tag "Concept Relationships" concept-relationships)
-                   (const :tag "Timeline Engine" timeline-engine)
-                   (const :tag "Concept Tree" concept-tree)
-                   (const :tag "YASnippet Templates" yas)))
+   '(doc-engine citation-database viz-engine concept-relationships timeline-engine concept-tree yas agenda)
+   "List of components to load and enable."
+   :group 'scientific-mapping
+   :type '(set (const :tag "Document Engine" doc-engine)
+                    (const :tag "Citation Database" citation-database)
+                    (const :tag "Visualization Engine" viz-engine)
+                    (const :tag "Concept Relationships" concept-relationships)
+                    (const :tag "Timeline Engine" timeline-engine)
+                    (const :tag "Concept Tree" concept-tree)
+                    (const :tag "YASnippet Templates" yas)
+                    (const :tag "Org Agenda Integration" agenda)))
+
+(defcustom scientific-mapping-agenda-files
+   (list (expand-file-name "research-agenda.org" user-emacs-directory))
+   "List of Org files to include in scientific-mapping agenda."
+   :group 'scientific-mapping
+   :type '(repeat file))
+
+(defcustom scientific-mapping-agenda-tags
+   '("research" "paper" "review" "experiment" "analysis" "writing" "conference" "deadline")
+   "Tags to use for scientific research tasks."
+   :group 'scientific-mapping
+   :type '(repeat string))
 
 ;;;; Main Mode
 
@@ -117,16 +133,334 @@
       (message "Loading timeline-engine..."))
     (when (memq 'concept-tree scientific-mapping-components)
       (message "Loading concept-tree..."))
-    (when (memq 'yas scientific-mapping-components)
-      (yas-global-mode 1)
-      (message "Loading yas templates..."))
+     (when (memq 'yas scientific-mapping-components)
+       (yas-global-mode 1)
+       (message "Loading yas templates..."))
 
-    (message "Scientific Knowledge Mapping System enabled. Use M-x scientific-mapping-help for commands."))
+     (when (memq 'agenda scientific-mapping-components)
+       (scientific-mapping-setup-agenda)
+       (message "Setting up org-agenda integration..."))
+
+     (message "Scientific Knowledge Mapping System enabled. Use M-x scientific-mapping-help for commands."))
    (t
     ;; Disable all components
     (citation-database-autosync-mode -1)
     (viz-engine-mode -1)
     (message "Scientific Knowledge Mapping System disabled."))))
+
+;;;; Org Agenda Integration
+
+(defun scientific-mapping-setup-agenda ()
+  "Setup org-agenda integration for scientific research."
+  (interactive)
+  ;; Add scientific-mapping agenda files to org-agenda-files
+  (dolist (file scientific-mapping-agenda-files)
+    (unless (member file org-agenda-files)
+      (add-to-list 'org-agenda-files file)))
+
+  ;; Create default agenda file if it doesn't exist
+  (let ((agenda-file (car scientific-mapping-agenda-files)))
+    (unless (file-exists-p agenda-file)
+      (with-temp-file agenda-file
+        (insert "#+TITLE: Scientific Research Agenda
+#+AUTHOR: Research Team
+#+EMAIL: research@example.com
+
+* Research Projects
+** TODO Literature Review: Machine Learning in Scientific Discovery
+   SCHEDULED: <2025-01-15 Tue>
+   :PROPERTIES:
+   :EFFORT: 2d
+   :END:
+   - Review recent papers on ML applications in scientific research
+   - Identify key methodologies and gaps
+   - Create summary document
+
+** TODO Paper Writing: Knowledge Mapping Framework
+   DEADLINE: <2025-02-28 Fri>
+   :PROPERTIES:
+   :EFFORT: 5d
+   :END:
+   - Write introduction section
+   - Develop methodology
+   - Implement evaluation framework
+
+* Conference Deadlines
+** TODO Submit to ICML 2025
+   DEADLINE: <2025-01-20 Mon>
+   :PROPERTIES:
+   :CATEGORY: Conference
+   :END:
+
+* Regular Tasks
+** TODO Weekly Literature Review
+   SCHEDULED: <2025-01-06 Mon +1w>
+   :PROPERTIES:
+   :STYLE: habit
+   :END:
+
+** TODO Database Maintenance
+   SCHEDULED: <2025-01-10 Fri +2w>
+   :PROPERTIES:
+   :EFFORT: 4h
+   :END:
+"))))
+
+  ;; Setup custom agenda commands for scientific research
+  (scientific-mapping-setup-agenda-commands))
+
+(defun scientific-mapping-setup-agenda-commands ()
+  "Setup custom org-agenda commands for scientific research."
+  (setq org-agenda-custom-commands
+        (append org-agenda-custom-commands
+                '(("r" "Research Agenda"
+                   ((agenda "" ((org-agenda-span 'week)
+                               (org-agenda-start-on-weekday 1)))
+                    (todo "TODO" ((org-agenda-files scientific-mapping-agenda-files)
+                                 (org-agenda-prefix-format " %i %-12:c")
+                                 (org-agenda-sorting-strategy '(priority-down effort-up))))
+                    (todo "WAITING" ((org-agenda-files scientific-mapping-agenda-files)))
+                    (todo "DONE" ((org-agenda-files scientific-mapping-agenda-files)))))
+                  ("p" "Paper Deadlines"
+                   ((agenda "" ((org-agenda-span 'month)))
+                    (todo "TODO" ((org-agenda-files scientific-mapping-agenda-files)
+                                 (org-agenda-filter-preset '("+paper+deadline"))))))
+                  ("c" "Conference Deadlines"
+                   ((agenda "" ((org-agenda-span 'month)))
+                    (todo "TODO" ((org-agenda-files scientific-mapping-agenda-files)
+                                 (org-agenda-filter-preset '("+conference"))))))
+                  ("w" "Weekly Review"
+                   ((agenda "" ((org-agenda-span 'week)))
+                    (todo "DONE" ((org-agenda-span 'week)
+                                 (org-agenda-files scientific-mapping-agenda-files)))))))))
+
+;;;###autoload
+(defun scientific-mapping-agenda ()
+  "Open the scientific research agenda."
+  (interactive)
+  (scientific-mapping-setup-agenda)
+  (org-agenda nil "r"))
+
+;;;###autoload
+(defun scientific-mapping-schedule-paper-review (doi)
+  "Schedule a paper for review in the agenda."
+  (interactive
+   (list (read-string "DOI of paper to review: "
+                      (when (and (eq major-mode 'org-mode)
+                               (org-entry-get nil "DOI"))
+                        (org-entry-get nil "DOI")))))
+  (let* ((paper-info (citation-database-get-paper-by-doi doi))
+         (title (or (elt paper-info 2) "Unknown Paper"))
+         (agenda-file (car scientific-mapping-agenda-files)))
+
+    ;; Ensure agenda file exists
+    (scientific-mapping-setup-agenda)
+
+    ;; Add to agenda file
+    (with-current-buffer (find-file-noselect agenda-file)
+      (goto-char (point-max))
+      (insert (format "\n** TODO Review: %s
+   SCHEDULED: %s
+   :PROPERTIES:
+   :DOI: %s
+   :EFFORT: 2h
+   :END:
+   - Read abstract and introduction
+   - Identify key contributions
+   - Note relevant citations
+   - Add to knowledge map if significant\n"
+                     title
+                     (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 7 24 3600)))
+                     doi)))
+    (message "Paper review scheduled for %s" title)))
+
+;;;###autoload
+(defun scientific-mapping-schedule-deadline (task deadline)
+  "Schedule a research task with a deadline."
+  (interactive
+   (list (read-string "Task description: ")
+         (org-read-date nil t nil "Deadline: ")))
+  (let ((agenda-file (car scientific-mapping-agenda-files)))
+
+    ;; Ensure agenda file exists
+    (scientific-mapping-setup-agenda)
+
+    ;; Add to agenda file
+    (with-current-buffer (find-file-noselect agenda-file)
+      (goto-char (point-max))
+      (insert (format "\n** TODO %s
+   DEADLINE: %s
+   :PROPERTIES:
+   :CATEGORY: Research
+   :END:\n"
+                     task
+                     (format-time-string "<%Y-%m-%d %a>" deadline))))
+    (message "Task scheduled: %s (deadline: %s)"
+             task
+             (format-time-string "%Y-%m-%d" deadline))))
+
+;;;###autoload
+(defun scientific-mapping-create-research-project (name description)
+  "Create a new research project in the agenda."
+  (interactive
+   (list (read-string "Project name: ")
+         (read-string "Project description: ")))
+  (let ((agenda-file (car scientific-mapping-agenda-files)))
+
+    ;; Ensure agenda file exists
+    (scientific-mapping-setup-agenda)
+
+    ;; Add project to agenda file
+    (with-current-buffer (find-file-noselect agenda-file)
+      (goto-char (point-max))
+      (insert (format "\n* %s
+%s
+
+** TODO Project Planning
+   SCHEDULED: %s
+   :PROPERTIES:
+   :EFFORT: 1d
+   :END:
+   - Define research questions
+   - Identify methodology
+   - Set milestones and deliverables
+
+** TODO Literature Review
+   SCHEDULED: %s
+   :PROPERTIES:
+   :EFFORT: 3d
+   :END:
+   - Conduct comprehensive literature search
+   - Analyze existing work
+   - Identify research gaps
+
+** TODO Implementation
+   SCHEDULED: %s
+   :PROPERTIES:
+   :EFFORT: 10d
+   :END:
+   - Develop research methodology
+   - Implement solution
+   - Collect and analyze data
+
+** TODO Writing and Publication
+   SCHEDULED: %s
+   :PROPERTIES:
+   :EFFORT: 7d
+   :END:
+   - Write research paper
+   - Create presentations
+   - Submit to conferences/journals\n"
+                     name
+                     (if description (concat description "\n\n") "")
+                     (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 1 24 3600)))
+                     (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 7 24 3600)))
+                     (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 14 24 3600)))
+                     (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 60 24 3600))))))
+    (message "Research project created: %s" name)))
+
+;;;###autoload
+(defun scientific-mapping-weekly-review ()
+  "Generate a weekly research progress report."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Weekly Research Review*"))
+        (start-date (time-subtract (current-time) (* 7 24 3600)))
+        (end-date (current-time)))
+
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert (format "= Weekly Research Review: %s - %s =\n\n"
+                      (format-time-string "%Y-%m-%d" start-date)
+                      (format-time-string "%Y-%m-%d" end-date)))
+
+      ;; Papers reviewed this week
+      (insert "* Papers Reviewed\n")
+      (let ((papers-reviewed 0))
+        (dolist (file (doc-engine-all-files))
+          (let ((file-time (nth 5 (file-attributes file))))
+            (when (and file-time
+                      (time-less-p start-date file-time)
+                      (time-less-p file-time end-date))
+              (insert (format "** %s\n" (file-name-base file)))
+              (setq papers-reviewed (1+ papers-reviewed)))))
+        (insert (format "Total: %d papers\n\n" papers-reviewed)))
+
+      ;; Agenda items completed
+      (insert "* Tasks Completed\n")
+      (let ((completed-tasks 0))
+        (dolist (file scientific-mapping-agenda-files)
+          (when (file-exists-p file)
+            (with-current-buffer (find-file-noselect file)
+              (org-map-entries
+               (lambda ()
+                 (let ((todo-state (org-get-todo-state))
+                       (closed-time (org-entry-get nil "CLOSED")))
+                   (when (and (string= todo-state "DONE")
+                             closed-time
+                             (time-less-p start-date (date-to-time closed-time))
+                             (time-less-p (date-to-time closed-time) end-date))
+                     (insert (format "** DONE %s\n" (org-get-heading t t)))
+                     (setq completed-tasks (1+ completed-tasks)))))
+               nil 'file))))
+        (insert (format "Total: %d tasks\n\n" completed-tasks)))
+
+      ;; Upcoming deadlines
+      (insert "* Upcoming Deadlines\n")
+      (let ((upcoming-deadlines 0))
+        (dolist (file scientific-mapping-agenda-files)
+          (when (file-exists-p file)
+            (with-current-buffer (find-file-noselect file)
+              (org-map-entries
+               (lambda ()
+                 (let ((deadline (org-entry-get nil "DEADLINE"))
+                       (todo-state (org-get-todo-state)))
+                   (when (and deadline
+                             (not (string= todo-state "DONE"))
+                             (time-less-p (current-time) (date-to-time deadline)))
+                     (insert (format "** %s - %s\n" deadline (org-get-heading t t)))
+                     (setq upcoming-deadlines (1+ upcoming-deadlines)))))
+               nil 'file))))
+        (insert (format "Total: %d upcoming deadlines\n\n" upcoming-deadlines)))
+
+      (goto-char (point-min))
+      (org-mode))
+    (display-buffer buffer)))
+
+;;;###autoload
+(defun scientific-mapping-agenda-from-document ()
+  "Create agenda items from the current scientific document."
+  (interactive)
+  (when (and (eq major-mode 'org-mode)
+             (buffer-file-name))
+    (let* ((title (or (org-get-title) (file-name-base (buffer-file-name))))
+           (doi (org-entry-get nil "DOI"))
+           (keywords (org-entry-get nil "SCIENTIFIC_CONCEPTS"))
+           (agenda-file (car scientific-mapping-agenda-files)))
+
+      ;; Ensure agenda file exists
+      (scientific-mapping-setup-agenda)
+
+      ;; Create agenda entry
+      (with-current-buffer (find-file-noselect agenda-file)
+        (goto-char (point-max))
+        (insert (format "\n** TODO Process Document: %s
+   SCHEDULED: %s
+   :PROPERTIES:
+   :FILE: %s
+   :DOI: %s
+   :KEYWORDS: %s
+   :EFFORT: 1h
+   :END:
+   - Extract key concepts and relationships
+   - Add citations to database
+   - Link to existing knowledge map
+   - Identify follow-up research questions\n"
+                       title
+                       (format-time-string "<%Y-%m-%d %a>" (time-add (current-time) (* 1 24 3600)))
+                       (buffer-file-name)
+                       (or doi "")
+                       (or keywords ""))))
+      (message "Agenda item created for document: %s" title))))
 
 ;;;; Interactive Commands
 
@@ -320,24 +654,31 @@
 ;;;; Key Bindings
 
 (defvar scientific-mapping-prefix-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map "s" 'scientific-mapping-start)
-    (define-key map "S" 'scientific-mapping-stop)
-    (define-key map "i" 'scientific-mapping-import-paper)
-    (define-key map "c" 'concept-relationships-create-entry)
-    (define-key map "v" 'viz-engine-open)
-    (define-key map "n" 'viz-engine-set-mode)
-    (define-key map "r" 'scientific-mapping-literature-review)
-    (define-key map "b" 'scientific-mapping-backup)
-    (define-key map "t" 'timeline-engine-open)
-    (define-key map "e" 'concept-tree-toggle-section)
-    ;; AI integration commands
-    (define-key map "a" 'ai-integration-analyze-document)
-    (define-key map "q" 'ai-integration-ask-question)
-    (define-key map "h" 'ai-integration-research-assistance)
-    (define-key map "?" 'scientific-mapping-help)
-    map)
-  "Prefix keymap for scientific-mapping commands.")
+   (let ((map (make-sparse-keymap)))
+     (define-key map "s" 'scientific-mapping-start)
+     (define-key map "S" 'scientific-mapping-stop)
+     (define-key map "i" 'scientific-mapping-import-paper)
+     (define-key map "c" 'concept-relationships-create-entry)
+     (define-key map "v" 'viz-engine-open)
+     (define-key map "n" 'viz-engine-set-mode)
+     (define-key map "r" 'scientific-mapping-literature-review)
+     (define-key map "b" 'scientific-mapping-backup)
+     (define-key map "t" 'timeline-engine-open)
+     (define-key map "e" 'concept-tree-toggle-section)
+     ;; Agenda commands
+     (define-key map "a" 'scientific-mapping-agenda)
+     (define-key map "p" 'scientific-mapping-schedule-paper-review)
+     (define-key map "d" 'scientific-mapping-schedule-deadline)
+     (define-key map "P" 'scientific-mapping-create-research-project)
+     (define-key map "w" 'scientific-mapping-weekly-review)
+     (define-key map "A" 'scientific-mapping-agenda-from-document)
+     ;; AI integration commands
+     (define-key map "I" 'ai-integration-analyze-document)
+     (define-key map "q" 'ai-integration-ask-question)
+     (define-key map "h" 'ai-integration-research-assistance)
+     (define-key map "?" 'scientific-mapping-help)
+     map)
+   "Prefix keymap for scientific-mapping commands.")
 
 (defvar-keymap scientific-mapping-mode-map
   (let ((map (make-sparse-keymap)))
@@ -350,7 +691,7 @@
 ;;; scientific-mapping.el ends here
 
 ;;; Usage:
-;; 
+;;
 ;; To enable the system:
 ;; (scientific-mapping-mode 1)
 ;;
@@ -366,7 +707,19 @@
 ;; C-c s n - Set visualization mode
 ;; C-c s r - Generate literature review
 ;; C-c s b - Create backup
-;; C-c s a - AI document analysis
+;; C-c s t - Open timeline
+;; C-c s e - Toggle concept tree section
+;;
+;; Agenda Integration:
+;; C-c s a - Open research agenda
+;; C-c s p - Schedule paper for review
+;; C-c s d - Schedule task with deadline
+;; C-c s P - Create research project
+;; C-c s w - Weekly progress review
+;; C-c s A - Create agenda item from current document
+;;
+;; AI Integration:
+;; C-c s I - AI document analysis
 ;; C-c s q - AI question answering
 ;; C-c s h - AI research assistance
 ;; C-c s ? - Show help
