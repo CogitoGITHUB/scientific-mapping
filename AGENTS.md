@@ -32,3 +32,11 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 - **Benefits**: Better algorithms, easier implementation, more appropriate for knowledge graphs
 - **Dependencies**: Updated package.json with cytoscape and layout extensions
 - **Features**: Multiple layout algorithms (FCose, CoSE, Cola, Euler), search, highlighting
+
+## Git Workflow
+
+**Always commit and push changes**: After making any modifications to the codebase
+- **Commit message format**: Use conventional commits (feat:, fix:, docs:, etc.)
+- **Push immediately**: Always push commits to remote repository after committing
+- **Clear messages**: Describe what changed, why, and impact in commit messages
+- **Atomic commits**: Each commit should represent a single logical change

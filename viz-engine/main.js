@@ -1,18 +1,14 @@
-// Scientific Knowledge Mapping Network Visualizer
-// Using Cytoscape.js for better scientific network visualization
+// Scientific Knowledge Mapping 3D Visualizer
+// Using 3D Force Graph for precise 3D network control
 
 class ScientificVisualizer {
     constructor() {
-        this.cy = null;
+        this.graph = null;
         this.ws = null;
         this.currentMode = 'citation';
-        this.layouts = {
-            'cose': 'cose-bilkent',
-            'fcose': 'fcose',
-            'cola': 'cola',
-            'euler': 'euler'
-        };
-        this.currentLayout = 'fcose';
+        this.nodes = [];
+        this.links = [];
+        this.nodeMap = new Map();
 
         this.init();
         this.connectWebSocket();
@@ -20,75 +16,100 @@ class ScientificVisualizer {
     }
 
     init() {
-        // Initialize Cytoscape
-        this.cy = cytoscape({
-            container: document.getElementById('cy'),
+        // Initialize 3D Force Graph
+        this.graph = ForceGraph3D({
+            controlType: 'orbit',
+            rendererConfig: {
+                antialias: true,
+                alpha: true
+            }
+        })
+        (document.getElementById('3d-graph'))
 
-            style: [
-                {
-                    selector: 'node',
-                    style: {
-                        'background-color': this.getNodeColor(),
-                        'label': 'data(label)',
-                        'color': '#ffffff',
-                        'text-valign': 'center',
-                        'text-halign': 'center',
-                        'font-size': '12px',
-                        'width': '40px',
-                        'height': '40px',
-                        'border-width': '2px',
-                        'border-color': '#ffffff'
-                    }
-                },
-                {
-                    selector: 'edge',
-                    style: {
-                        'width': 'data(weight)',
-                        'line-color': 'data(color)',
-                        'target-arrow-color': 'data(color)',
-                        'target-arrow-shape': 'triangle',
-                        'curve-style': 'bezier',
-                        'label': 'data(label)',
-                        'font-size': '10px',
-                        'text-background-color': '#000000',
-                        'text-background-opacity': 0.7
-                    }
-                },
-                {
-                    selector: '.highlighted',
-                    style: {
-                        'background-color': '#ff0000',
-                        'line-color': '#ff0000',
-                        'target-arrow-color': '#ff0000',
-                        'transition-property': 'background-color, line-color, target-arrow-color',
-                        'transition-duration': '0.5s'
-                    }
-                }
-            ],
+        // Configure graph appearance and behavior
+        .nodeLabel(node => `${node.title || node.id}<br/>Type: ${node.type || 'unknown'}`)
+        .nodeColor(node => this.getNodeColor(node))
+        .nodeVal(node => Math.sqrt((node.weight || 1) + 1))
+        .nodeResolution(16)
+        .linkColor(link => this.getLinkColor(link))
+        .linkWidth(link => Math.max(1, Math.min(5, link.weight || 1)))
+        .linkDirectionalArrowLength(3)
+        .linkDirectionalArrowRelPos(1)
+        .linkOpacity(0.8)
+        .onNodeClick(node => {
+            // Center camera on clicked node
+            const distance = 40;
+            const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
 
-            layout: {
-                name: this.currentLayout,
-                animate: true,
-                animationDuration: 1000,
-                fit: true,
-                padding: 30
+            this.graph.cameraPosition(
+                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                node,
+                2000
+            );
+
+            // Send message to Emacs
+            this.sendMessage('open-paper', { identifier: node.id });
+        })
+        .onLinkClick(link => {
+            console.log('Link clicked:', link);
+        });
+
+        // Advanced controls
+        this.setupAdvancedControls();
+    }
+
+    setupAdvancedControls() {
+        // Custom controls for precise manipulation
+        const controls = this.graph.controls();
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'r':
+                case 'R':
+                    this.resetCamera();
+                    break;
+                case 'f':
+                case 'F':
+                    this.fitToScreen();
+                    break;
+                case 'p':
+                case 'P':
+                    this.pauseResumeAnimation();
+                    break;
+                case 'l':
+                case 'L':
+                    this.toggleLabels();
+                    break;
             }
         });
 
-        // Event handlers
-        this.setupEventHandlers();
+        // Mouse wheel for zoom with finer control
+        controls.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const zoomSpeed = 0.1;
+            const delta = event.deltaY > 0 ? 1 + zoomSpeed : 1 - zoomSpeed;
+            controls.dollyInOut(delta);
+        });
     }
 
-    setupEventHandlers() {
-        this.cy.on('tap', 'node', (evt) => {
-            const node = evt.target;
-            this.sendMessage('open-paper', { identifier: node.data('id') });
-        });
+    resetCamera() {
+        this.graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 2000);
+    }
 
-        this.cy.on('tap', 'edge', (evt) => {
-            const edge = evt.target;
-            console.log('Edge tapped:', edge.data());
-        });
+    fitToScreen() {
+        this.graph.zoomToFit(1000, 50);
+    }
+
+    pauseResumeAnimation() {
+        const isPaused = this.graph.pauseAnimation();
+        this.graph.pauseAnimation(!isPaused);
+        console.log(`Animation ${!isPaused ? 'paused' : 'resumed'}`);
+    }
+
+    toggleLabels() {
+        const showLabels = this.graph.nodeLabel() !== null;
+        this.graph.nodeLabel(showLabels ? null : node => `${node.title || node.id}`);
     }
 
     connectWebSocket() {
@@ -125,125 +146,96 @@ class ScientificVisualizer {
     }
 
     updateGraph(data) {
-        const elements = this.convertToCytoscapeFormat(data);
-        this.cy.elements().remove();
-        this.cy.add(elements);
-        this.runLayout();
+        // Convert data format
+        this.nodes = this.convertNodes(data.nodes || []);
+        this.links = this.convertLinks(data.edges || []);
+
+        // Update graph
+        this.graph.graphData({
+            nodes: this.nodes,
+            links: this.links
+        });
 
         // Update stats
-        document.getElementById('node-count').textContent = `Nodes: ${this.cy.nodes().length}`;
-        document.getElementById('edge-count').textContent = `Edges: ${this.cy.edges().length}`;
+        document.getElementById('node-count').textContent = `Nodes: ${this.nodes.length}`;
+        document.getElementById('edge-count').textContent = `Edges: ${this.links.length}`;
+
+        // Auto-fit after a short delay
+        setTimeout(() => this.fitToScreen(), 1000);
     }
 
-    convertToCytoscapeFormat(data) {
-        const elements = [];
-
-        // Add nodes
-        if (data.nodes) {
-            data.nodes.forEach(node => {
-                elements.push({
-                    data: {
-                        id: node[0], // identifier
-                        label: node[1] || node[0], // title or identifier
-                        type: node[2] || 'default', // node type
-                        weight: node[3] || 1 // node weight/size
-                    }
-                });
-            });
-        }
-
-        // Add edges
-        if (data.edges) {
-            data.edges.forEach((edge, index) => {
-                const edgeType = edge[2] || 'default';
-                const edgeWeight = edge[3] || 1;
-
-                elements.push({
-                    data: {
-                        id: `edge_${index}`,
-                        source: edge[0],
-                        target: edge[1],
-                        color: this.getEdgeColor(edgeType),
-                        weight: Math.max(1, Math.min(5, edgeWeight)),
-                        label: edgeType,
-                        type: edgeType
-                    }
-                });
-            });
-        }
-
-        return elements;
+    convertNodes(nodesData) {
+        return nodesData.map(node => ({
+            id: node[0], // identifier
+            title: node[1] || node[0], // title or identifier
+            type: node[2] || 'default', // node type
+            weight: node[3] || 1, // node weight/size
+            group: this.getNodeGroup(node[2] || 'default')
+        }));
     }
 
-    getNodeColor() {
+    convertLinks(edgesData) {
+        return edgesData.map(edge => ({
+            source: edge[0],
+            target: edge[1],
+            type: edge[2] || 'default',
+            weight: edge[3] || 1
+        }));
+    }
+
+    getNodeGroup(nodeType) {
         switch (this.currentMode) {
-            case 'citation': return '#4a90e2'; // Blue
-            case 'concept': return '#50c878'; // Green
-            case 'author': return '#ff6b6b'; // Red
-            case 'journal': return '#ffa500'; // Orange
-            default: return '#ffffff';
+            case 'citation': return nodeType === 'paper' ? 1 : 2;
+            case 'concept': return nodeType === 'concept' ? 1 : 2;
+            case 'author': return nodeType === 'author' ? 1 : 2;
+            default: return 1;
         }
     }
 
-    getEdgeColor(edgeType) {
-        switch (edgeType) {
-            case 'citation': return '#4a90e2'; // Blue
-            case 'parent': return '#ff6b6b';   // Red
-            case 'child': return '#50c878';   // Green
-            case 'sibling': return '#ffa500'; // Orange
-            case 'friend': return '#9b59b6';  // Purple
-            case 'evidence': return '#e74c3c'; // Dark red
-            case 'method': return '#3498db';  // Light blue
-            case 'evolution': return '#2ecc71'; // Light green
-            default: return '#666666';        // Gray
+    getNodeColor(node) {
+        switch (this.currentMode) {
+            case 'citation':
+                return node.type === 'paper' ? '#4a90e2' : '#666666';
+            case 'concept':
+                return node.type === 'concept' ? '#50c878' : '#666666';
+            case 'author':
+                return node.type === 'author' ? '#ff6b6b' : '#666666';
+            case 'journal':
+                return node.type === 'journal' ? '#ffa500' : '#666666';
+            default:
+                return '#ffffff';
         }
     }
 
-    runLayout(layoutName = null) {
-        const layout = layoutName || this.currentLayout;
-        const layoutOptions = {
-            name: layout,
-            animate: true,
-            animationDuration: 1000,
-            fit: true,
-            padding: 30
-        };
-
-        // Add layout-specific options
-        switch (layout) {
-            case 'fcose':
-                layoutOptions.quality = 'proof';
-                layoutOptions.randomize = false;
-                break;
-            case 'cola':
-                layoutOptions.maxSimulationTime = 3000;
-                break;
+    getLinkColor(link) {
+        switch (link.type) {
+            case 'citation': return '#4a90e2';
+            case 'parent': return '#ff6b6b';
+            case 'child': return '#50c878';
+            case 'sibling': return '#ffa500';
+            case 'friend': return '#9b59b6';
+            case 'evidence': return '#e74c3c';
+            case 'method': return '#3498db';
+            case 'evolution': return '#2ecc71';
+            default: return '#666666';
         }
-
-        const layoutInstance = this.cy.layout(layoutOptions);
-        layoutInstance.run();
     }
 
     updateVariables(vars) {
         if (vars.visualizationMode) {
             this.currentMode = vars.visualizationMode;
             document.getElementById('mode-select').value = this.currentMode;
-            this.updateNodeColors();
-        }
-        if (vars.layout) {
-            this.currentLayout = vars.layout;
-            this.runLayout();
+            this.refreshGraph();
         }
         if (vars.theme) {
             this.applyTheme(vars.theme);
         }
     }
 
-    updateNodeColors() {
-        this.cy.style()
-            .selector('node')
-            .style('background-color', this.getNodeColor())
-            .update();
+    refreshGraph() {
+        // Re-color nodes based on new mode
+        this.graph.nodeColor(node => this.getNodeColor(node));
+        this.graph.linkColor(link => this.getLinkColor(link));
     }
 
     applyTheme(theme) {
@@ -272,32 +264,43 @@ class ScientificVisualizer {
             case 'highlight':
                 this.highlightNode(command.identifier);
                 break;
+            case 'zoom':
+                this.zoomToNode(command.identifier);
+                break;
         }
     }
 
     focusNode(identifier) {
-        const node = this.cy.$(`node[id="${identifier}"]`);
-        if (node.length > 0) {
-            this.cy.animate({
-                center: { eles: node },
-                zoom: 2,
-                duration: 1000
-            });
+        const node = this.nodes.find(n => n.id === identifier);
+        if (node) {
+            const distance = 40;
+            const distRatio = 1 + distance/Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+
+            this.graph.cameraPosition(
+                { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
+                node,
+                2000
+            );
         }
     }
 
     highlightNode(identifier) {
-        // Remove previous highlights
-        this.cy.elements().removeClass('highlighted');
+        // Highlight node and its connections
+        this.graph.nodeColor(node => {
+            if (node.id === identifier) return '#ff0000';
+            const connected = this.links.some(link =>
+                (link.source.id || link.source) === identifier && (link.target.id || link.target) === node.id ||
+                (link.target.id || link.target) === identifier && (link.source.id || link.source) === node.id
+            );
+            return connected ? '#ff8800' : this.getNodeColor(node);
+        });
 
-        const node = this.cy.$(`node[id="${identifier}"]`);
-        if (node.length > 0) {
-            node.addClass('highlighted');
+        // Reset after 3 seconds
+        setTimeout(() => this.refreshGraph(), 3000);
+    }
 
-            // Highlight connected edges and nodes
-            const connected = node.neighborhood();
-            connected.addClass('highlighted');
-        }
+    zoomToNode(identifier) {
+        this.focusNode(identifier);
     }
 
     requestGraphData() {
@@ -309,46 +312,64 @@ class ScientificVisualizer {
         document.getElementById('mode-select').addEventListener('change', (e) => {
             this.currentMode = e.target.value;
             this.sendMessage('set-visualization-mode', { mode: this.currentMode });
-            this.updateNodeColors();
+            this.refreshGraph();
             this.requestGraphData();
         });
 
-        // Layout selector
-        document.getElementById('layout-select').addEventListener('change', (e) => {
-            this.currentLayout = e.target.value;
-            this.runLayout();
-        });
+        // Control buttons
+        document.getElementById('reset-view').addEventListener('click', () => this.resetCamera());
+        document.getElementById('fit-view').addEventListener('click', () => this.fitToScreen());
+        document.getElementById('toggle-labels').addEventListener('click', () => this.toggleLabels());
 
-        // Reset view
-        document.getElementById('reset-view').addEventListener('click', () => {
-            this.cy.fit();
-            this.cy.zoom(1);
-            this.cy.center();
-        });
-
-        // Toggle labels
-        document.getElementById('toggle-labels').addEventListener('click', () => {
-            const showLabels = document.getElementById('toggle-labels').textContent === 'Hide Labels';
-            this.cy.style()
-                .selector('node')
-                .style('label', showLabels ? 'data(label)' : '')
-                .update();
-            document.getElementById('toggle-labels').textContent = showLabels ? 'Show Labels' : 'Hide Labels';
-        });
+        // Advanced controls
+        document.getElementById('pause-animation').addEventListener('click', () => this.pauseResumeAnimation());
 
         // Search functionality
         document.getElementById('search-input').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             if (query) {
-                const matchingNodes = this.cy.nodes().filter(node =>
-                    node.data('label').toLowerCase().includes(query)
+                const matchingNodes = this.nodes.filter(node =>
+                    node.title.toLowerCase().includes(query) || node.id.toLowerCase().includes(query)
                 );
-                this.cy.elements().removeClass('highlighted');
-                matchingNodes.addClass('highlighted');
+
+                // Highlight matching nodes
+                this.graph.nodeColor(node =>
+                    matchingNodes.some(mn => mn.id === node.id) ? '#00ff00' : this.getNodeColor(node)
+                );
             } else {
-                this.cy.elements().removeClass('highlighted');
+                this.refreshGraph();
             }
         });
+
+        // Keyboard shortcuts info
+        this.setupKeyboardHints();
+    }
+
+    setupKeyboardHints() {
+        const hints = document.createElement('div');
+        hints.id = 'keyboard-hints';
+        hints.innerHTML = `
+            <div class="hint-group">
+                <strong>Camera:</strong> Mouse drag • Wheel zoom • Right-click pan
+            </div>
+            <div class="hint-group">
+                <strong>Shortcuts:</strong> R (reset) • F (fit) • P (pause) • L (labels)
+            </div>
+        `;
+        hints.style.cssText = `
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 1000;
+        `;
+
+        document.body.appendChild(hints);
     }
 
     sendMessage(command, data) {
