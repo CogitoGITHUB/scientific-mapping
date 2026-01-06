@@ -713,46 +713,4 @@
 ;; Or use the interactive command:
 ;; M-x scientific-mapping-start
 ;;
-;; Key bindings (when in scientific-mapping-mode):
-;; C-c s s - Start system
-;; C-c s S - Stop system
-;; C-c s i - Import paper
-;; C-c s c - Create concept
-;; C-c s v - Open visualizer
-;; C-c s n - Set visualization mode
-;; C-c s r - Generate literature review
-;; C-c s b - Create backup
-;; C-c s t - Open timeline
-;; C-c s e - Toggle concept tree section
-;;
-;; Agenda Integration:
-;; C-c s a - Open research agenda
-;; C-c s p - Schedule paper for review
-;; C-c s d - Schedule deadline
-;; C-c s P - Create research project
-;; C-c s w - Weekly progress review
-;; C-c s A - Agenda from current document
-;;
-;; Academic APIs:
-;; C-c s X - Search arXiv
-;; C-c s M - Search PubMed
-;; C-c s D - Resolve DOI
-;; C-c s I - Import from academic APIs
-;;
-;; Reference Managers:
-;; C-c s Z - Sync with Zotero
-;; C-c s B - Import BibTeX file
-;; C-c s R - Import from reference managers
-;;
-;; AI Integration:
-;; C-c s A a - AI document analysis
-;; C-c s A s - AI document summary
-;; C-c s A q - AI question answering
-;; C-c s A c - AI concept extraction
-;; C-c s A g - AI research gap detection
-;; C-c s A r - AI research assistance
-;; C-c s A w - AI writing assistance
-;; C-c s A i - AI citation analysis
-;; C-c s A e - AI semantic search
-;; C-c s A b - AI batch analysis
-;; C-c s ? - Show help
+;; See KEYBINDINGS.md for complete command reference and key bindings.
