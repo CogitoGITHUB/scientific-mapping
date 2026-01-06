@@ -66,6 +66,12 @@
 ;; Load AI integration (optional)
 (require 'ai-integration nil t)
 
+;; Load academic APIs (optional)
+(require 'academic-apis nil t)
+
+;; Load reference managers (optional)
+(require 'reference-managers nil t)
+
 (defconst scientific-mapping-version "1.0.0"
   "Version of the scientific-mapping system.")
 
@@ -672,6 +678,15 @@
      (define-key map "P" 'scientific-mapping-create-research-project)
      (define-key map "w" 'scientific-mapping-weekly-review)
      (define-key map "A" 'scientific-mapping-agenda-from-document)
+     ;; Academic API commands
+     (define-key map "X" 'academic-apis-search-arxiv)
+     (define-key map "M" 'academic-apis-search-pubmed)
+     (define-key map "D" 'academic-apis-resolve-doi)
+     (define-key map "I" 'academic-apis-import-to-scientific-mapping)
+     ;; Reference manager commands
+     (define-key map "Z" 'reference-managers-zotero-get-collections)
+     (define-key map "B" 'reference-managers-import-bibtex)
+     (define-key map "R" 'reference-managers-import-to-scientific-mapping)
      ;; AI integration commands
      (define-key map "I" 'ai-integration-analyze-document)
      (define-key map "q" 'ai-integration-ask-question)
@@ -713,13 +728,31 @@
 ;; Agenda Integration:
 ;; C-c s a - Open research agenda
 ;; C-c s p - Schedule paper for review
-;; C-c s d - Schedule task with deadline
+;; C-c s d - Schedule deadline
 ;; C-c s P - Create research project
 ;; C-c s w - Weekly progress review
-;; C-c s A - Create agenda item from current document
+;; C-c s A - Agenda from current document
+;;
+;; Academic APIs:
+;; C-c s X - Search arXiv
+;; C-c s M - Search PubMed
+;; C-c s D - Resolve DOI
+;; C-c s I - Import from academic APIs
+;;
+;; Reference Managers:
+;; C-c s Z - Sync with Zotero
+;; C-c s B - Import BibTeX file
+;; C-c s R - Import from reference managers
 ;;
 ;; AI Integration:
-;; C-c s I - AI document analysis
-;; C-c s q - AI question answering
-;; C-c s h - AI research assistance
+;; C-c s A a - AI document analysis
+;; C-c s A s - AI document summary
+;; C-c s A q - AI question answering
+;; C-c s A c - AI concept extraction
+;; C-c s A g - AI research gap detection
+;; C-c s A r - AI research assistance
+;; C-c s A w - AI writing assistance
+;; C-c s A i - AI citation analysis
+;; C-c s A e - AI semantic search
+;; C-c s A b - AI batch analysis
 ;; C-c s ? - Show help
