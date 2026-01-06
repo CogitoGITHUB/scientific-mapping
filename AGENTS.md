@@ -27,11 +27,11 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 
 ## Visualization Framework Migration
 
-**From Three.js to Cytoscape.js**: Migrated 3D visualization to 2D network visualization
-- **Why**: Cytoscape.js is specifically designed for scientific/biological networks
-- **Benefits**: Better algorithms, easier implementation, more appropriate for knowledge graphs
-- **Dependencies**: Updated package.json with cytoscape and layout extensions
-- **Features**: Multiple layout algorithms (FCose, CoSE, Cola, Euler), search, highlighting
+**From Cytoscape.js to 3D Force Graph**: Migrated to 3D visualization with precise controls
+- **Why**: User requested precise 3D control over the visualization
+- **Benefits**: Full 3D navigation, advanced camera controls, better for exploring complex knowledge networks
+- **Dependencies**: Updated package.json with 3d-force-graph and three.js
+- **Features**: Orbit controls, keyboard shortcuts (R/F/P/L), node focusing, highlighting, search, smooth animations
 
 ## Git Workflow
 
