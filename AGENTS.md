@@ -33,6 +33,14 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 - **Dependencies**: 3d-force-graph and three.js with custom control system
 - **Features**: WASD/IJKL/UO keys, touch gestures (drag/rotate/pinch/tap), virtual controls on mobile, device-optimized performance
 
+## Org Agenda Integration
+
+**Research Task Management**: Comprehensive agenda integration for scientific workflows
+- **Why**: User requested org-agenda as dependency for research project management
+- **Benefits**: Schedule research tasks, track deadlines, manage literature reviews, project planning
+- **Dependencies**: org-agenda (part of org package)
+- **Features**: Custom agenda views, paper review scheduling, research project templates, weekly reviews, deadline tracking
+
 ## Git Workflow
 
 **Always commit and push changes**: After making any modifications to the codebase
