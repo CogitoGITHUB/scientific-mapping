@@ -20,22 +20,32 @@ class ScientificVisualizer {
         this.graph = ForceGraph3D({
             controlType: false, // Disable all mouse controls
             rendererConfig: {
-                antialias: true,
-                alpha: true
+                antialias: this.isMobileDevice() ? false : true, // Disable antialias on mobile for performance
+                alpha: true,
+                powerPreference: this.isMobileDevice() ? "low-power" : "high-performance"
             }
         })
         (document.getElementById('3d-graph'))
 
         // Configure graph appearance and behavior
-        .nodeLabel(node => `${node.title || node.id}<br/>Type: ${node.type || 'unknown'}`)
+        .nodeLabel(node => {
+            if (this.isMobileDevice()) {
+                return `${node.title || node.id}`; // Shorter labels on mobile
+            }
+            return `${node.title || node.id}<br/>Type: ${node.type || 'unknown'}`;
+        })
         .nodeColor(node => this.getNodeColor(node))
-        .nodeVal(node => Math.sqrt((node.weight || 1) + 1))
-        .nodeResolution(16)
+        .nodeVal(node => {
+            // Smaller nodes on mobile for better performance
+            const baseSize = Math.sqrt((node.weight || 1) + 1);
+            return this.isMobileDevice() ? Math.max(2, baseSize * 0.7) : baseSize;
+        })
+        .nodeResolution(this.isMobileDevice() ? 8 : 16) // Lower resolution on mobile
         .linkColor(link => this.getLinkColor(link))
         .linkWidth(link => Math.max(1, Math.min(5, link.weight || 1)))
-        .linkDirectionalArrowLength(3)
+        .linkDirectionalArrowLength(this.isMobileDevice() ? 2 : 3)
         .linkDirectionalArrowRelPos(1)
-        .linkOpacity(0.8);
+        .linkOpacity(this.isMobileDevice() ? 0.6 : 0.8); // More transparent on mobile
 
         // Initialize keyboard control state
         this.keyboardState = {
@@ -58,9 +68,24 @@ class ScientificVisualizer {
         this.rotationSpeed = 0.02;
         this.zoomSpeed = 0.1;
 
+        // Touch control state
+        this.touchState = {
+            isDragging: false,
+            lastTouchX: 0,
+            lastTouchY: 0,
+            touchStartX: 0,
+            touchStartY: 0,
+            pinchDistance: 0,
+            rotationAngle: 0,
+            lastPinchDistance: 0,
+            lastRotationAngle: 0
+        };
+
         // Setup comprehensive keyboard controls
         this.setupKeyboardControls();
+        this.setupTouchControls();
         this.startKeyboardAnimationLoop();
+        this.detectDeviceCapabilities();
     }
         })
         (document.getElementById('3d-graph'))
@@ -116,6 +141,37 @@ class ScientificVisualizer {
                 event.preventDefault();
             }
         });
+    }
+
+    setupTouchControls() {
+        const canvas = document.getElementById('3d-graph');
+
+        // Touch event handlers
+        canvas.addEventListener('touchstart', (event) => this.handleTouchStart(event), { passive: false });
+        canvas.addEventListener('touchmove', (event) => this.handleTouchMove(event), { passive: false });
+        canvas.addEventListener('touchend', (event) => this.handleTouchEnd(event), { passive: false });
+
+        // Prevent default touch behaviors
+        canvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+        canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+        canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
+
+        // Add virtual controls for mobile
+        if (this.isMobileDevice()) {
+            this.createVirtualControls();
+        }
+    }
+
+    detectDeviceCapabilities() {
+        this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        console.log(`Device detection: Touch=${this.isTouchDevice}, Mobile=${this.isMobileDevice}`);
+    }
+
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (window.innerWidth <= 768 && window.innerHeight <= 1024);
     }
 
     handleKeyDown(event) {
@@ -195,9 +251,171 @@ class ScientificVisualizer {
     startKeyboardAnimationLoop() {
         const animate = () => {
             this.updateCameraFromKeyboard();
+            this.updateCameraFromTouch();
             requestAnimationFrame(animate);
         };
         animate();
+    }
+
+    handleTouchStart(event) {
+        const touches = event.touches;
+
+        if (touches.length === 1) {
+            // Single touch - prepare for drag or tap
+            const touch = touches[0];
+            this.touchState.touchStartX = touch.clientX;
+            this.touchState.touchStartY = touch.clientY;
+            this.touchState.lastTouchX = touch.clientX;
+            this.touchState.lastTouchY = touch.clientY;
+            this.touchState.isDragging = false;
+
+        } else if (touches.length === 2) {
+            // Two touches - prepare for pinch/rotate
+            const touch1 = touches[0];
+            const touch2 = touches[1];
+
+            this.touchState.pinchDistance = this.getTouchDistance(touch1, touch2);
+            this.touchState.rotationAngle = this.getTouchAngle(touch1, touch2);
+            this.touchState.lastPinchDistance = this.touchState.pinchDistance;
+            this.touchState.lastRotationAngle = this.touchState.rotationAngle;
+        }
+    }
+
+    handleTouchMove(event) {
+        const touches = event.touches;
+
+        if (touches.length === 1) {
+            // Single touch drag - camera rotation
+            const touch = touches[0];
+            const deltaX = touch.clientX - this.touchState.lastTouchX;
+            const deltaY = touch.clientY - this.touchState.lastTouchY;
+
+            // Mark as dragging if moved more than threshold
+            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                this.touchState.isDragging = true;
+            }
+
+            // Apply rotation based on touch movement
+            const rotationSpeed = 0.005;
+            this.touchState.pendingRotationX = deltaY * rotationSpeed;
+            this.touchState.pendingRotationY = deltaX * rotationSpeed;
+
+            this.touchState.lastTouchX = touch.clientX;
+            this.touchState.lastTouchY = touch.clientY;
+
+        } else if (touches.length === 2) {
+            // Two finger gestures
+            const touch1 = touches[0];
+            const touch2 = touches[1];
+
+            const currentDistance = this.getTouchDistance(touch1, touch2);
+            const currentAngle = this.getTouchAngle(touch1, touch2);
+
+            // Pinch to zoom
+            const pinchDelta = currentDistance - this.touchState.lastPinchDistance;
+            this.touchState.pendingZoom = pinchDelta * 0.01;
+
+            // Two finger rotate
+            const angleDelta = currentAngle - this.touchState.lastRotationAngle;
+            this.touchState.pendingRotationY = angleDelta * 0.01;
+
+            this.touchState.lastPinchDistance = currentDistance;
+            this.touchState.lastRotationAngle = currentAngle;
+        }
+    }
+
+    handleTouchEnd(event) {
+        const touches = event.changedTouches;
+
+        // Handle tap gestures
+        if (!this.touchState.isDragging && touches.length === 1) {
+            const touch = touches[0];
+            const deltaX = Math.abs(touch.clientX - this.touchState.touchStartX);
+            const deltaY = Math.abs(touch.clientY - this.touchState.touchStartY);
+
+            // If it was a small movement, treat as tap
+            if (deltaX < 10 && deltaY < 10) {
+                this.handleTap(touch.clientX, touch.clientY);
+            }
+        }
+
+        // Reset touch state
+        this.touchState.isDragging = false;
+        this.touchState.pendingRotationX = 0;
+        this.touchState.pendingRotationY = 0;
+        this.touchState.pendingZoom = 0;
+    }
+
+    handleTap(clientX, clientY) {
+        // Convert screen coordinates to 3D world coordinates
+        const rect = document.getElementById('3d-graph').getBoundingClientRect();
+        const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+        // Find nearest node to tap position
+        const camera = this.graph.camera();
+        const raycaster = new THREE.Raycaster();
+
+        // Create ray from camera through tap point
+        raycaster.setFromCamera({ x, y }, camera);
+
+        // Check intersections with nodes
+        const nodeObjects = this.graph.scene().children.filter(child =>
+            child.userData && child.userData.id
+        );
+
+        const intersections = raycaster.intersectObjects(nodeObjects);
+
+        if (intersections.length > 0) {
+            const intersectedNode = intersections[0].object;
+            const nodeId = intersectedNode.userData.id;
+
+            // Set as selected node
+            const nodeIndex = this.nodes.findIndex(node => node.id === nodeId);
+            if (nodeIndex >= 0) {
+                this.selectedNodeIndex = nodeIndex;
+                this.updateNodeSelection();
+
+                // Send activation message
+                this.sendMessage('open-paper', { identifier: nodeId });
+                console.log(`Tapped node: ${this.nodes[nodeIndex].title || nodeId}`);
+            }
+        }
+    }
+
+    getTouchDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    getTouchAngle(touch1, touch2) {
+        return Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX);
+    }
+
+    updateCameraFromTouch() {
+        const camera = this.graph.camera();
+
+        // Apply pending touch rotations
+        if (this.touchState.pendingRotationX) {
+            camera.rotation.x += this.touchState.pendingRotationX;
+            camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+            this.touchState.pendingRotationX *= 0.9; // Decay
+        }
+
+        if (this.touchState.pendingRotationY) {
+            camera.rotation.y += this.touchState.pendingRotationY;
+            this.touchState.pendingRotationY *= 0.9; // Decay
+        }
+
+        // Apply pending zoom
+        if (this.touchState.pendingZoom) {
+            const zoomFactor = 1 + this.touchState.pendingZoom;
+            camera.position.x *= zoomFactor;
+            camera.position.y *= zoomFactor;
+            camera.position.z *= zoomFactor;
+            this.touchState.pendingZoom *= 0.9; // Decay
+        }
     }
 
     updateCameraFromKeyboard() {
@@ -428,9 +646,117 @@ class ScientificVisualizer {
         console.log('Minimum speed set');
     }
 
+    createVirtualControls() {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.id = 'virtual-controls';
+        controlsContainer.innerHTML = `
+            <div class="virtual-controls-group">
+                <div class="movement-controls">
+                    <button id="move-forward" class="virtual-btn">↑</button>
+                    <div class="horizontal-controls">
+                        <button id="move-left" class="virtual-btn">←</button>
+                        <button id="move-back" class="virtual-btn">↓</button>
+                        <button id="move-right" class="virtual-btn">→</button>
+                    </div>
+                </div>
+                <div class="rotation-controls">
+                    <button id="rotate-up" class="virtual-btn">↻↑</button>
+                    <button id="rotate-left" class="virtual-btn">↻←</button>
+                    <button id="rotate-down" class="virtual-btn">↻↓</button>
+                    <button id="rotate-right" class="virtual-btn">↻→</button>
+                </div>
+            </div>
+            <div class="virtual-controls-group">
+                <button id="zoom-in" class="virtual-btn zoom-btn">+</button>
+                <button id="zoom-out" class="virtual-btn zoom-btn">-</button>
+                <button id="reset-camera" class="virtual-btn action-btn">Reset</button>
+                <button id="fit-screen" class="virtual-btn action-btn">Fit</button>
+            </div>
+            <div class="virtual-controls-group">
+                <button id="select-prev" class="virtual-btn nav-btn">◀</button>
+                <button id="select-activate" class="virtual-btn nav-btn">●</button>
+                <button id="select-next" class="virtual-btn nav-btn">▶</button>
+            </div>
+        `;
+
+        controlsContainer.style.cssText = `
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        `;
+
+        document.body.appendChild(controlsContainer);
+
+        // Add event listeners for virtual controls
+        this.setupVirtualControlEvents();
+    }
+
+    setupVirtualControlEvents() {
+        // Movement controls
+        document.getElementById('move-forward').addEventListener('touchstart', () => this.keyboardState.moveForward = true);
+        document.getElementById('move-forward').addEventListener('touchend', () => this.keyboardState.moveForward = false);
+        document.getElementById('move-back').addEventListener('touchstart', () => this.keyboardState.moveBackward = true);
+        document.getElementById('move-back').addEventListener('touchend', () => this.keyboardState.moveBackward = false);
+        document.getElementById('move-left').addEventListener('touchstart', () => this.keyboardState.moveLeft = true);
+        document.getElementById('move-left').addEventListener('touchend', () => this.keyboardState.moveLeft = false);
+        document.getElementById('move-right').addEventListener('touchstart', () => this.keyboardState.moveRight = true);
+        document.getElementById('move-right').addEventListener('touchend', () => this.keyboardState.moveRight = false);
+
+        // Rotation controls
+        document.getElementById('rotate-up').addEventListener('touchstart', () => this.keyboardState.rotateUp = true);
+        document.getElementById('rotate-up').addEventListener('touchend', () => this.keyboardState.rotateUp = false);
+        document.getElementById('rotate-down').addEventListener('touchstart', () => this.keyboardState.rotateDown = true);
+        document.getElementById('rotate-down').addEventListener('touchend', () => this.keyboardState.rotateDown = false);
+        document.getElementById('rotate-left').addEventListener('touchstart', () => this.keyboardState.rotateLeft = true);
+        document.getElementById('rotate-left').addEventListener('touchend', () => this.keyboardState.rotateLeft = false);
+        document.getElementById('rotate-right').addEventListener('touchstart', () => this.keyboardState.rotateRight = true);
+        document.getElementById('rotate-right').addEventListener('touchend', () => this.keyboardState.rotateRight = false);
+
+        // Zoom controls
+        document.getElementById('zoom-in').addEventListener('touchstart', () => this.keyboardState.zoomIn = true);
+        document.getElementById('zoom-in').addEventListener('touchend', () => this.keyboardState.zoomIn = false);
+        document.getElementById('zoom-out').addEventListener('touchstart', () => this.keyboardState.zoomOut = true);
+        document.getElementById('zoom-out').addEventListener('touchend', () => this.keyboardState.zoomOut = false);
+
+        // Action controls
+        document.getElementById('reset-camera').addEventListener('click', () => this.resetCamera());
+        document.getElementById('fit-screen').addEventListener('click', () => this.fitToScreen());
+
+        // Node navigation
+        document.getElementById('select-prev').addEventListener('click', () => this.selectPreviousNode());
+        document.getElementById('select-next').addEventListener('click', () => this.selectNextNode());
+        document.getElementById('select-activate').addEventListener('click', () => this.activateSelectedNode());
+    }
+
     showHelp() {
-        const helpText = `
-KEYBOARD CONTROLS (No Mouse Required):
+        const isMobile = this.isMobileDevice();
+        const helpText = isMobile ? `
+TOUCH & VIRTUAL CONTROLS:
+
+GESTURES:
+  Single Finger Drag: Rotate camera
+  Two Finger Pinch: Zoom in/out
+  Two Finger Rotate: Camera rotation
+  Tap Node: Select & activate
+
+VIRTUAL CONTROLS:
+  ↑↓←→: Move camera
+  ↻↑↓←→: Rotate camera
+  +/-: Zoom in/out
+  ◀●▶: Navigate nodes
+  Reset/Fit: Camera controls
+
+KEYBOARD (if available):
+  WASD: Move    IJKL: Rotate    UO: Zoom
+  Arrows: Navigate    Enter: Activate
+  R: Reset    F: Fit    H: Help` :
+
+`KEYBOARD CONTROLS (No Mouse Required):
 
 CAMERA MOVEMENT:
   W/S: Forward/Back     A/D: Left/Right     Q/E: Up/Down
@@ -455,12 +781,68 @@ SPEED CONTROL:
   PageUp: Increase Speed   PageDown: Decrease Speed
   Home: Maximum Speed      End: Minimum Speed
 
+TOUCH SUPPORT:
+  Single Drag: Rotate     Pinch: Zoom     Tap: Select
+  Virtual controls available on mobile
+
 OTHER:
   H: Show This Help
 
 All controls work without mouse - pure keyboard navigation!`;
+
         console.log(helpText);
-        alert(helpText);
+        if (isMobile) {
+            alert(helpText);
+        } else {
+            // Create a modal for desktop
+            this.showDesktopHelp(helpText);
+        }
+    }
+
+    showDesktopHelp(helpText) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            color: white;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #4a90e2;
+        `;
+
+        content.innerHTML = `
+            <h2 style="color: #4a90e2; margin-top: 0;">Keyboard & Touch Controls</h2>
+            <pre style="margin: 0; white-space: pre-wrap; font-size: 12px;">${helpText}</pre>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                margin-top: 15px;
+                padding: 8px 16px;
+                background: #4a90e2;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            ">Close</button>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
     }
 
     connectWebSocket() {
