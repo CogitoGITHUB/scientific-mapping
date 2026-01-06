@@ -131,6 +131,11 @@
    - Automatic concept relationship discovery with Org properties
    - Ontology building integrated with existing concept mapping
 
+4. *MCP Server Integration*
+   - org-mcp for AI-powered Org mode interactions
+   - Agent-shell for AI agent command execution
+   - Seamless AI workflow integration within Emacs
+
 *** Emacs AI Architecture Decisions
 - *Emacs Integration First*: All AI features work through Emacs interfaces
 - *Local Processing Priority*: Ollama integration for privacy and offline capability

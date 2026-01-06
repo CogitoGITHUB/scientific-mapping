@@ -4,7 +4,7 @@
 ;; Author: Adapted from org-roam-timeline by Gerardo Cendejas Mendoza
 ;; Maintainer: Scientific Tools Development Team
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "27.1") (scientific-document-engine "1.0.0") (json-mode "1.0") (simple-httpd "1.5.1"))
+;; Package-Requires: ((emacs "27.1") (doc-engine "1.0.0") (json-mode "1.0") (simple-httpd "1.5.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -40,7 +40,7 @@
 
 ;;; Code:
 
-(require 'scientific-document-engine)
+(require 'doc-engine)
 (require 'citation-database)
 (require 'simple-httpd)
 (require 'json)
@@ -331,7 +331,7 @@
             (with-current-buffer user-buffer
               (when (and (derived-mode-p 'org-mode) (buffer-file-name))
                 (let ((file (buffer-file-name)))
-                  (when (string-match-p scientific-document-directory file)
+                  (when (string-match-p doc-engine-directory file)
                     (with-current-buffer (find-file-noselect file)
                       (let ((identifier (org-entry-get (point-min) "IDENTIFIER")))
                         (when identifier
@@ -367,7 +367,7 @@
   "Focus current research node in visual timeline."
   (interactive)
   (let* ((file (buffer-file-name))
-         (identifier (when (and file (string-match-p scientific-document-directory file))
+         (identifier (when (and file (string-match-p doc-engine-directory file))
                         (with-current-buffer (find-file-noselect file)
                           (org-entry-get (point-min) "IDENTIFIER")))))
     (if identifier
@@ -380,7 +380,7 @@
   "Hide current research node from visual timeline."
   (interactive)
   (let* ((file (buffer-file-name))
-         (identifier (when (and file (string-match-p scientific-document-directory file))
+         (identifier (when (and file (string-match-p doc-engine-directory file))
                         (with-current-buffer (find-file-noselect file)
                           (org-entry-get (point-min) "IDENTIFIER")))))
     (if identifier

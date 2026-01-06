@@ -81,7 +81,7 @@
 ;;   4. M-x page-view-goto-page (navigate sections)
 ;;   5. Export to PDF/Word when complete
 ;;
-;; Integration with scientific-yasnippet templates:
+;; Integration with snippet-engine templates:
 ;;   Templates automatically integrate with page view layout
 ;;   Academic document types (research, review, thesis) supported
 ;;   Journal-specific formatting enforced
@@ -825,10 +825,10 @@ Provides word processor-like layout following academic writing standards."
 ;; INTEGRATION:
 ;; ============
 ;; This system integrates with:
-;; - scientific-document-engine: Document management and metadata
-;; - scientific-yasnippet: Academic templates
+;; - doc-engine: Document management and metadata
+;; - snippet-engine: Academic templates
 ;; - citation-database: Reference tracking
 ;; - concept-relationships: Concept organization
 ;; 
-;; Templates from scientific-yasnippet automatically conform to page view layout
+;; Templates from snippet-engine automatically conform to page view layout
 ;; and enforce word counts from official journal guidelines.

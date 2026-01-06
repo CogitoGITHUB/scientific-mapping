@@ -28,7 +28,7 @@
 ;;
 ;; 1. scientific-document-engine - Paper and note management
 ;; 2. citation-database - Bibliographic database and citation tracking
-;; 3. scientific-visualizer - 3D visualization of knowledge networks
+;; 3. viz-engine - 3D visualization of knowledge networks
 ;; 4. concept-relationships - Concept mapping and theoretical relationships
 ;;
 ;; The system is designed for researchers, academics, and scientists who need to:
@@ -59,6 +59,9 @@
 (require 'timeline-engine)
 (require 'concept-tree)
 (require 'yasnippet)
+
+;; Load AI integration (optional)
+(require 'ai-integration nil t)
 
 (defconst scientific-mapping-version "1.0.0"
   "Version of the scientific-mapping system.")
@@ -133,7 +136,7 @@
   (interactive)
   (scientific-mapping-mode 1)
   (when (y-or-n-p "Open visualizer interface? ")
-    (scientific-visualizer-open))
+    (viz-engine-open))
   (message "Scientific Knowledge Mapping System started."))
 
 ;;;###autoload
@@ -328,6 +331,10 @@
     (define-key map "b" 'scientific-mapping-backup)
     (define-key map "t" 'timeline-engine-open)
     (define-key map "e" 'concept-tree-toggle-section)
+    ;; AI integration commands
+    (define-key map "a" 'ai-integration-analyze-document)
+    (define-key map "q" 'ai-integration-ask-question)
+    (define-key map "h" 'ai-integration-research-assistance)
     (define-key map "?" 'scientific-mapping-help)
     map)
   "Prefix keymap for scientific-mapping commands.")
@@ -359,4 +366,7 @@
 ;; C-c s n - Set visualization mode
 ;; C-c s r - Generate literature review
 ;; C-c s b - Create backup
+;; C-c s a - AI document analysis
+;; C-c s q - AI question answering
+;; C-c s h - AI research assistance
 ;; C-c s ? - Show help

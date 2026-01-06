@@ -77,6 +77,8 @@ The system is designed for academics, scientists, and researchers who need to:
 - Node.js (for 3D visualizer)
 - YASnippet (included)
 - EAF Browser (recommended for in-Emacs visualization)
+- org-mcp (for AI-powered Org mode interactions)
+- agent-shell (for AI agent interactions)
 
 *** Installation Steps
 
@@ -95,10 +97,19 @@ The system is designed for academics, scientists, and researchers who need to:
 
 3. Add to your Emacs configuration (~/.emacs or init.el):
    #+begin_src elisp
+   ;; EAF Browser setup
    (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework")
    (require 'eaf)
    (eaf-setq eaf-browser-default-zoom "1.0")
 
+   ;; AI Integration packages
+   (require 'org-mcp)
+   ;; (org-mcp-start-server) ;; uncomment for auto-start
+
+   (require 'agent-shell)
+   ;; (agent-shell-start) ;; uncomment for auto-start
+
+   ;; Scientific Mapping System
    (add-to-list 'load-path "~/scientific-mapping")
    (require 'scientific-mapping)
    (scientific-mapping-mode 1)
