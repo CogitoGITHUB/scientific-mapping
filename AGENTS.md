@@ -127,6 +127,19 @@
 - **Benefits**: Reduced cognitive load, better research habits, proactive notifications
 - **Features**: Context detection, smart suggestions, quick actions, pattern recognition
 
+### Clean Filenames & Invisible IDs
+**Ultra-Clean Document Management**: Frictionless file organization
+- **Why**: User wanted to eliminate .org extensions and visible IDs (hard rule)
+- **Benefits**: Clean file manager display, invisible identifiers, semantic naming
+- **Implementation**: Internal ID mapping, clean display names, automatic conflict resolution
+- **Features**: Files show as 'machine-learning-paper' not 'machine-learning-paper.org', IDs stored invisibly
+
+### Org File Manager
+**Structured Org Document Interface**: Scientific document management
+- **Why**: Transformed generic file manager into Org-aware research tool
+- **Benefits**: Visual document status, structured content view, research workflow integration
+- **Features**: Status indicators (🧠 analyzed, 📄 published), word counts, heading previews, properties display, sorting/filtering
+
 ### Visualization Framework Migration
 **3D Force Graph with Universal Controls**: Keyboard + Touchscreen support for all devices
 - **Why**: User required touchscreen support as must-have for laptop and mobile (hard rule)
