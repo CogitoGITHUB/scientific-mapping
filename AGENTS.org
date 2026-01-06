@@ -1,5 +1,11 @@
 * Scientific Knowledge Mapping System - Agent Guidelines
 
+** General Principles
+- *Org Mode First*: Use Org mode for all documentation, notes, and structured content
+- *Avoid Markdown*: Do not create .md files unless absolutely necessary (e.g., for web deployment)
+- *Emacs Native*: Prefer Emacs built-in formats and tools over external alternatives
+- *Consistency*: All documentation follows Org mode conventions
+
 ** Build/Lint/Test Commands
 
 *** Testing
@@ -16,6 +22,13 @@
 - *Package validation*: =cask install && cask build=
 
 ** Code Style Guidelines
+
+*** Org Mode Usage
+- *Documentation*: Use Org mode (=.org=) for all documentation files
+- *Configuration*: Prefer Org properties and drawers over external config files
+- *Notes/Planning*: Use Org files for design documents, TODO lists, and project notes
+- *Examples*: Include Org-formatted examples in docstrings when relevant
+- *READMEs*: All component READMEs must be in Org format
 
 *** Emacs Lisp Conventions
 - *Naming*: Use =kebab-case= for functions/variables, =PascalCase= for major modes
@@ -48,7 +61,8 @@
 - *Modular*: Each component provides single responsibility
 - *Integration*: Components communicate via well-defined APIs
 - *Configuration*: Customizable via defcustom variables
-- *Documentation*: README.org files for complex components
+- *Documentation*: README.org files for all components, use Org properties for metadata
+- *Org Integration*: Components should work seamlessly with Org mode features
 
 *** Git Workflow
 - *Commits*: Descriptive messages, atomic changes
