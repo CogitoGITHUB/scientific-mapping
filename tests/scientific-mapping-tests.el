@@ -7,6 +7,10 @@
 
 (require 'ert)
 (require 'scientific-mapping)
+(require 'doc-engine)
+(require 'citation-database)
+(require 'viz-engine)
+(require 'concept-relationships)
 
 (defvar scientific-mapping-test-dir (expand-file-name "test-data" (file-name-directory load-file-name))
   "Directory for test data.")
@@ -16,7 +20,7 @@
   (unless (file-exists-p scientific-mapping-test-dir)
     (make-directory scientific-mapping-test-dir t))
   ;; Set test-specific variables
-  (setq scientific-document-directory scientific-mapping-test-dir
+  (setq doc-engine-directory scientific-mapping-test-dir
         citation-database-location (expand-file-name "test-citation-db.sqlite" scientific-mapping-test-dir)))
 
 (defun scientific-mapping-test-teardown ()

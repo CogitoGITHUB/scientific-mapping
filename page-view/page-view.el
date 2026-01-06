@@ -1,4 +1,4 @@
-;;; scientific-page-view.el --- Scientific writing workflow with page-based layout -*- lexical-binding: t -*-
+;;; page-view.el --- Scientific writing workflow with page-based layout -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2025  Scientific Knowledge Mapping System
 ;; Author: Adapted from page-view by Brad Stewart
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; scientific-page-view provides a word processor-like page layout for writing
+;; page-view provides a word processor-like page layout for writing
 ;; scientific papers in org-mode, following established academic writing
 ;; standards from official sources (PLOS, Nature, Science, ICMJE, etc.).
 ;;
@@ -72,13 +72,13 @@
 ;; == USAGE ==
 ;;
 ;; Enable in any org buffer:
-;;   M-x scientific-page-view-mode
+;;   M-x page-view-mode
 ;;
 ;; Quick workflow:
-;;   1. M-x scientific-page-view-start (begin writing)
+;;   1. M-x page-view-start (begin writing)
 ;;   2. Use page breaks to organize sections
 ;;   3. Write content following IMRaD structure
-;;   4. M-x scientific-page-view-goto-page (navigate sections)
+;;   4. M-x page-view-goto-page (navigate sections)
 ;;   5. Export to PDF/Word when complete
 ;;
 ;; Integration with scientific-yasnippet templates:
@@ -95,7 +95,7 @@
 ;; CONFIGURATION AND CUSTOMIZATION
 ;; ==============================================================================
 
-(defgroup scientific-page-view nil
+(defgroup page-view nil
   "Scientific page view settings for academic writing."
   :group 'scientific-mapping
   :prefix "spv-")
@@ -104,10 +104,10 @@
 ;; Academic Standards Configuration
 ;; ========================================
 
-(defcustom scientific-page-view-paper-type 'research-article
+(defcustom page-view-paper-type 'research-article
   "Type of scientific paper being written.
 Controls word count limits and structure requirements."
-  :group 'scientific-page-view
+  :group 'page-view
   :type '(choice (const :tag "Research Article" research-article)
                   (const :tag "Literature Review" literature-review)
                   (const :tag "Conference Paper" conference-paper)
@@ -115,10 +115,10 @@ Controls word count limits and structure requirements."
                   (const :tag "Doctoral Dissertation" thesis-doc)
                   (const :tag "Technical Report" technical-report)))
 
-(defcustom scientific-page-view-journal-type 'general
+(defcustom page-view-journal-type 'general
   "Journal category for specific formatting requirements.
 Different journals have different word limits, abstract requirements, etc."
-  :group 'scientific-page-view
+  :group 'page-view
   :type '(choice (const :tag "General (no specific requirements)" general)
                   (const :tag "APA Style" apa)
                   (const :tag "MLA Style" mla)
@@ -128,9 +128,9 @@ Different journals have different word limits, abstract requirements, etc."
                   (const :tag "Nature" nature)
                   (const :tag "PLOS" plos)))
 
-(defcustom scientific-page-view-citation-style 'apa
+(defcustom page-view-citation-style 'apa
   "Citation style to use for formatting references."
-  :group 'scientific-page-view
+  :group 'page-view
   :type '(choice (const :tag "APA (7th edition)" apa)
                   (const :tag "MLA (9th edition)" mla)
                   (const :tag "Chicago (17th edition)" chicago)
@@ -142,81 +142,81 @@ Different journals have different word limits, abstract requirements, etc."
 ;; Page Layout Configuration
 ;; ========================================
 
-(defcustom scientific-page-view-page-width 69
+(defcustom page-view-page-width 69
   "Width of text in characters (approximating letter-sized page).
 Times New Roman 12pt at 1.5 spacing ≈ 69 chars wide."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'integer)
 
-(defcustom scientific-page-view-lines-per-page 36
+(defcustom page-view-lines-per-page 36
   "Number of lines per page for academic writing.
 Approximates ~250-300 words per page (standard single-spaced)."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'integer)
 
-(defcustom scientific-page-view-line-spacing 1.5
+(defcustom page-view-line-spacing 1.5
   "Line spacing for academic writing (standard is 1.5)."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'number)
 
-(defcustom scientific-page-view-font-family "Times New Roman"
+(defcustom page-view-font-family "Times New Roman"
   "Font family for academic writing (standard is Times New Roman)."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'string)
 
-(defcustom scientific-page-view-font-size 12
+(defcustom page-view-font-size 12
   "Font size in points (academic standard is 12pt)."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'integer)
 
 ;; ========================================
 ;; Header and Footer Configuration
 ;; ========================================
 
-(defcustom scientific-page-view-show-headers t
+(defcustom page-view-show-headers t
   "Show document title and author information at top of each page."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
-(defcustom scientific-page-view-show-footers t
+(defcustom page-view-show-footers t
   "Show page numbers at bottom of each page."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
-(defcustom scientific-page-view-footer-format "Page %d"
+(defcustom page-view-footer-format "Page %d"
   "Format string for page footer. Use %d for page number."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'string)
 
 ;; ========================================
 ;; Academic Writing Features
 ;; ========================================
 
-(defcustom scientific-page-view-enforce-word-counts t
+(defcustom page-view-enforce-word-counts t
   "Enforce abstract word count limits based on paper type."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
-(defcustom scientific-page-view-auto-number-figures t
+(defcustom page-view-auto-number-figures t
   "Automatically number figures in order of appearance."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
-(defcustom scientific-page-view-auto-number-tables t
+(defcustom page-view-auto-number-tables t
   "Automatically number tables in order of appearance."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
-(defcustom scientific-page-view-track-changes nil
+(defcustom page-view-track-changes nil
   "Track word count and line statistics for progress monitoring."
-  :group 'scientific-page-view
+  :group 'page-view
   :type 'boolean)
 
 ;; ==============================================================================
 ;; WORD COUNT LIMITS (From Official Sources)
 ;; ==============================================================================
 
-(defconst scientific-page-view-word-count-limits
+(defconst page-view-word-count-limits
   '((research-article . ((abstract . 250)  ; PLOS standard
                      (intro . 300)
                      (methods . 1500)
@@ -245,84 +245,84 @@ Sources: PLOS, Nature, Science, ICMJE, university thesis requirements.")
 ;; ==============================================================================
 
 ;; Page break separator (horizontal line across page)
-(defface scientific-page-view-pagebreak-face
+(defface page-view-pagebreak-face
   `((t :inherit 'tab-bar
        :family "monospace"
        :foreground "white"
        :background "gray30"
        :height 1.0))
   "Face for page break separators in scientific documents."
-  :group 'scientific-page-view)
+  :group 'page-view)
 
 ;; Document title in page header
-(defface scientific-page-view-header-face
+(defface page-view-header-face
   `((t :inherit 'default
-       :family ,scientific-page-view-font-family
+       :family ,page-view-font-family
        :weight 'bold
        :height 1.1))
   "Face for document headers."
-  :group 'scientific-page-view)
+  :group 'page-view)
 
 ;; Page number in footer
-(defface scientific-page-view-footer-face
+(defface page-view-footer-face
   `((t :inherit 'default
        :family "monospace"
        :weight 'bold))
   "Face for page footers."
-  :group 'scientific-page-view)
+  :group 'page-view)
 
 ;; Debug information overlays
-(defface scientific-page-view-debug-face
-  `((t :inherit 'scientific-page-view-footer-face
+(defface page-view-debug-face
+  `((t :inherit 'page-view-footer-face
        :foreground "yellow"
        :slant 'italic))
   "Face for debug mode overlays."
-  :group 'scientific-page-view)
+  :group 'page-view)
 
 ;; Section headings for organization
-(defface scientific-page-view-section-face
+(defface page-view-section-face
   `((t :inherit 'org-level-1
        :weight 'bold
        :height 1.2))
   "Face for section headings."
-  :group 'scientific-page-view)
+  :group 'page-view)
 
 ;; ==============================================================================
 ;; INTERNAL VARIABLES
 ;; ==============================================================================
 
-(defvar-local scientific-page-view--overlays nil
+(defvar-local page-view--overlays nil
   "Hash table storing page overlay objects.
 Key: page-number → overlay object")
 
-(defvar-local scientific-page-view--max-page 1
+(defvar-local page-view--max-page 1
   "Current highest page number in document.")
 
-(defvar-local scientific-page-view--debug-flag nil
+(defvar-local page-view--debug-flag nil
   "When non-nil, show debug overlays with line heights.")
 
-(defvar-local scientific-page-view--track-statistics nil
+(defvar-local page-view--track-statistics nil
   "When tracking writing progress (word counts, etc).")
 
 ;; ==============================================================================
 ;; INITIALIZATION
 ;; ==============================================================================
 
-(defun scientific-page-view-initialize()
-  "Initialize scientific-page-view system for current buffer."
+(defun page-view-initialize()
+  "Initialize page-view system for current buffer."
   (interactive)
   (message "Initializing Scientific Page View...")
   
   ;; Configure olivetti for academic writing
   (setq-local olivetti-style 'fancy)
-  (setq-local olivetti-body-width scientific-page-view-page-width)
+  (setq-local olivetti-body-width page-view-page-width)
   
   ;; Set academic font
   (setq-local default-text-properties
-            `(line-spacing ,scientific-page-view-line-spacing
-                 wrap-prefix (space . (:height ,(round (* scientific-page-view-font-size 
-                                                                   scientific-page-view-line-spacing))
-                                        :width scientific-page-view-page-width))))
+            `(line-spacing ,page-view-line-spacing
+                 wrap-prefix (space . (:height ,(round (* page-view-font-size 
+                                                                   page-view-line-spacing))
+                                        :width page-view-page-width))))
   
   ;; Enable olivetti mode
   (olivetti-mode 1)
@@ -333,39 +333,39 @@ Key: page-number → overlay object")
   (hl-line-mode -1)
   
   ;; Initialize tracking
-  (setq-local scientific-page-view--overlays (make-hash-table :test 'equal))
-  (setq-local scientific-page-view--max-page 1)
+  (setq-local page-view--overlays (make-hash-table :test 'equal))
+  (setq-local page-view--max-page 1)
   
   (message "Scientific Page View initialized for %s paper" 
-           (symbol-name scientific-page-view-paper-type)))
+           (symbol-name page-view-paper-type)))
 
 ;; ==============================================================================
 ;; PAGE BREAK AND NAVIGATION
 ;; ==============================================================================
 
-(defun scientific-page-view-insert-page-break()
+(defun page-view-insert-page-break()
   "Insert a scientific page break at current point.
 Creates a visual separator and prepares for new page numbering.
 Follows journal standards for page breaks."
   (interactive)
-  (let* ((page-number (1+ scientific-page-view--max-page))
+  (let* ((page-number (1+ page-view--max-page))
          (current-line (line-number-at-pos))
          (height 3))
     
     ;; Insert visual separator (three underscores for page break)
-    (insert (propertize "___" 'face 'scientific-page-view-pagebreak-face))
+    (insert (propertize "___" 'face 'page-view-pagebreak-face))
     (insert "\n\n")
     
     ;; Update max page number
-    (setq scientific-page-view--max-page page-number)
+    (setq page-view--max-page page-number)
     
     (message "Inserted page break. Now on page %d" page-number)
     
     ;; Update statistics if tracking
-    (when scientific-page-view--track-statistics
-      (scientific-page-view--update-statistics))))
+    (when page-view--track-statistics
+      (page-view--update-statistics))))
 
-(defun scientific-page-view-goto-page(page-number)
+(defun page-view-goto-page(page-number)
   "Navigate to specific PAGE-NUMBER in the document.
 Page numbers correspond to logical document pages, not physical lines."
   (interactive "nPage number: ")
@@ -374,7 +374,7 @@ Page numbers correspond to logical document pages, not physical lines."
   
   ;; Find page break marker
   (let* ((found-page nil)
-         (target-line (* (1- page-number) scientific-page-view-lines-per-page)))
+         (target-line (* (1- page-number) page-view-lines-per-page)))
     
     ;; Search for page break at target line
     (save-excursion
@@ -393,23 +393,23 @@ Page numbers correspond to logical document pages, not physical lines."
     
     (unless found-page
       (message "Page %d not found. Document has %d pages." 
-               page-number scientific-page-view--max-page))))
+               page-number page-view--max-page))))
 
-(defun scientific-page-view-next-page()
+(defun page-view-next-page()
   "Navigate to next page in document."
   (interactive)
-  (scientific-page-view-goto-page (1+ scientific-page-view--max-page)))
+  (page-view-goto-page (1+ page-view--max-page)))
 
-(defun scientific-page-view-previous-page()
+(defun page-view-previous-page()
   "Navigate to previous page in document."
   (interactive)
-  (scientific-page-view-goto-page (1- scientific-page-view--max-page)))
+  (page-view-goto-page (1- page-view--max-page)))
 
 ;; ==============================================================================
 ;; HEADER AND FOOTER GENERATION
 ;; ==============================================================================
 
-(defun scientific-page-view--generate-header(page-number)
+(defun page-view--generate-header(page-number)
   "Generate academic document header for PAGE-NUMBER.
 Includes title, author, and page number."
   (let* ((title (or (org-get-title) "Untitled"))
@@ -417,16 +417,16 @@ Includes title, author, and page number."
          (date (or (org-entry-get (point-min) "DATE") (format-time-string "%Y-%m-%d")))
     (format "  %s | %s | %s  \n" title author date)))
 
-(defun scientific-page-view--generate-footer(page-number)
+(defun page-view--generate-footer(page-number)
   "Generate academic document footer for PAGE-NUMBER.
 Standard format: 'Page X' at bottom of page."
-  (format scientific-page-view-footer-format page-number))
+  (format page-view-footer-format page-number))
 
 ;; ==============================================================================
 ;; WORD COUNT AND ABSTRACT ENFORCEMENT
 ;; ==============================================================================
 
-(defun scientific-page-view-count-words(beginning end)
+(defun page-view-count-words(beginning end)
   "Count words between BEGINNING and END positions.
 Uses simple word counting algorithm suitable for academic text."
   (let ((text (buffer-substring-no-properties beginning end))
@@ -440,12 +440,12 @@ Uses simple word counting algorithm suitable for academic text."
         (setq words (1+ words)))
       words)))
 
-(defun scientific-page-view-check-abstract-length()
+(defun page-view-check-abstract-length()
   "Check if abstract section meets word count requirements.
 Based on paper type, enforce word limits from official sources."
   (interactive)
-  (let* ((limits (cdr (assq scientific-page-view-paper-type
-                               scientific-page-view-word-count-limits)))
+  (let* ((limits (cdr (assq page-view-paper-type
+                               page-view-word-count-limits)))
          (abstract-limit (cdr (assq 'abstract limits)))
     (save-excursion
       ;; Find abstract section
@@ -458,9 +458,9 @@ Based on paper type, enforce word limits from official sources."
                   (abstract-text (buffer-substring-no-properties
                                          (+ 7 abstract-start)  ; Skip "* Abstract"
                                          abstract-end))
-                  (word-count (scientific-page-view-count-words 
+                  (word-count (page-view-count-words 
                                                      abstract-start abstract-end)))
-          (if (and scientific-page-view-enforce-word-counts
+          (if (and page-view-enforce-word-counts
                      (> word-count abstract-limit))
               (progn
                 (message "Abstract: %d words (limit: %d) - TOO LONG!" 
@@ -469,18 +469,18 @@ Based on paper type, enforce word limits from official sources."
             (message "Abstract: %d words (limit: %d) - OK" 
                      word-count abstract-limit)))))))
 
-(defun scientific-page-view-show-word-counts()
+(defun page-view-show-word-counts()
   "Display word count statistics for current buffer or section."
   (interactive)
-  (let* ((total-words (scientific-page-view-count-words 
+  (let* ((total-words (page-view-count-words 
                                             (point-min) (point-max)))
-         (limits (cdr (assq scientific-page-view-paper-type
-                                scientific-page-view-word-count-limits)))
+         (limits (cdr (assq page-view-paper-type
+                                page-view-word-count-limits)))
          (expected-total (cdr (assq 'total limits))))
     (message "Current: %d words | Expected: %d words | Status: %s"
              total-words 
              expected-total
-             (if (and scientific-page-view-enforce-word-counts
+             (if (and page-view-enforce-word-counts
                       (<= total-words expected-total))
                  "✓ OK"
                (⚠ EXCEEDS")))))
@@ -489,7 +489,7 @@ Based on paper type, enforce word limits from official sources."
 ;; FIGURE AND TABLE CAPTIONING
 ;; ==============================================================================
 
-(defun scientific-page-view-number-figures()
+(defun page-view-number-figures()
   "Automatically number all figures in order of appearance.
 Figure captions follow standard academic format: 'Figure 1: Description'."
   (interactive)
@@ -509,7 +509,7 @@ Figure captions follow standard academic format: 'Figure 1: Description'."
               (insert (format "Figure %d: " figure-count)))))))
     (message "Numbered %d figures." figure-count)))
 
-(defun scientific-page-view-number-tables()
+(defun page-view-number-tables()
   "Automatically number all tables in order of appearance.
 Table captions follow standard academic format: 'Table 1: Description'."
   (interactive)
@@ -537,33 +537,33 @@ Table captions follow standard academic format: 'Table 1: Description'."
 ;; These functions follow the chronological academic writing process
 ;; based on official sources (PLOS, Nature, Science, ICMJE)
 
-(defun scientific-page-view-start-writing-session()
+(defun page-view-start-writing-session()
   "Phase 1: Start new scientific writing session.
 Prepares buffer for academic writing with proper formatting."
   (interactive)
   (message "=== Starting Scientific Writing Session ===")
   
   ;; Initialize page view
-  (scientific-page-view-initialize)
+  (page-view-initialize)
   
   ;; Show word count limits
-  (let ((limits (cdr (assq scientific-page-view-paper-type
-                                scientific-page-view-word-count-limits))))
-    (message "Paper Type: %s" (symbol-name scientific-page-view-paper-type))
+  (let ((limits (cdr (assq page-view-paper-type
+                                page-view-word-count-limits))))
+    (message "Paper Type: %s" (symbol-name page-view-paper-type))
     (message "Word Count Limits:")
     (message "  Abstract: %d words" (cdr (assq 'abstract limits)))
     (message "  Total Expected: %d words" (cdr (assq 'total limits)))
-    (message "Journal: %s" (symbol-name scientific-page-view-journal-type)))
+    (message "Journal: %s" (symbol-name page-view-journal-type)))
   
-  (when scientific-page-view--track-statistics
-    (setq scientific-page-view--track-statistics t)
+  (when page-view--track-statistics
+    (setq page-view--track-statistics t)
     (message "Writing statistics tracking enabled."))
   
   (message "=== Session Ready ===")
-  (message "Use: M-x scientific-page-view-insert-page-break to add sections")
-  (message "      M-x scientific-page-view-goto-page to navigate pages"))
+  (message "Use: M-x page-view-insert-page-break to add sections")
+  (message "      M-x page-view-goto-page to navigate pages"))
 
-(defun scientific-page-view-insert-section-template(section-name &optional heading-level)
+(defun page-view-insert-section-template(section-name &optional heading-level)
   "Insert standard academic section template at current point.
 SECTION-NAME is the section name (e.g., 'Methods', 'Results').
 HEADING-LEVEL is the org heading level (default 2)."
@@ -572,25 +572,25 @@ HEADING-LEVEL is the org heading level (default 2)."
     (insert template)
     (message "Inserted '%s' section. Start writing..." section-name)))
 
-(defun scientific-page-view-insert-figure-with-caption(caption)
+(defun page-view-insert-figure-with-caption(caption)
   "Insert a figure placeholder with proper caption formatting.
 Figure number will be auto-assigned when numbering."
   (interactive "sFigure caption: ")
   (let* ((placeholder (format "\n#+CAPTION: %s\n[[file:figure-placeholder.png]]\n" caption)))
     (insert placeholder)
-    (message "Inserted figure placeholder. Use M-x scientific-page-view-number-figures when complete.")))
+    (message "Inserted figure placeholder. Use M-x page-view-number-figures when complete.")))
 
-(defun scientific-page-view-insert-table-with-caption(caption)
+(defun page-view-insert-table-with-caption(caption)
   "Insert a table placeholder with proper caption formatting.
 Table number will be auto-assigned when numbering."
   (interactive "sTable caption: ")
   (let* ((placeholder (format "\n#+CAPTION: %s\n| Column 1 | Column 2 |\n|---|\n" caption)))
     (insert placeholder)
-    (message "Inserted table placeholder. Use M-x scientific-page-view-number-tables when complete.")))
+    (message "Inserted table placeholder. Use M-x page-view-number-tables when complete.")))
 
-(defun scientific-page-view-format-citation(key citation)
+(defun page-view-format-citation(key citation)
   "Format a citation according to selected style (APA, MLA, Chicago, etc.)."
-  (let ((formatted (pcase scientific-page-view-citation-style
+  (let ((formatted (pcase page-view-citation-style
                       ('apa 
                        (format "(%s, %d)" (car citation) (cdr citation)))
                       ('mla 
@@ -604,7 +604,7 @@ Table number will be auto-assigned when numbering."
     (message "Formatted as: %s" formatted)
     formatted))
 
-(defun scientific-page-view-check-references()
+(defun page-view-check-references()
   "Check if references section is properly formatted according to journal standards.
 Provides feedback on citation consistency and formatting."
   (interactive)
@@ -631,21 +631,21 @@ Provides feedback on citation consistency and formatting."
 ;; DEBUG AND STATISTICS
 ;; ==============================================================================
 
-(defun scientific-page-view-toggle-debug()
+(defun page-view-toggle-debug()
   "Toggle debug mode showing line heights and page information."
   (interactive)
-  (setq scientific-page-view--debug-flag 
-        (not scientific-page-view--debug-flag))
-  (message "Debug mode: %s" (if scientific-page-view--debug-flag "ON" "OFF")))
+  (setq page-view--debug-flag 
+        (not page-view--debug-flag))
+  (message "Debug mode: %s" (if page-view--debug-flag "ON" "OFF")))
 
-(defun scientific-page-view--update-statistics()
+(defun page-view--update-statistics()
   "Update writing statistics display in mode line."
-  (when scientific-page-view--track-statistics
-    (let* ((total-words (scientific-page-view-count-words 
+  (when page-view--track-statistics
+    (let* ((total-words (page-view-count-words 
                                              (point-min) (point-max)))
            (total-lines (count-lines (point-min) (point-max))
-           (limits (cdr (assq scientific-page-view-paper-type
-                                scientific-page-view-word-count-limits)))
+           (limits (cdr (assq page-view-paper-type
+                                page-view-word-count-limits)))
            (expected-total (cdr (assq 'total limits))))
       ;; Update mode line with statistics
       (setq mode-line-format
@@ -653,70 +653,70 @@ Provides feedback on citation consistency and formatting."
                    (if (<= total-words expected-total) "✓" "⚠")
                    total-words expected-total
                    total-lines
-                   scientific-page-view--max-page)))))
+                   page-view--max-page)))))
 
 ;; ==============================================================================
 ;; MAIN MODE
 ;; ==============================================================================
 
-(define-minor-mode scientific-page-view-mode
+(define-minor-mode page-view-mode
   "Scientific page view mode for academic writing.
 Provides word processor-like layout following academic writing standards."
   :lighter " SciPageView"
   :group 'scientific-mapping
   :init-value nil
-  (if scientific-page-view-mode
+  (if page-view-mode
       (progn
         ;; Activate mode
-        (scientific-page-view-initialize)
+        (page-view-initialize)
         
         ;; Add hooks for dynamic updates
         (add-hook 'after-change-functions 
-                  #'scientific-page-view--handle-change nil t)
+                  #'page-view--handle-change nil t)
         (add-hook 'window-scroll-functions 
-                  #'scientific-page-view--on-scroll nil t))
+                  #'page-view--on-scroll nil t))
         
         (message "Scientific Page View enabled for %s writing" 
-                 (symbol-name scientific-page-view-paper-type)))
+                 (symbol-name page-view-paper-type)))
     
     (progn
       ;; Deactivate mode
       (remove-hook 'after-change-functions 
-                   #'scientific-page-view--handle-change t)
+                   #'page-view--handle-change t)
       (remove-hook 'window-scroll-functions 
-                   #'scientific-page-view--on-scroll t)
+                   #'page-view--on-scroll t)
       
       (olivetti-mode -1)
       (setq-default-text-properties nil)
       
       (remove-overlays (point-min) (point-max) 'pagebreak t)
-      (setq scientific-page-view--overlays nil)
-      (setq scientific-page-view--max-page 1)
+      (setq page-view--overlays nil)
+      (setq page-view--max-page 1)
       
       (message "Scientific Page View disabled")))))
 
 ;; Event handlers
-(defun scientific-page-view--handle-change(beg end _len)
+(defun page-view--handle-change(beg end _len)
   "Handle buffer changes and invalidate cached overlays."
-  (scientific-page-view-clear-overlays beg (min (1+ end) (point-max)))
+  (page-view-clear-overlays beg (min (1+ end) (point-max)))
 
-(defun scientific-page-view--on-scroll(_window _display-start)
+(defun page-view--on-scroll(_window _display-start)
   "Handle window scrolling and reflow page breaks."
-  (scientific-page-view--reflow-screen _display-start (window-end _window) t))
+  (page-view--reflow-screen _display-start (window-end _window) t))
 
-(defun scientific-page-view-clear-overlays(&optional start end)
+(defun page-view-clear-overlays(&optional start end)
   "Clear all page-break overlays from START to END."
   (remove-overlays (or start (point-min)) 
                     (or end (point-max)) 
                     'pagebreak t)
-  (setq scientific-page-view--max-page 1))
+  (setq page-view--max-page 1))
 
-(defun scientific-page-view--reflow-screen(start end)
+(defun page-view--reflow-screen(start end)
   "Reflow page breaks for region between START and END."
   (let* ((page-start (or start 1))
          (page-end (or end page-start))
-         (current-page scientific-page-view--max-page))
-         (target-line (* page-start scientific-page-view-lines-per-page)))
+         (current-page page-view--max-page))
+         (target-line (* page-start page-view-lines-per-page)))
     
     (message "Reflowing pages from %d to %d" page-start page-end)
     
@@ -726,7 +726,7 @@ Provides word processor-like layout following academic writing standards."
       (let ((line-count 0))
         (while (and (not (eobp)) (< line-count page-end))
           (when (= (1+ line-count) target-line)
-            (scientific-page-view-insert-page-break)
+            (page-view-insert-page-break)
             (setq current-page (1+ current-page)))
           (forward-line 1)
           (setq line-count (1+ line-count)))))))
@@ -735,31 +735,31 @@ Provides word processor-like layout following academic writing standards."
 ;; KEY BINDINGS
 ;; ==============================================================================
 
-(defvar scientific-page-view-mode-map
+(defvar page-view-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-p") 'scientific-page-view-insert-page-break)
-    (define-key map (kbd "C-c C-g") 'scientific-page-view-goto-page)
-    (define-key map (kbd "C-c C-n") 'scientific-page-view-next-page)
-    (define-key map (kbd "C-c C-p") 'scientific-page-view-previous-page)
-    (define-key map (kbd "C-c C-s") 'scientific-page-view-insert-section-template)
-    (define-key map (kbd "C-c C-f") 'scientific-page-view-insert-figure-with-caption)
-    (define-key map (kbd "C-c C-t") 'scientific-page-view-insert-table-with-caption)
-    (define-key map (kbd "C-c C-c") 'scientific-page-view-check-abstract-length)
-    (define-key map (kbd "C-c C-w") 'scientific-page-view-show-word-counts)
-    (define-key map (kbd "C-c C-r") 'scientific-page-view-check-references)
-    (define-key map (kbd "C-c C-d") 'scientific-page-view-toggle-debug)
+    (define-key map (kbd "C-c C-p") 'page-view-insert-page-break)
+    (define-key map (kbd "C-c C-g") 'page-view-goto-page)
+    (define-key map (kbd "C-c C-n") 'page-view-next-page)
+    (define-key map (kbd "C-c C-p") 'page-view-previous-page)
+    (define-key map (kbd "C-c C-s") 'page-view-insert-section-template)
+    (define-key map (kbd "C-c C-f") 'page-view-insert-figure-with-caption)
+    (define-key map (kbd "C-c C-t") 'page-view-insert-table-with-caption)
+    (define-key map (kbd "C-c C-c") 'page-view-check-abstract-length)
+    (define-key map (kbd "C-c C-w") 'page-view-show-word-counts)
+    (define-key map (kbd "C-c C-r") 'page-view-check-references)
+    (define-key map (kbd "C-c C-d") 'page-view-toggle-debug)
     map)
-  "Keymap for scientific-page-view commands.")
+  "Keymap for page-view commands.")
 
 ;; Add key bindings to mode map
-(define-key scientific-page-view-mode-map (kbd "M-s") 'scientific-page-view-start-writing-session)
-(define-key scientific-page-view-mode-map (kbd "M-w") 'scientific-page-view-show-word-counts)
-(define-key scientific-page-view-mode-map (kbd "M-n") 'scientific-page-view-number-figures)
-(define-key scientific-page-view-mode-map (kbd "M-t") 'scientific-page-view-number-tables)
+(define-key page-view-mode-map (kbd "M-s") 'page-view-start-writing-session)
+(define-key page-view-mode-map (kbd "M-w") 'page-view-show-word-counts)
+(define-key page-view-mode-map (kbd "M-n") 'page-view-number-figures)
+(define-key page-view-mode-map (kbd "M-t") 'page-view-number-tables)
 
-(provide 'scientific-page-view)
+(provide 'page-view)
 
-;;; scientific-page-view.el ends here
+;;; page-view.el ends here
 
 ;; ==============================================================================
 ;; FUNCTION ORDERING (CHRONOLOGICAL - ACADEMIC WRITING PROCESS)
@@ -769,37 +769,37 @@ Provides word processor-like layout following academic writing standards."
 ;; established scientific writing process from official sources:
 ;; 
 ;; 1. PREPARATION AND INITIALIZATION
-;;    - scientific-page-view-initialize()
-;;    scientific-page-view-start-writing-session()
+;;    - page-view-initialize()
+;;    page-view-start-writing-session()
 ;; 
 ;; 2. PAGE LAYOUT AND NAVIGATION
-;;    - scientific-page-view-insert-page-break()
-;;    - scientific-page-view-goto-page()
-;;    - scientific-page-view-next-page()
-;;    - scientific-page-view-previous-page()
+;;    - page-view-insert-page-break()
+;;    - page-view-goto-page()
+;;    - page-view-next-page()
+;;    - page-view-previous-page()
 ;; 
 ;; 3. HEADER AND FOOTER GENERATION
-;;    - scientific-page-view--generate-header()
-;;    - scientific-page-view--generate-footer()
+;;    - page-view--generate-header()
+;;    - page-view--generate-footer()
 ;; 
 ;; 4. WORD COUNT AND ABSTRACT COMPLIANCE
-;;    - scientific-page-view-count-words()
-;;    - scientific-page-view-check-abstract-length()
-;;    - scientific-page-view-show-word-counts()
+;;    - page-view-count-words()
+;;    - page-view-check-abstract-length()
+;;    - page-view-show-word-counts()
 ;; 
 ;; 5. FIGURE AND TABLE MANAGEMENT
-;;    - scientific-page-view-number-figures()
-;;    - scientific-page-view-number-tables()
-;;    - scientific-page-view-insert-figure-with-caption()
-;;    - scientific-page-view-insert-table-with-caption()
+;;    - page-view-number-figures()
+;;    - page-view-number-tables()
+;;    - page-view-insert-figure-with-caption()
+;;    - page-view-insert-table-with-caption()
 ;; 
 ;; 6. CITATION AND REFERENCE HANDLING
-;;    - scientific-page-view-format-citation()
-;;    - scientific-page-view-check-references()
+;;    - page-view-format-citation()
+;;    - page-view-check-references()
 ;; 
 ;; 7. DEBUG AND STATISTICS
-;;    - scientific-page-view-toggle-debug()
-;;    - scientific-page-view--update-statistics()
+;;    - page-view-toggle-debug()
+;;    - page-view--update-statistics()
 ;; 
 ;; This ordering ensures that writing functions follow the natural academic workflow:
 ;; Preparation → Structure → Content → Analysis → Revision → Publication

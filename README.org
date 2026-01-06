@@ -19,7 +19,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 ** Features
 
-*** Academic Document Management
+*** Document Engine
 - DOI-based document identification and naming
 - Multi-format support (Org, Markdown, plain text)
 - Automatic metadata extraction and indexing
@@ -40,9 +40,8 @@ The system is designed for academics, scientists, and researchers who need to:
 - Hierarchical knowledge organization
 - Cross-disciplinary connections
 
-*** 3D Visualization (EAF Browser)
+*** Visualization Engine
 - Interactive 3D graphs with Three.js and force-directed layouts
-- Runs inside Emacs using EAF Browser for seamless integration
 - Citation, concept, author, and journal networks
 - Real-time synchronization with Emacs via WebSocket
 - Modus theme integration for consistent colors
@@ -143,19 +142,19 @@ The system is designed for academics, scientists, and researchers who need to:
 
 5. Open the 3D visualizer:
    #+begin_src elisp
-   M-x scientific-visualizer-open
+   M-x viz-engine-open
    #+end_src
 
 ** Components
 
-*** scientific-document-engine
-*Purpose*: Scientific paper and note management with DOI-based identification
+*** doc-engine
+*Purpose*: Document and paper management with DOI-based identification
 
 *Key Functions*:
-- =scientific-document-create=: Create new scientific documents
-- =scientific-document-search=: Search documents
-- =scientific-document-set-reading-status=: Track reading progress
-- =scientific-document-add-concept=: Extract and link concepts
+- =doc-engine-create=: Create new documents
+- =doc-engine-search=: Search documents
+- =doc-engine-set-reading-status=: Track reading progress
+- =doc-engine-add-concept=: Extract and link concepts
 
 *** citation-database
 *Purpose*: Bibliographic SQLite backend for citation management
@@ -166,13 +165,13 @@ The system is designed for academics, scientists, and researchers who need to:
 - =citation-database-stats=: View database statistics
 - =citation-database-sync=: Synchronize with files
 
-*** scientific-visualizer
+*** viz-engine
 *Purpose*: 3D web-based visualization of knowledge networks
 
 *Key Functions*:
-- =scientific-visualizer-open=: Open visualization interface
-- =scientific-visualizer-set-mode=: Change visualization mode
-- =scientific-visualizer-paper-zoom=: Focus on specific paper
+- =viz-engine-open=: Open visualization interface
+- =viz-engine-set-mode=: Change visualization mode
+- =viz-engine-paper-zoom=: Focus on specific paper
 
 *** concept-relationships
 *Purpose*: Concept mapping and theoretical relationships
@@ -203,7 +202,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 1. Create a new document:
    #+begin_src elisp
-   M-x scientific-document-create
+   M-x doc-engine-create
    #+end_src
 
 2. Fill in metadata (title, DOI, keywords, etc.)
@@ -256,7 +255,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 1. Start visualizer:
    #+begin_src elisp
-   M-x scientific-visualizer-open
+   M-x viz-engine-open
    #+end_src
 
 2. Switch between modes:
@@ -277,8 +276,8 @@ When =scientific-mapping-mode= is active:
 | =C-c s S= | =scientific-mapping-stop= | Stop the system |
 | =C-c s i= | =scientific-mapping-import-paper= | Import paper from DOI |
 | =C-c s c= | =concept-relationships-create-entry= | Create concept |
-| =C-c s v= | =scientific-visualizer-open= | Open visualizer |
-| =C-c s n= | =scientific-visualizer-set-mode= | Set visualization mode |
+| =C-c s v= | =viz-engine-open= | Open visualizer |
+| =C-c s n= | =viz-engine-set-mode= | Set visualization mode |
 | =C-c s r= | =scientific-mapping-literature-review= | Generate literature review |
 | =C-c s b= | =scientific-mapping-backup= | Create backup |
 | =C-c s t= | =scientific-research-timeline-open= | Open research timeline |

@@ -1,4 +1,4 @@
-;;; scientific-research-timeline.el --- Visual timeline for scientific research nodes  -*- lexical-binding: t; -*-
+;;; timeline-engine.el --- Visual timeline for scientific research nodes  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025  Scientific Knowledge Mapping System
 ;; Author: Adapted from org-roam-timeline by Gerardo Cendejas Mendoza
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; scientific-research-timeline provides a visual timeline interface for scientific
+;; timeline-engine provides a visual timeline interface for scientific
 ;; research nodes managed by the Scientific Knowledge Mapping System. It enables
 ;; researchers to:
 ;;
@@ -46,72 +46,72 @@
 (require 'json)
 (require 'ox-html)
 
-(defconst scientific-research-timeline-root
+(defconst timeline-engine-root
   (file-name-directory (or load-file-name buffer-file-name))
-  "Root directory where scientific-research-timeline package is installed.")
+  "Root directory where timeline-engine package is installed.")
 
 ;; --- SIGNALS ---
 
-(defvar scientific-research-timeline--explicit-focus-id nil
+(defvar timeline-engine--explicit-focus-id nil
   "Store ID of research node to be explicitly focused.")
 
-(defvar scientific-research-timeline--explicit-hide-id nil
+(defvar timeline-engine--explicit-hide-id nil
   "Store ID of research node to be explicitly hidden.")
 
-(defvar scientific-research-timeline--explicit-date-focus nil
+(defvar timeline-engine--explicit-date-focus nil
   "Store date string to zoom towards.")
 
-(defvar scientific-research-timeline--filter-signal nil
+(defvar timeline-engine--filter-signal nil
   "Signal to filter research tags. A cons cell of (action . tag).")
 
-(defvar scientific-research-timeline--toggle-follow-signal nil
+(defvar timeline-engine--toggle-follow-signal nil
   "Boolean signal to toggle Follow Mode.")
 
-(defvar scientific-research-timeline--toggle-preview-signal nil
+(defvar timeline-engine--toggle-preview-signal nil
   "Boolean signal to toggle auto-preview panel.")
 
 ;; --- HELPER: Get All Research Tags ---
 
-(defun scientific-research-timeline--get-all-tags ()
+(defun timeline-engine--get-all-tags ()
   "Retrieve a list of all unique research tags in citation database."
   (mapcar #'car (emacsql citation-database-db
                    [:select :distinct keyword :from keywords])))
 
 ;; --- CONFIGURATION ---
 
-(defgroup scientific-research-timeline nil
+(defgroup timeline-engine nil
   "Settings for Scientific Research Timeline."
   :group 'scientific-mapping)
 
-(defcustom scientific-research-timeline-default-theme 'dark
+(defcustom timeline-engine-default-theme 'dark
   "Default theme: 'dark or 'light."
-  :group 'scientific-research-timeline
+  :group 'timeline-engine
   :type '(choice (const :tag "Dark" dark)
                   (const :tag "Light" light)))
 
-(defcustom scientific-research-timeline-focus-window-years 5
+(defcustom timeline-engine-focus-window-years 5
   "Zoom window in years for date focus."
-  :group 'scientific-research-timeline
+  :group 'timeline-engine
   :type 'integer)
 
-(defcustom scientific-research-timeline-show-links-on-start t
+(defcustom timeline-engine-show-links-on-start t
   "Show citation links on timeline start."
-  :group 'scientific-research-timeline
+  :group 'timeline-engine
   :type 'boolean)
 
-(defcustom scientific-research-timeline-follow-mode-on-start t
+(defcustom timeline-engine-follow-mode-on-start t
   "Follow mode active on timeline start."
-  :group 'scientific-research-timeline
+  :group 'timeline-engine
   :type 'boolean)
 
-(defcustom scientific-research-timeline-preview-on-start t
+(defcustom timeline-engine-preview-on-start t
   "Auto-open preview panel on timeline start."
-  :group 'scientific-research-timeline
+  :group 'timeline-engine
   :type 'boolean)
 
 ;; --- DATA PROCESSING ---
 
-(defun scientific-research-timeline--process-node (paper-id)
+(defun timeline-engine--process-node (paper-id)
   "Process a research PAPER-ID to extract time and structure metadata."
   (condition-case err
       (let* ((paper (citation-database-get-paper-by-identifier paper-id))
@@ -156,7 +156,7 @@
               (all_tags . ,tags)))))
     (error nil)))
 
-(defun scientific-research-timeline--get-nodes ()
+(defun timeline-engine--get-nodes ()
   "Retrieve and process all valid research nodes for timeline."
   (let* ((papers (emacsql citation-database-db
                        [:select * :from nodes
@@ -164,12 +164,12 @@
          (nodes '()))
     (dolist (paper papers)
       (let* ((paper-id (elt paper 0))
-             (item (scientific-research-timeline--process-node paper-id)))
+             (item (timeline-engine--process-node paper-id)))
         (when item
           (push item nodes))))
     nodes))
 
-(defun scientific-research-timeline--clean-date (date-str &optional is-end)
+(defun timeline-engine--clean-date (date-str &optional is-end)
   "Clean and format DATE-STR. If IS-END is non-nil, adjust to year end."
   (when (stringp date-str)
     (let ((clean (string-trim date-str)))
@@ -182,7 +182,7 @@
 
 ;; --- SERVLETS ---
 
-(defservlet* scientific-research-timeline-content text/html (id)
+(defservlet* timeline-engine-content text/html (id)
   (require 'ox-html)
   (let* ((paper (citation-database-get-paper-by-identifier id))
          (marker (when paper
@@ -247,24 +247,24 @@
     (insert final-output)))
 
 ;; UPDATED CONFIG SERVLET (Sends preview setting)
-(defservlet* scientific-research-timeline-config text/json ()
-  (insert (json-encode `((theme . ,(symbol-name scientific-research-timeline-default-theme))
-                          (showLinks . ,(if scientific-research-timeline-show-links-on-start t :json-false))
-                          (followMode . ,(if scientific-research-timeline-follow-mode-on-start t :json-false))
-                          (autoPreview . ,(if scientific-research-timeline-preview-on-start t :json-false))
-                          (zoomWindow . ,scientific-research-timeline-focus-window-years)))))
+(defservlet* timeline-engine-config text/json ()
+  (insert (json-encode `((theme . ,(symbol-name timeline-engine-default-theme))
+                          (showLinks . ,(if timeline-engine-show-links-on-start t :json-false))
+                          (followMode . ,(if timeline-engine-follow-mode-on-start t :json-false))
+                          (autoPreview . ,(if timeline-engine-preview-on-start t :json-false))
+                          (zoomWindow . ,timeline-engine-focus-window-years)))))
 
-(defservlet* scientific-research-timeline-data text/json ()
-  (insert (json-encode (scientific-research-timeline--get-nodes))))
+(defservlet* timeline-engine-data text/json ()
+  (insert (json-encode (timeline-engine--get-nodes))))
 
-(defservlet* scientific-research-timeline-node-data text/json (id)
+(defservlet* timeline-engine-node-data text/json (id)
   (let ((paper (citation-database-get-paper-by-identifier id)))
     (if paper
-        (let ((item (scientific-research-timeline--process-node id)))
+        (let ((item (timeline-engine--process-node id)))
           (if item (insert (json-encode item)) (insert "{}")))
       (insert "{}"))))
 
-(defservlet* scientific-research-timeline-open text/plain (id)
+(defservlet* timeline-engine-open text/plain (id)
   (let ((paper (citation-database-get-paper-by-identifier id)))
     (if paper
         (progn
@@ -278,53 +278,53 @@
 
 ;; --- POLLING SERVLET ---
 
-(defservlet* scientific-research-timeline-current-focus text/json ()
+(defservlet* timeline-engine-current-focus text/json ()
   (let ((response '((action . "none"))))
     
     ;; 1. Tags Filter
-    (when scientific-research-timeline--filter-signal
-      (setq response `((action . ,(car scientific-research-timeline--filter-signal))
-                        (tag . ,(cdr scientific-research-timeline--filter-signal))))
-      (setq scientific-research-timeline--filter-signal nil))
+    (when timeline-engine--filter-signal
+      (setq response `((action . ,(car timeline-engine--filter-signal))
+                        (tag . ,(cdr timeline-engine--filter-signal))))
+      (setq timeline-engine--filter-signal nil))
     
     ;; 2. Date Zoom
     (unless (assoc 'tag response)
-      (when scientific-research-timeline--explicit-date-focus
+      (when timeline-engine--explicit-date-focus
         (setq response `((action . "zoom-date")
-                          (date . ,scientific-research-timeline--explicit-date-focus)))
-        (setq scientific-research-timeline--explicit-date-focus nil)))
+                          (date . ,timeline-engine--explicit-date-focus)))
+        (setq timeline-engine--explicit-date-focus nil)))
     
     ;; 3. Toggle Follow
     (unless (or (assoc 'tag response) (string-equal (cdr (assoc 'action response)) "zoom-date"))
-      (when scientific-research-timeline--toggle-follow-signal
+      (when timeline-engine--toggle-follow-signal
         (setq response `((action . "toggle-follow")))
-        (setq scientific-research-timeline--toggle-follow-signal nil)))
+        (setq timeline-engine--toggle-follow-signal nil)))
     
     ;; 4. Toggle Preview
     (unless (or (assoc 'tag response)
                   (string-equal (cdr (assoc 'action response)) "zoom-date")
                   (string-equal (cdr (assoc 'action response)) "toggle-follow"))
-      (when scientific-research-timeline--toggle-preview-signal
+      (when timeline-engine--toggle-preview-signal
         (setq response `((action . "toggle-preview")))
-        (setq scientific-research-timeline--toggle-preview-signal nil)))
+        (setq timeline-engine--toggle-preview-signal nil)))
     
     ;; 5. Hide
     (unless (or (assoc 'tag response)
                   (string-equal (cdr (assoc 'action response)) "zoom-date")
                   (string-equal (cdr (assoc 'action response)) "toggle-follow")
                   (string-equal (cdr (assoc 'action response)) "toggle-preview"))
-      (when scientific-research-timeline--explicit-hide-id
+      (when timeline-engine--explicit-hide-id
         (setq response `((action . "hide")
-                          (id . ,scientific-research-timeline--explicit-hide-id)))
-        (setq scientific-research-timeline--explicit-hide-id nil)))
+                          (id . ,timeline-engine--explicit-hide-id)))
+        (setq timeline-engine--explicit-hide-id nil)))
     
     ;; 6. Focus / Follow
     (if (string-equal (cdr (assoc 'action response)) "none")
-        (if scientific-research-timeline--explicit-focus-id
+        (if timeline-engine--explicit-focus-id
             (progn
               (setq response `((action . "focus")
-                            (id . ,scientific-research-timeline--explicit-focus-id)))
-              (setq scientific-research-timeline--explicit-focus-id nil))
+                            (id . ,timeline-engine--explicit-focus-id)))
+              (setq timeline-engine--explicit-focus-id nil))
           (let* ((user-window (selected-window))
                   (user-buffer (window-buffer user-window))
                   (node-id nil))
@@ -342,7 +342,7 @@
     
     (insert (json-encode response))))
 
-(defservlet* scientific-research-timeline-remove-date text/plain (id)
+(defservlet* timeline-engine-remove-date text/plain (id)
   (let ((paper (citation-database-get-paper-by-identifier id)))
     (if paper
         (let* ((file (plist-get paper :file))
@@ -356,14 +356,14 @@
 
 ;; --- INTERACTIVE COMMANDS ---
 
-(defun scientific-research-timeline-open ()
+(defun timeline-engine-open ()
   "Start web server and open research timeline in browser."
   (interactive)
-  (setq httpd-root (expand-file-name "html" scientific-research-timeline-root))
+  (setq httpd-root (expand-file-name "html" timeline-engine-root))
   (httpd-start)
   (browse-url (format "http://localhost:%d" httpd-port)))
 
-(defun scientific-research-timeline-show-node ()
+(defun timeline-engine-show-node ()
   "Focus current research node in visual timeline."
   (interactive)
   (let* ((file (buffer-file-name))
@@ -372,11 +372,11 @@
                           (org-entry-get (point-min) "IDENTIFIER")))))
     (if identifier
         (progn
-          (setq scientific-research-timeline--explicit-focus-id identifier)
+          (setq timeline-engine--explicit-focus-id identifier)
           (message "Research Timeline: Focus Node"))
       (user-error "No research node at point"))))
 
-(defun scientific-research-timeline-hide-node ()
+(defun timeline-engine-hide-node ()
   "Hide current research node from visual timeline."
   (interactive)
   (let* ((file (buffer-file-name))
@@ -385,23 +385,23 @@
                           (org-entry-get (point-min) "IDENTIFIER")))))
     (if identifier
         (progn
-          (setq scientific-research-timeline--explicit-hide-id identifier)
+          (setq timeline-engine--explicit-hide-id identifier)
           (message "Research Timeline: Hide Node"))
       (user-error "No research node at point"))))
 
-(defun scientific-research-timeline-toggle-follow ()
+(defun timeline-engine-toggle-follow ()
   "Toggle Follow Mode in visualization."
   (interactive)
-  (setq scientific-research-timeline--toggle-follow-signal t)
+  (setq timeline-engine--toggle-follow-signal t)
   (message "Research Timeline: Toggled Follow Mode"))
 
-(defun scientific-research-timeline-toggle-preview ()
+(defun timeline-engine-toggle-preview ()
   "Toggle Auto-Preview (sidebar content) in browser."
   (interactive)
-  (setq scientific-research-timeline--toggle-preview-signal t)
+  (setq timeline-engine--toggle-preview-signal t)
   (message "Research Timeline: Toggled Auto-Preview"))
 
-(defun scientific-research-timeline-add-date ()
+(defun timeline-engine-add-date ()
   "Interactively add TIMELINE_START/END properties to current research node."
   (interactive)
   (let* ((start-input (read-string "Start (YYYY or YYYY-MM-DD): "))
@@ -414,42 +414,42 @@
         (org-delete-property "TIMELINE_END"))
       (save-buffer)
       (citation-database-index-file (buffer-file-name))
-      (scientific-research-timeline-show-node))))
+      (timeline-engine-show-node))))
 
-(defun scientific-research-timeline-zoom-date ()
+(defun timeline-engine-zoom-date ()
   "Zoom timeline to a specific date."
   (interactive)
   (let ((date-str (read-string "Zoom to Date (YYYY[-MM[-DD]]): ")))
     (unless (string-empty-p date-str)
-      (setq scientific-research-timeline--explicit-date-focus date-str)
+      (setq timeline-engine--explicit-date-focus date-str)
       (message "Research Timeline: Zooming to %s..." date-str))))
 
-(defun scientific-research-timeline-filter-toggle ()
+(defun timeline-engine-filter-toggle ()
   "Toggle visibility of a specific research tag in timeline."
   (interactive)
-  (let ((tag (completing-read "Toggle Research Tag: " (scientific-research-timeline--get-all-tags) nil t)))
-    (setq scientific-research-timeline--filter-signal (cons "filter-toggle" tag))
+  (let ((tag (completing-read "Toggle Research Tag: " (timeline-engine--get-all-tags) nil t)))
+    (setq timeline-engine--filter-signal (cons "filter-toggle" tag))
     (message "Research Timeline: Toggling %s" tag)))
 
-(defun scientific-research-timeline-filter-block ()
+(defun timeline-engine-filter-block ()
   "Block (force hide) a specific research tag in timeline."
   (interactive)
-  (let ((tag (completing-read "Block Research Tag: " (scientific-research-timeline--get-all-tags) nil t)))
-    (setq scientific-research-timeline--filter-signal (cons "filter-block" tag))
+  (let ((tag (completing-read "Block Research Tag: " (timeline-engine--get-all-tags) nil t)))
+    (setq timeline-engine--filter-signal (cons "filter-block" tag))
     (message "Research Timeline: Blocking %s" tag)))
 
-(defun scientific-research-timeline-filter-reset ()
+(defun timeline-engine-filter-reset ()
   "Reset all visualization filters."
   (interactive)
-  (setq scientific-research-timeline--filter-signal (cons "filter-reset" "all"))
+  (setq timeline-engine--filter-signal (cons "filter-reset" "all"))
   (message "Research Timeline: Resetting filters"))
 
-(defun scientific-research-timeline-filter-hide-all ()
+(defun timeline-engine-filter-hide-all ()
   "Hide all research tags (blank slate)."
   (interactive)
-  (setq scientific-research-timeline--filter-signal (cons "filter-hide-all" "all"))
+  (setq timeline-engine--filter-signal (cons "filter-hide-all" "all"))
   (message "Research Timeline: Hiding all research tags (Blank Slate)."))
 
-(provide 'scientific-research-timeline)
+(provide 'timeline-engine)
 
-;;; scientific-research-timeline.el ends here
+;;; timeline-engine.el ends here

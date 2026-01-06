@@ -42,22 +42,22 @@
 
 ;; Add all components to load path
 (let ((root-dir (file-name-directory (or load-file-name buffer-file-name))))
-  (add-to-list 'load-path (expand-file-name "scientific-document-engine" root-dir))
+  (add-to-list 'load-path (expand-file-name "doc-engine" root-dir))
   (add-to-list 'load-path (expand-file-name "citation-database" root-dir))
-  (add-to-list 'load-path (expand-file-name "scientific-visualizer" root-dir))
+  (add-to-list 'load-path (expand-file-name "viz-engine" root-dir))
   (add-to-list 'load-path (expand-file-name "concept-relationships" root-dir))
-  (add-to-list 'load-path (expand-file-name "scientific-research-timeline" root-dir))
-  (add-to-list 'load-path (expand-file-name "scientific-concept-tree" root-dir))
-  (add-to-list 'load-path (expand-file-name "scientific-yasnippet" root-dir))
+  (add-to-list 'load-path (expand-file-name "timeline-engine" root-dir))
+  (add-to-list 'load-path (expand-file-name "concept-tree" root-dir))
+  (add-to-list 'load-path (expand-file-name "snippet-engine" root-dir))
   (add-to-list 'load-path (expand-file-name "core" root-dir)))
 
 ;; Load core modules
-(require 'scientific-document-engine)
+(require 'doc-engine)
 (require 'citation-database)
-(require 'scientific-visualizer)
+(require 'viz-engine)
 (require 'concept-relationships)
-(require 'scientific-research-timeline)
-(require 'scientific-concept-tree)
+(require 'timeline-engine)
+(require 'concept-tree)
 (require 'yasnippet)
 
 (defconst scientific-mapping-version "1.0.0"
@@ -77,16 +77,16 @@
   :type 'boolean)
 
 (defcustom scientific-mapping-components
-  '(scientific-document-engine citation-database scientific-visualizer concept-relationships scientific-research-timeline scientific-concept-tree yas)
+  '(doc-engine citation-database viz-engine concept-relationships timeline-engine concept-tree yas)
   "List of components to load and enable."
   :group 'scientific-mapping
-  :type '(set (const :tag "Scientific Document Engine" scientific-document-engine)
-                  (const :tag "Citation Database" citation-database)
-                  (const :tag "Scientific Visualizer" scientific-visualizer)
-                  (const :tag "Concept Relationships" concept-relationships)
-                  (const :tag "Scientific Research Timeline" scientific-research-timeline)
-                  (const :tag "Scientific Concept Tree" scientific-concept-tree)
-                  (const :tag "YASnippet Templates" yas)))
+  :type '(set (const :tag "Document Engine" doc-engine)
+                   (const :tag "Citation Database" citation-database)
+                   (const :tag "Visualization Engine" viz-engine)
+                   (const :tag "Concept Relationships" concept-relationships)
+                   (const :tag "Timeline Engine" timeline-engine)
+                   (const :tag "Concept Tree" concept-tree)
+                   (const :tag "YASnippet Templates" yas)))
 
 ;;;; Main Mode
 
@@ -100,29 +100,29 @@
   (cond
    (scientific-mapping-mode
     ;; Enable selected components
-    (when (memq 'scientific-document-engine scientific-mapping-components)
-      (message "Loading scientific-document-engine..."))
+    (when (memq 'doc-engine scientific-mapping-components)
+      (message "Loading doc-engine..."))
     (when (memq 'citation-database scientific-mapping-components)
       (citation-database-autosync-mode 1)
       (message "Loading citation-database..."))
-    (when (memq 'scientific-visualizer scientific-mapping-components)
-      (scientific-visualizer-mode 1)
-      (message "Loading scientific-visualizer..."))
+    (when (memq 'viz-engine scientific-mapping-components)
+      (viz-engine-mode 1)
+      (message "Loading viz-engine..."))
     (when (memq 'concept-relationships scientific-mapping-components)
       (message "Loading concept-relationships..."))
-    (when (memq 'scientific-research-timeline scientific-mapping-components)
-      (message "Loading scientific-research-timeline..."))
-    (when (memq 'scientific-concept-tree scientific-mapping-components)
-      (message "Loading scientific-concept-tree..."))
+    (when (memq 'timeline-engine scientific-mapping-components)
+      (message "Loading timeline-engine..."))
+    (when (memq 'concept-tree scientific-mapping-components)
+      (message "Loading concept-tree..."))
     (when (memq 'yas scientific-mapping-components)
       (yas-global-mode 1)
       (message "Loading yas templates..."))
-    
+
     (message "Scientific Knowledge Mapping System enabled. Use M-x scientific-mapping-help for commands."))
    (t
     ;; Disable all components
     (citation-database-autosync-mode -1)
-    (scientific-visualizer-mode -1)
+    (viz-engine-mode -1)
     (message "Scientific Knowledge Mapping System disabled."))))
 
 ;;;; Interactive Commands
@@ -158,19 +158,19 @@
       (erase-buffer)
       (insert "=== Scientific Knowledge Mapping System Status ===\n\n")
       
-      (insert "Components:\n")
-      (insert (format "  Scientific Document Engine: %s\n"
-                      (if (memq 'scientific-document-engine scientific-mapping-components)
-                          "Enabled" "Disabled")))
-      (insert (format "  Citation Database: %s\n"
-                      (if citation-database-autosync-mode
-                          "Active" "Inactive")))
-      (insert (format "  Scientific Visualizer: %s\n"
-                      (if scientific-visualizer-mode
-                          "Running" "Stopped")))
-      (insert (format "  Concept Relationships: %s\n"
-                      (if (memq 'concept-relationships scientific-mapping-components)
-                          "Enabled" "Disabled")))
+       (insert "Components:\n")
+       (insert (format "  Document Engine: %s\n"
+                       (if (memq 'doc-engine scientific-mapping-components)
+                           "Enabled" "Disabled")))
+       (insert (format "  Citation Database: %s\n"
+                       (if citation-database-autosync-mode
+                           "Active" "Inactive")))
+       (insert (format "  Visualization Engine: %s\n"
+                       (if viz-engine-mode
+                           "Running" "Stopped")))
+       (insert (format "  Concept Relationships: %s\n"
+                       (if (memq 'concept-relationships scientific-mapping-components)
+                           "Enabled" "Disabled")))
       
       (insert "\nDatabase Statistics:\n")
       (let ((stats (citation-database-stats)))
@@ -187,10 +187,10 @@
                           (plist-get stats :total-concepts)))))
       
       (insert "\nDocument Statistics:\n")
-      (let ((doc-stats (scientific-document-stats)))
-        (when doc-stats
-          (insert (format "  Total Documents: %d\n"
-                          (length doc-stats)))))
+       (let ((doc-stats (doc-engine-stats)))
+         (when doc-stats
+           (insert (format "  Total Documents: %d\n"
+                           (length doc-stats)))))
       
       (goto-char (point-min))
       (special-mode)))
@@ -208,10 +208,10 @@
              (keywords (split-string (read-string "Enter keywords (comma-separated): ") ",")))
         (unless (and doi title)
           (error "DOI and title are required"))
-        (scientific-document-create
-         :title title
-         :doi doi
-         :keywords keywords)
+    (doc-engine-create
+     :title title
+     :doi doi
+     :keywords keywords)
         (message "Paper imported. Add concepts and citations with C-c c and C-c p."))
     (error (message "Error importing paper: %s" (error-message-string err)))))
 
@@ -301,16 +301,16 @@
     (make-directory db-backup t)
     (make-directory concept-backup t)
     
-    ;; Backup documents
-    (dolist (file (scientific-document-all-files))
-      (copy-file file (expand-file-name (file-name-nondirectory file) doc-backup)))
-    
-    ;; Backup database
-    (copy-file citation-database-location db-backup)
-    
-    ;; Backup concepts
-    (dolist (file (concept-relationships-files))
-      (copy-file file (expand-file-name (file-name-nondirectory file) concept-backup)))
+     ;; Backup documents
+     (dolist (file (doc-engine-all-files))
+       (copy-file file (expand-file-name (file-name-nondirectory file) doc-backup)))
+
+     ;; Backup database
+     (copy-file citation-database-location db-backup)
+
+     ;; Backup concepts
+     (dolist (file (concept-relationships-files))
+       (copy-file file (expand-file-name (file-name-nondirectory file) concept-backup)))
     
     (message "Backup created: %s" backup-dir)))
 
@@ -322,12 +322,12 @@
     (define-key map "S" 'scientific-mapping-stop)
     (define-key map "i" 'scientific-mapping-import-paper)
     (define-key map "c" 'concept-relationships-create-entry)
-    (define-key map "v" 'scientific-visualizer-open)
-    (define-key map "n" 'scientific-visualizer-set-mode)
+    (define-key map "v" 'viz-engine-open)
+    (define-key map "n" 'viz-engine-set-mode)
     (define-key map "r" 'scientific-mapping-literature-review)
     (define-key map "b" 'scientific-mapping-backup)
-    (define-key map "t" 'scientific-research-timeline-open)
-    (define-key map "e" 'scientific-concept-tree-toggle-section)
+    (define-key map "t" 'timeline-engine-open)
+    (define-key map "e" 'concept-tree-toggle-section)
     (define-key map "?" 'scientific-mapping-help)
     map)
   "Prefix keymap for scientific-mapping commands.")

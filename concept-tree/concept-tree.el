@@ -1,4 +1,4 @@
-;;; scientific-concept-tree.el --- Tree-style concept display for scientific research  -*- lexical-binding: t; -*-
+;;; concept-tree.el --- Tree-style concept display for scientific research  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025  Scientific Knowledge Mapping System
 ;; Author: Adapted from org-roam-tree by Brad Stewart
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; scientific-concept-tree creates a tree-like structure display for concept
+;; concept-tree creates a tree-like structure display for concept
 ;; relationships in scientific research. It organizes concept connections
 ;; by their source, creating hierarchical views of theoretical frameworks
 ;; and research concepts.
@@ -39,58 +39,58 @@
 
 (require 'citation-database)
 
-(defgroup scientific-concept-tree nil
+(defgroup concept-tree nil
   "Tree-style display extensions for scientific concepts."
   :group 'scientific-mapping)
 
-(defcustom scientific-concept-tree-default-visible t
+(defcustom concept-tree-default-visible t
   "Whether to collapse all file-level branches after rendering."
-  :group 'scientific-concept-tree
+  :group 'concept-tree
   :type 'boolean)
 
 ;; Enable by adding to concept-relationships sections
 ;; (add-to-list 'concept-relationships-mode-sections
-;;              #'scientific-concept-tree-section t)
+;;              #'concept-tree-section t)
 
-(defvar scientific-concept-tree-visible-state (make-hash-table :test 'equal)
+(defvar concept-tree-visible-state (make-hash-table :test 'equal)
   "Stores fold states for concepts per node.")
 
-(defun scientific-concept-tree--visible-state (concept source)
+(defun concept-tree--visible-state (concept source)
   "Return t if SOURCE under CONCEPT should be folded."
-  (gethash (cons concept source) scientific-concept-tree-visible-state
-          scientific-concept-tree-default-visible))
+  (gethash (cons concept source) concept-tree-visible-state
+          concept-tree-default-visible))
 
-(defun scientific-concept-tree--set-visible-state (concept source hidden)
+(defun concept-tree--set-visible-state (concept source hidden)
   "Store fold state for SOURCE under CONCEPT."
-  (puthash (cons concept source) hidden scientific-concept-tree-visible-state))
+  (puthash (cons concept source) hidden concept-tree-visible-state))
 
 ;; Concept Tree Section
 
-(cl-defun scientific-concept-tree-concepts-section (concept &key (section-heading "Concept Tree:"))
+(cl-defun concept-tree-concepts-section (concept &key (section-heading "Concept Tree:"))
   "A tree-style section showing CONCEPT's related concepts grouped by source."
-  (scientific-concept-tree-section concept :section-heading section-heading
-                                 :data-getter #'scientific-concept-tree-concepts
+  (concept-tree-section concept :section-heading section-heading
+                                 :data-getter #'concept-tree-concepts
                                  :section-id 'concept-tree))
 
 ;; Citation Tree Section
 
-(cl-defun scientific-concept-tree-citations-section (concept &key (section-heading "Citation Tree:"))
+(cl-defun concept-tree-citations-section (concept &key (section-heading "Citation Tree:"))
   "A tree-style section showing CONCEPT's citation relationships grouped by source."
-  (scientific-concept-tree-section concept :section-heading section-heading
-                                 :data-getter #'scientific-concept-tree-citations
+  (concept-tree-section concept :section-heading section-heading
+                                 :data-getter #'concept-tree-citations
                                  :section-id 'citation-tree))
 
 ;; Evidence Tree Section
 
-(cl-defun scientific-concept-tree-evidence-section (concept &key (section-heading "Evidence Tree:"))
+(cl-defun concept-tree-evidence-section (concept &key (section-heading "Evidence Tree:"))
   "A tree-style section showing CONCEPT's evidence relationships grouped by source."
-  (scientific-concept-tree-section concept :section-heading section-heading
-                                 :data-getter #'scientific-concept-tree-evidence
+  (concept-tree-section concept :section-heading section-heading
+                                 :data-getter #'concept-tree-evidence
                                  :section-id 'evidence-tree))
 
 ;; Generalized Tree Logic
 
-(cl-defun scientific-concept-tree-section (node &key (section-heading "Tree Section:") (data-getter #'scientific-concept-tree-default) (section-id 'concept-tree))
+(cl-defun concept-tree-section (node &key (section-heading "Tree Section:") (data-getter #'concept-tree-default) (section-id 'concept-tree))
   "Generalized logic for a tree in concept-relationships buffer.
 
 DATA-GETTER is a function that returns a tree in format:
@@ -98,7 +98,7 @@ DATA-GETTER is a function that returns a tree in format:
 backlinks are relationship objects.
 
 SECTION-ID is a symbol to tag this tree's section in the buffer."
-  (with-scientific-concept-tree-layout
+  (with-concept-tree-layout
     (when-let ((tree (funcall data-getter node)))
       (magit-insert-section section-id
         ;; Top-level heading
@@ -107,21 +107,21 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
         (dolist (source-entry tree)
           (let* ((source (car source-entry))
                  (relationships (cdr source-entry))
-                 (visible (scientific-concept-tree--visible-state node source)))
+                 (visible (concept-tree--visible-state node source)))
             (if visible
                 ;; Show source heading and relationships
                 (progn
                   (magit-insert-heading (format "  %s" source))
                   (dolist (rel relationships)
                     (magit-insert-heading (format "    %s"
-                                                   (scientific-concept-tree--format-relationship rel)))
+                                                   (concept-tree--format-relationship rel)))
                     (insert "\n")))
               ;; Collapsed: just show indicator
               (magit-insert-heading (format "  %s [collapsed]" source))
               (when (and visible (not (eq visible 'collapsed)))
                 (insert "\n")))))))))
 
-(defun scientific-concept-tree-concepts (concept-id)
+(defun concept-tree-concepts (concept-id)
   "Return concept relationships tree for CONCEPT-ID grouped by source file."
   (let* ((concepts (citation-database--get-concept-relations concept-id))
          (tree '()))
@@ -135,7 +135,7 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
           (push (cons source (list concept)) tree))))
     tree))
 
-(defun scientific-concept-tree-citations (paper-id)
+(defun concept-tree-citations (paper-id)
   "Return citation tree for PAPER-ID grouped by source."
   (let* ((citations (citation-database-get-citations paper-id))
          (tree '()))
@@ -159,7 +159,7 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
               (push (cons source (list citation-info)) tree)))))
     tree))
 
-(defun scientific-concept-tree-evidence (concept-id)
+(defun concept-tree-evidence (concept-id)
   "Return evidence tree for CONCEPT-ID grouped by source."
   (let* ((evidence (citation-database--get-evidence-relations concept-id))
          (tree '()))
@@ -172,17 +172,17 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
           (push (cons source (list ev)) tree))))
     tree))
 
-(defun scientific-concept-tree-default (node-id)
+(defun concept-tree-default (node-id)
   "Return default tree with all relationship types for NODE-ID."
-  (let* ((concepts (scientific-concept-tree-concepts node-id))
-         (citations (scientific-concept-tree-citations node-id))
-         (evidence (scientific-concept-tree-evidence node-id))
+  (let* ((concepts (concept-tree-concepts node-id))
+         (citations (concept-tree-citations node-id))
+         (evidence (concept-tree-evidence node-id))
          (combined-tree `(("Concepts" . ,concepts)
                            ("Citations" . ,citations)
                            ("Evidence" . ,evidence))))
     combined-tree))
 
-(defun scientific-concept-tree--format-relationship (rel)
+(defun concept-tree--format-relationship (rel)
   "Format RELATION object for display."
   (let* ((type (plist-get rel :type))
          (target (plist-get rel :target))
@@ -191,7 +191,7 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
             (when context
               (concat " (" context ") ")")))))
 
-(defun scientific-concept-tree-toggle-section (section-id)
+(defun concept-tree-toggle-section (section-id)
   "Toggle visibility of tree SECTION-ID."
   (interactive)
   (let* ((section (completing-read "Toggle section: "
@@ -199,22 +199,22 @@ SECTION-ID is a symbol to tag this tree's section in the buffer."
          (concept-id (org-entry-get (point-min) "IDENTIFIER"))
          (source (read-string "Source to toggle: ")))
     (when (and concept-id source)
-      (let ((current-state (scientific-concept-tree--visible-state concept-id source)))
-        (scientific-concept-tree--set-visible-state concept-id source (not current-state))
+      (let ((current-state (concept-tree--visible-state concept-id source)))
+        (concept-tree--set-visible-state concept-id source (not current-state))
         (concept-relationships--update-visualization)))))
 
-(provide 'scientific-concept-tree)
+(provide 'concept-tree)
 
-;;; scientific-concept-tree.el ends here
+;;; concept-tree.el ends here
 
 ;;; Usage:
 
 ;; Add tree sections to concept-relationships visualization:
 ;; (add-to-list 'concept-relationships-mode-sections
-;;              #'scientific-concept-tree-concepts-section)
+;;              #'concept-tree-concepts-section)
 ;;
 ;; (add-to-list 'concept-relationships-mode-sections
-;;              #'scientific-concept-tree-citations-section)
+;;              #'concept-tree-citations-section)
 ;;
 ;; (add-to-list 'concept-relationships-mode-sections
-;;              #'scientific-concept-tree-evidence-section)
+;;              #'concept-tree-evidence-section)
