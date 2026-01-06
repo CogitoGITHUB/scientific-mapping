@@ -84,6 +84,12 @@
 ;; Load context awareness
 (require 'context-awareness)
 
+;; Load UX enhancements
+(require 'ux-enhancements)
+
+;; Load tutorial system
+(require 'tutorial-system)
+
 ;; Load startup automation
 (require 'startup-automation)
 

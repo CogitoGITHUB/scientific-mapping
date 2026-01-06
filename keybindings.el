@@ -90,6 +90,14 @@
     (define-key map (kbd "C-c s S") 'context-awareness-show-suggestions)
     (define-key map (kbd "C-c s Q") 'context-awareness-quick-actions)
 
+    ;; UX enhancements
+    (define-key map (kbd "C-c s !") 'ux-enhancements-welcome-screen)
+    (define-key map (kbd "C-c s K") 'ux-enhancements-keyboard-help)
+    (define-key map (kbd "C-c s T") 'ux-enhancements-show-contextual-tip)
+
+    ;; Tutorial system
+    (define-key map (kbd "C-c s L") 'tutorial-system-interactive-tutorial)
+
     map)
   "Keymap for scientific-mapping-mode with all centralized key bindings.")
 
