@@ -1,0 +1,20 @@
+{
+  "name": "scientific-visualizer",
+  "version": "1.0.0",
+  "description": "3D visualization for scientific knowledge networks",
+  "main": "index.html",
+  "scripts": {
+    "build": "cp index.html out/ && cp main.js out/ && cp style.css out/",
+    "start": "python3 -m http.server 35901"
+  },
+  "dependencies": {
+    "three": "^0.150.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "keywords": ["visualization", "3d", "scientific", "emacs"],
+  "author": "Scientific Tools Development Team",
+  "license": "GPL-3.0"
+}

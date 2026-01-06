@@ -1,0 +1,150 @@
+/* Scientific Knowledge Mapping 3D Visualizer Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+#container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#ui {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #333;
+    z-index: 1000;
+}
+
+#ui h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #4a90e2;
+}
+
+#controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#mode-select {
+    padding: 8px 12px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+#mode-select:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+button {
+    padding: 8px 16px;
+    background: #4a90e2;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #357abd;
+}
+
+#stats {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #cccccc;
+}
+
+#scene-container {
+    flex: 1;
+    position: relative;
+}
+
+#scene-container canvas {
+    display: block;
+}
+
+/* Node labels */
+.node-label {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid #444;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #ui {
+        padding: 10px;
+    }
+
+    #controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #controls select,
+    #controls button {
+        width: 100%;
+    }
+
+    #stats {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+/* Loading indicator */
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #4a90e2;
+    font-size: 18px;
+}
+
+/* Error messages */
+.error {
+    background: #ff6b6b;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border-left: 4px solid #cc5555;
+}
+
+/* Success messages */
+.success {
+    background: #50c878;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border-left: 4px solid #3d8b5d;
+}

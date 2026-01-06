@@ -15,4 +15,9 @@
   (scientific-visualizer-set-mode "concept")
   (should (eq scientific-visualizer-visualization-mode 'concept)))
 
+(ert-deftest scientific-visualizer-data-functions-test ()
+  "Test data retrieval functions."
+  ;; These would require a test database setup
+  (should t)) ; Placeholder for actual data tests
+
 (provide 'scientific-visualizer-tests)

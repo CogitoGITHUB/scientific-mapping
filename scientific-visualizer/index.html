@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Knowledge Mapping - 3D Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <div id="ui">
+            <h1>Scientific Knowledge Mapping</h1>
+            <div id="controls">
+                <select id="mode-select">
+                    <option value="citation">Citation Network</option>
+                    <option value="concept">Concept Map</option>
+                    <option value="author">Author Collaboration</option>
+                    <option value="journal">Journal Landscape</option>
+                </select>
+                <button id="reset-view">Reset View</button>
+                <button id="toggle-labels">Toggle Labels</button>
+            </div>
+            <div id="stats">
+                <div id="node-count">Nodes: 0</div>
+                <div id="edge-count">Edges: 0</div>
+            </div>
+        </div>
+        <div id="scene-container"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
