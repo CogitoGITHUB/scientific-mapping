@@ -109,6 +109,24 @@
 
 ## Feature Overview
 
+### Workflow Integration
+**Seamless Cross-Component Automation**: Automated workflows between all components
+- **Why**: Components should work together seamlessly without manual handoffs
+- **Benefits**: End-to-end research automation, reduced manual work, consistent data flow
+- **Features**: Automated import pipelines, unified search, workflow status dashboard, smart handoffs
+
+### Data Synchronization
+**Real-Time Component Sync**: Keep all components synchronized automatically
+- **Why**: Prevent data drift and inconsistencies across documents, citations, concepts
+- **Benefits**: Single source of truth, automatic updates, consistency checks
+- **Features**: Full sync, consistency validation, change tracking hooks, periodic auto-sync
+
+### Context Awareness
+**Smart Suggestions & Proactive Assistance**: Intelligent recommendations based on work patterns
+- **Why**: Help researchers discover next steps and optimize workflows
+- **Benefits**: Reduced cognitive load, better research habits, proactive notifications
+- **Features**: Context detection, smart suggestions, quick actions, pattern recognition
+
 ### Visualization Framework Migration
 **3D Force Graph with Universal Controls**: Keyboard + Touchscreen support for all devices
 - **Why**: User required touchscreen support as must-have for laptop and mobile (hard rule)
@@ -136,7 +154,6 @@
 - **Benefits**: Stay current with latest research, automated metadata extraction, prevent duplicate work
 - **APIs**: arXiv, PubMed, CrossRef DOI resolution
 - **Features**: Search interfaces, structured import, Org-mode formatting, action checklists, duplicate detection
-- **IMPORTANT**: Always prioritize local library management - APIs supplement, don't replace local collection
 
 ### Reference Manager Integration
 **Sync with Existing Workflows**: Connect to popular reference management tools
