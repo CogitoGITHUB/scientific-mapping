@@ -27,11 +27,11 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 
 ## Visualization Framework Migration
 
-**From Cytoscape.js to 3D Force Graph**: Migrated to 3D visualization with precise controls
-- **Why**: User requested precise 3D control over the visualization
-- **Benefits**: Full 3D navigation, advanced camera controls, better for exploring complex knowledge networks
-- **Dependencies**: Updated package.json with 3d-force-graph and three.js
-- **Features**: Orbit controls, keyboard shortcuts (R/F/P/L), node focusing, highlighting, search, smooth animations
+**3D Force Graph with Keyboard-Only Controls**: Complete keyboard navigation for 3D visualization
+- **Why**: User required ALL control from keyboard (hard rule)
+- **Benefits**: Pure keyboard workflow, precise 3D navigation, accessibility, power user control
+- **Dependencies**: 3d-force-graph and three.js with disabled mouse controls
+- **Features**: WASD movement, IJKL rotation, UO zoom, arrow key navigation, Enter/Space actions, speed controls
 
 ## Git Workflow
 
