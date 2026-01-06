@@ -1,0 +1,170 @@
+# name: thesis-master
+# key: tm
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# --
+** $0
+:PROPERTIES:
+:READING_STATUS: writing
+:PRIORITY: high
+:END:
+#+TITLE: Master's Thesis: ${1:Thesis Title}
+#+AUTHOR: ${2:Author Name}
+#+DATE: ${3:Submission Date}
+#+INSTITUTION: ${4:University Name}
+#+DEPARTMENT: ${5:Department}
+#+ADVISOR: ${6:Advisor Name}
+#+SCIENTIFIC_TAGS: :thesis:master:${5:department}:
+
+* Title Page
+
+${2:Author Name}
+
+Master's Thesis
+
+Submitted to the Graduate School
+
+of
+
+${4:University}
+
+in partial fulfillment of the requirements for the degree of
+
+Master of Science in ${5:Department}
+
+${6:Advisor Name}, Thesis Advisor
+
+${3:Date}
+
+* Abstract
+
+${7:Abstract text (typically 200-400 words)}
+
+Keywords: ${8:keyword1, keyword2, keyword3, keyword4, keyword5}
+
+* Acknowledgments
+
+${9:Acknowledgments text}
+
+* Table of Contents
+(Auto-generated)
+
+* List of Tables
+(Auto-generated)
+
+* List of Figures
+(Auto-generated)
+
+* Chapter 1: Introduction
+
+**1.1 Background**
+Context and background information...
+
+**1.2 Problem Statement**
+Research problem and objectives...
+
+**1.3 Research Questions/Hypotheses**
+- $10:Research Question 1
+- $11:Research Question 2
+- $12:Research Question 3
+
+**1.4 Significance of Study**
+Why this research matters...
+
+**1.5 Organization of Thesis**
+Roadmap of chapters...
+
+* Chapter 2: Literature Review
+
+**2.1 Theoretical Framework**
+Underlying theories and models...
+
+**2.2 Previous Studies**
+Review of related research...
+
+**2.3 Research Gap**
+What's missing from current knowledge...
+
+**2.4 Conceptual Model**
+Proposed framework...
+
+* Chapter 3: Methodology
+
+**3.1 Research Design**
+Quantitative/Qualitative/Mixed methods...
+
+**3.2 Participants/Sample**
+Population and sampling method...
+
+**3.3 Instruments/Measures**
+Data collection tools and instruments...
+
+**3.4 Procedures**
+Step-by-step data collection...
+
+**3.5 Data Analysis Plan**
+Statistical or analytical methods...
+
+**3.6 Ethical Considerations**
+IRB approval, informed consent, privacy...
+
+* Chapter 4: Results
+
+**4.1 Descriptive Statistics**
+Demographics and basic statistics...
+
+**4.2 Inferential Statistics**
+Hypothesis testing results...
+
+**4.3 Tables and Figures**
+Visual presentation of results...
+
+**4.4 Summary of Findings**
+Key findings organized by research questions...
+
+* Chapter 5: Discussion
+
+**5.1 Interpretation of Results**
+What the findings mean...
+
+**5.2 Comparison with Literature**
+How results relate to previous studies...
+
+**5.3 Theoretical Implications**
+Contribution to theory...
+
+**5.4 Practical Applications**
+Real-world implications...
+
+**5.5 Limitations**
+Study limitations and constraints...
+
+**5.6 Future Research**
+Directions for future studies...
+
+* Conclusion
+
+**6.1 Summary of Findings**
+Brief recap of main findings...
+
+**6.2 Conclusions**
+Answer to research questions...
+
+**6.3 Contributions**
+Theoretical and practical contributions...
+
+* References
+Complete bibliography...
+
+* Appendices
+
+**Appendix A: Instruments**
+Survey instruments, interview guides...
+
+**Appendix B: Raw Data**
+Raw data tables...
+
+**Appendix C: Additional Analyses**
+Supplementary statistical analyses...
+
+**Appendix D: IRB Approval**
+Ethics approval documentation...

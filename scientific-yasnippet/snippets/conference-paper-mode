@@ -1,0 +1,43 @@
+# name: conference-paper
+# key: cp
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# --
+** $0
+:PROPERTIES:
+:READING_STATUS: reading
+:PRIORITY: high
+:END:
+#+TITLE: ${1:Paper Title}
+#+AUTHORS: ${2:Authors (comma-separated)}
+#+CONFERENCE: ${3:Conference Name}
+#+LOCATION: ${4:Conference Location}
+#+YEAR: ${5:Conference Year}
+#+ABSTRACT: ${6:Abstract (100-200 words)}
+#+SCIENTIFIC_TAGS: :conference:${3:conference-name}:preliminary:
+
+* Abstract
+$6
+
+* Introduction
+$0
+
+* Related Work
+Brief literature review...
+
+* Methodology
+Describe methods...
+
+* Experiments/Results
+Present findings...
+
+* Discussion
+Interpretation and limitations...
+
+* Conclusion
+Summary and future work...
+
+* References
+Limited to conference proceedings...
+
+* Acknowledgments
+Funding and collaborators...

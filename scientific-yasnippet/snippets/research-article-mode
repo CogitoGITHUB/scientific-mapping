@@ -1,0 +1,47 @@
+# name: research-article
+# key: ra
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# --
+** $0
+:PROPERTIES:
+:READING_STATUS: unread
+:PRIORITY: medium
+:END:
+#+TITLE: ${1:Research Title}
+#+DOI: ${2:DOI (optional)}
+#+AUTHORS: ${3:Authors (comma-separated)}
+#+YEAR: ${4:Publication Year}
+#+JOURNAL: ${5:Journal Name}
+#+VOLUME: ${6:Volume (optional)}
+#+ISSUE: ${7:Issue (optional)}
+#+PAGES: ${8:Pages (optional)}
+#+ABSTRACT: ${9:Abstract (150-250 words)}
+#+READING_STATUS: ${10|unread,reading,annotated,completed}
+#+SCIENTIFIC_TAGS: ${11:keywords (comma-separated, lowercase)}
+
+* Abstract
+$9
+
+* Introduction
+$0
+
+* Literature Review
+Brief literature review...
+
+* Methodology
+Describe research methods...
+
+* Results
+Present findings...
+
+* Discussion
+Interpretation of results...
+
+* Conclusion
+Summary and implications...
+
+* References
+Citations and bibliography...
+
+* Future Work
+Potential research directions...

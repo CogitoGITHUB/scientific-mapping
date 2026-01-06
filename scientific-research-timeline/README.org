@@ -1,0 +1,276 @@
+#+TITLE: Scientific Research Timeline
+#+AUTHOR: Adapted from org-roam-timeline by Gerardo Cendejas Mendoza
+#+DATE: 2025
+#+STARTUP: content
+
+* Overview
+
+Scientific Research Timeline creates an interactive, browser-based timeline of your scientific documents, allowing you to visualize historical context, filter by research tags, and seamlessly navigate between your timeline and your text editor.
+
+It is designed for researchers, academics, and scientists who need to see *when* their research happened, not just how it links together.
+
+* Installation
+
+**Use-package**
+
+Using ~use-package~ (Recommended). You should add something like this to your ~init.el~, these are the keybindings that I find useful, but feel free to change them.
+
+#+BEGIN_SRC elisp
+
+(use-package scientific-research-timeline
+       :after scientific-mapping
+       :bind (("C-c n p" . scientific-research-timeline-open)       ; Open the Timeline View
+              ("C-c n d" . scientific-research-timeline-add-date)   ; Add/Edit Timeline Date
+              ("C-c n s" . scientific-research-timeline-show-node)  ; Force Show Node in Browser
+      	      ("C-c n h" . scientific-research-timeline-hide-node)  ; Force Hide Node in Browser
+              ("C-c n t" . scientific-research-timeline-tag-add)    ; Add Tag (Smart Completion)
+ 	      ("C-c n z" . scientific-research-timeline-zoom-date)  ; Focus the view on a specified date
+      	 )
+       
+       ;; Default zoom range (years) when focusing a single point
+       (scientific-research-timeline-focus-window-years 5)
+
+       ;; Start with connection lines enabled?
+       (scientific-research-timeline-show-links-on-start t)
+
+       ;; Enable "Follow Me" mode by default? (Timeline tracks your cursor)
+       (scientific-research-timeline-follow-mode-on-start t)
+
+       ;; Disable the minibuffer with note content in the UI
+       (scientific-research-timeline-preview-on-start nil)
+       
+       :config
+       (message "Scientific Research Timeline loaded."))
+#+END_SRC
+
+**Manual Installation**
+
+Clone this repository and add the following to your ~init.el~:
+
+#+BEGIN_SRC elisp
+(add-to-list 'load-path "/path/to/scientific-research-timeline")
+(require 'scientific-research-timeline)
+#+END_SRC
+
+* Usage
+
+**Basic Usage**
+
+1. Add timeline dates to your scientific documents using ~scientific-research-timeline-add-date~
+2. Open the timeline with ~scientific-research-timeline-open~
+3. Navigate through your research chronology
+4. Click on nodes to open them in Emacs
+
+**Timeline Properties**
+
+To add timeline information to your scientific documents, add these properties:
+
+#+BEGIN_EXAMPLE
+:PROPERTIES:
+:TIMELINE_START: 2023-01-15
+:TIMELINE_END: 2023-06-30
+:END:
+#+END_EXAMPLE
+
+- ~TIMELINE_START~: When the research/project began (required)
+- ~TIMELINE_END~: When the research/project ended (optional, for ranges)
+
+**Supported Date Formats**
+
+- ~YYYY-MM-DD~ (e.g., 2023-01-15)
+- ~YYYY-MM~ (e.g., 2023-01) - interpreted as first day of month
+- ~YYYY~ (e.g., 2023) - interpreted as January 1st of that year
+
+* Features ✨
+
+**Interactive Timeline**
+
+- *Visual Timeline*: See your research chronologically with interactive visualization
+- *Date Ranges*: Support for research projects with start and end dates
+- *Real-time Updates*: Timeline updates automatically as you work
+- *Browser Integration*: Seamless navigation between timeline and editor
+
+**Filtering and Navigation**
+
+- *Tag Filtering*: Filter timeline by research keywords and tags
+- *Date Zooming*: Focus on specific time periods
+- *Follow Mode*: Timeline tracks your cursor position in documents
+- *Node Hiding/Showing*: Control which research appears in timeline
+
+**Research Integration**
+
+- *Citation Tracking*: Timeline shows citation relationships over time
+- *Impact Visualization*: See citation counts and research impact
+- *Progress Tracking*: Monitor research progress chronologically
+- *Publication Timeline*: Track publication dates and submission history
+
+**Customization**
+
+- *Theme Support*: Light and dark themes
+- *Zoom Controls*: Adjustable time window focus
+- *Connection Lines*: Toggle citation relationship visualization
+- *Preview Panel*: Show document content in timeline interface
+
+* Configuration
+
+**Timeline Settings**
+
+#+BEGIN_SRC elisp
+;; Timeline appearance
+(setq scientific-research-timeline-default-theme 'dark)  ; 'dark or 'light
+(setq scientific-research-timeline-focus-window-years 5) ; Zoom window in years
+
+;; Behavior settings
+(setq scientific-research-timeline-show-links-on-start t)    ; Show citation links
+(setq scientific-research-timeline-follow-mode-on-start t)   ; Follow cursor
+(setq scientific-research-timeline-preview-on-start nil)     ; Content preview
+#+END_SRC
+
+**Key Bindings**
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| ~C-c n p~ | ~scientific-research-timeline-open~ | Open timeline |
+| ~C-c n d~ | ~scientific-research-timeline-add-date~ | Add timeline date |
+| ~C-c n s~ | ~scientific-research-timeline-show-node~ | Show node in timeline |
+| ~C-c n h~ | ~scientific-research-timeline-hide-node~ | Hide node from timeline |
+| ~C-c n t~ | ~scientific-research-timeline-tag-add~ | Add research tag |
+| ~C-c n z~ | ~scientific-research-timeline-zoom-date~ | Zoom to specific date |
+
+* Integration with Scientific Mapping
+
+**Automatic Timeline Updates**
+
+The timeline automatically updates when:
+
+- New scientific documents are created
+- Publication dates are added
+- Research tags are modified
+- Citation relationships change
+
+**Research Workflow Integration**
+
+1. *Document Creation*: Use scientific-yasnippet templates
+2. *Add Timeline Dates*: ~scientific-research-timeline-add-date~
+3. *Track Progress*: Timeline shows research evolution
+4. *Visualize Impact*: See citation networks over time
+5. *Navigate Chronology*: Jump between research phases
+
+**Citation Database Integration**
+
+Timeline integrates with citation-database to show:
+
+- Publication dates from DOI metadata
+- Citation relationships over time
+- Research impact metrics
+- Co-citation patterns
+
+* Advanced Features
+
+**Timeline Filtering**
+
+- *Tag-based Filtering*: Show only research with specific keywords
+- *Date Range Filtering*: Focus on specific time periods
+- *Citation Count Filtering*: Show high-impact research
+- *Author Filtering*: Focus on specific researchers
+
+**Interactive Controls**
+
+- *Zoom Controls*: Zoom in/out of timeline
+- *Pan Controls*: Navigate through time periods
+- *Node Selection*: Click to open documents in Emacs
+- *Connection Toggles*: Show/hide citation relationships
+
+**Export and Sharing**
+
+- *Timeline Export*: Save timeline as image or data
+- *Research Reports*: Generate chronological research summaries
+- *Collaboration*: Share timeline views with research teams
+
+* Troubleshooting
+
+**Timeline Not Loading**
+
+*Problem*: Timeline doesn't open in browser
+*Solution*:
+#+BEGIN_SRC elisp
+;; Check if scientific-research-timeline-mode is enabled
+(scientific-mapping-mode 1)
+
+;; Verify web server is running
+(scientific-research-timeline-open)
+#+END_SRC
+
+**Dates Not Appearing**
+
+*Problem*: Research dates not showing in timeline
+*Solution*:
+#+BEGIN_SRC elisp
+;; Add timeline properties to document
+M-x scientific-research-timeline-add-date
+
+;; Or manually add properties:
+:PROPERTIES:
+:TIMELINE_START: 2023-01-15
+:END:
+#+END_SRC
+
+**Performance Issues**
+
+*Problem*: Timeline slow with many documents
+*Solution*:
+#+BEGIN_SRC elisp
+;; Reduce zoom window
+(setq scientific-research-timeline-focus-window-years 2)
+
+;; Disable connection lines
+(setq scientific-research-timeline-show-links-on-start nil)
+#+END_SRC
+
+* Development
+
+**Contributing**
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+**Building**
+
+To build the web interface:
+
+#+BEGIN_SRC bash
+cd scientific-research-timeline
+npm install
+npm run build
+#+END_SRC
+
+**Testing**
+
+Run tests with:
+
+#+BEGIN_SRC elisp
+;; Load test suite
+(load "scientific-research-timeline-tests.el")
+
+;; Run tests
+(ert-run-tests-interactively t)
+#+END_SRC
+
+* License
+
+This project is licensed under the GPL-3.0 License - see the [[file:LICENSE][LICENSE]] file for details.
+
+* Acknowledgments
+
+- Original ~org-roam-timeline~ by Gerardo Cendejas Mendoza
+- Scientific Mapping System integration
+- Research community feedback and contributions
+
+---
+
+*Scientific Research Timeline*: Visualize your research journey through time.

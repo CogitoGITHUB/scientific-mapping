@@ -1,0 +1,84 @@
+# name: literature-review
+# key: lr
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# --
+** $0
+:PROPERTIES:
+:READING_STATUS: reading
+:PRIORITY: high
+:END:
+#+TITLE: ${1:Review Title}: A ${2:Topic/Systematic} Literature Review
+#+AUTHOR: ${3:Author Name}
+#+DATE: ${4:Review Date}
+#+SCIENTIFIC_TAGS: :literature-review:${2:topic}
+
+* Executive Summary
+One-paragraph summary of key findings...
+
+* Introduction
+**Purpose**: Provide context for review
+**Scope**: Define inclusion/exclusion criteria
+**Research Questions**:
+1. $5:Research Question 1
+2. $6:Research Question 2
+3. $7:Research Question 3
+
+* Search Strategy
+**Databases Searched**: PubMed, Scopus, Web of Science, etc.
+**Time Period**: $8:Start Year - $9:End Year
+**Keywords**: ${10:Search keywords}
+**Inclusion Criteria**: 
+- Peer-reviewed articles
+- English language
+- Specific population/study design
+**Exclusion Criteria**:
+- Non-peer-reviewed
+- Non-English articles
+- Irrelevant populations
+
+* Results
+
+**Study Selection Flow**:
+Total identified → Screened → Full-text assessed → Included
+
+**Included Studies**: $11:Number of studies
+
+**Study Characteristics Table**:
+| Study | Design | Sample | Intervention | Outcome | Quality |
+|--------|---------|--------|---------------|---------|---------|
+| Study 1| | | | | |
+
+* Thematic Analysis
+
+**Theme 1**: $12:First Theme
+- Key findings
+- Contradictions
+- Gaps in research
+
+**Theme 2**: $13:Second Theme
+- Key findings
+- Contradictions
+- Gaps in research
+
+**Theme 3**: $14:Third Theme
+- Key findings
+- Contradictions
+- Gaps in research
+
+* Discussion
+**Synthesis of Findings**: Main conclusions across studies
+**Methodological Quality**: Assessment of study designs
+**Research Gaps**: What remains unknown?
+**Implications**: For practice and future research
+**Limitations**: Of this review
+
+* Conclusion
+Summary of key points...
+
+* References
+Complete bibliography...
+
+* Appendix
+Search strategy details
+Quality assessment tools
+Excluded studies with reasons

@@ -1,0 +1,96 @@
+#+title: Readme
+Page View for Org Mode  
+  
+
+* Overview   
+This is a package meant to emulate the visual, page-based layout of a word
+processor like LibreOffice Write or Microsoft Word in org-mode. Mainly, it
+divides your document into pages, divided by a visual pagebreak/footer,
+implemented as an overlay. It currently applies styling and page sizes
+that approximate a letter-sized page using Times New Roman 12 point, at 1.5
+spacing. The package is built to work on top of [[https://github.com/rnkn/olivetti][olivetti-mode]], but it should
+be able to function without it with minimal changes.
+[[file:preview.gif]]
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+Note that the purpose of the package is to *look like* a word processor for more comfortable writing, not to be a perfect layout engine for documents. Org-mode remains the underlying format, so for publication or printing, use org-export to LaTeX, odt, html, or some other format.
+
+* What's new?
+** v0.3
+I've added footnote functionality that applies to =[fn::Anonymous footnotes]= and =[cite:@bradmontPageView2025 p. 1;org-cite footnotes]=.
+
+* Installation  
+  Clone or copy the file into your load path:
+
+#+begin_src emacs-lisp  
+(require 'page-view)  
+#+end_src
+
+  
+
+* Usage  
+  Activate the mode in an Org buffer:
+
+#+begin_src emacs-lisp  
+(page-view-mode)  
+#+end_src
+
+To toggle debugging overlays:
+
+#+begin_src emacs-lisp  
+(page-view-debug-mode)  
+#+end_src
+
+
+* Style
+You can cutomize the following faces to adjust display to your preferences:
+=page-view-body-face= : The default face for body text. If you change this, you'll also want to change  bp =page-view-lines-per-page= and =page-view-olivetti-width=. Eventually I want to automatically calculate these based on the attributes of =page-view-body-face=, but for the time being it needs to be hard coded.
+
+=page-view-footer-face= and =page-view-header-face= : The faces the header and footer text (default to document title and page number) are displayed in.
+
+=org-inline-fn-overlay-face= styles footnotes.
+
+You can also customize =page-view-document-header-function= and =page-view-document-footer-function= to change the text of the headers and footers. They take two variables, PAGE and TARGET-VISUAL-LINE, which are the current page number and visual line where the pagebreak should be displayed (this second one is mainly used for debugging).
+
+* Incremental Updates  
+A small cache-invalidating mechanism ensures that only affected lines are recomputed after edits.  
+Pagination updates occur:
+
+- during jit-lock redisplay,
+  
+- after buffer changes,
+  
+- and during window scrolling.
+  
+
+* Configuration  
+Using olivetti-mode, =olivetti-body-width= determines the character width of the page; =page-view-lines-per-page= determines the size of a page.
+  
+Future versions aim to make these parameters fully customizable.
+
+** Known Limitations
+
+- Reflow while typing is functional but still rough in some cases 
+  
+- Tested primarily with Org Mode and =olivetti-mode=.
+  

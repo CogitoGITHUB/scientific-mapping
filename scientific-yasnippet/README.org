@@ -1,0 +1,399 @@
+#+TITLE: Scientific YASnippet Templates
+#+AUTHOR: Scientific Tools Development Team
+#+DATE: 2025
+#+STARTUP: content
+
+* Overview
+
+Scientific YASnippet templates are integrated with the main system to provide instant, structured templates for creating academic documents. Templates are organized by document type and follow standard academic formatting guidelines.
+
+* Available Templates
+
+**Research Articles**
+
+*Template*: ~research-article~
+*Key Binding*: ~ra~
+*Purpose*: Create structured journal articles
+*Structure*:
+- Abstract (150-250 words)
+- Introduction with research questions
+- Literature review
+- Methodology with detailed procedures
+- Results with statistical analysis
+- Discussion with implications
+- Conclusion
+- References
+
+*Fields Required*:
+- Research title
+- DOI (optional)
+- Authors (comma-separated)
+- Publication year
+- Journal name
+- Volume, issue, pages (optional)
+- Abstract text
+- Reading status (unread, reading, annotated, completed)
+- Scientific keywords (comma-separated, lowercase)
+
+---
+
+**Literature Reviews**
+
+*Template*: ~literature-review~
+*Key Binding*: ~lr~
+*Purpose*: Create systematic or narrative literature reviews
+*Structure*:
+- Executive summary
+- Introduction with purpose and scope
+- Search strategy (databases, time period, keywords)
+- Results (PRISMA flow: identified → screened → included)
+- Thematic analysis of findings
+- Discussion with synthesis, methodological quality, research gaps
+- Conclusion
+- Complete references
+- Appendix with search details
+
+*Fields Required*:
+- Review title
+- Topic/systematic approach
+- Author name
+- Review date
+- Research questions (3-5 questions)
+- Time period (start-end years)
+- Search keywords
+- Inclusion criteria
+- Exclusion criteria
+- Number of included studies
+- Theme 1, 2, 3
+
+---
+
+**Conference Papers**
+
+*Template*: ~conference-paper~
+*Key Binding*: ~cp~
+*Purpose*: Create papers for academic conferences
+*Structure*:
+- Abstract (100-200 words)
+- Introduction
+- Related work (brief)
+- Methodology
+- Experiments/results
+- Discussion and limitations
+- Conclusion
+- References (limited number)
+- Acknowledgments
+
+*Fields Required*:
+- Paper title
+- Authors (comma-separated)
+- Conference name
+- Conference location
+- Conference year
+- Abstract text
+- Conference tags
+
+---
+
+**Master's Thesis**
+
+*Template*: ~thesis-master~
+*Key Binding*: ~tm~
+*Purpose*: Create comprehensive master's thesis documents
+*Structure*:
+- Title page with author, institution, advisor
+- Abstract (200-400 words)
+- Acknowledgments
+- Table of contents, tables, figures
+- Chapter 1: Introduction
+- Chapter 2: Literature review
+- Chapter 3: Methodology
+- Chapter 4: Results
+- Chapter 5: Discussion
+- Conclusion
+- References
+- Appendices (instruments, raw data, additional analyses, IRB)
+
+*Fields Required*:
+- Thesis title
+- Author name
+- Submission date
+- University name
+- Department
+- Advisor name
+- Abstract text
+- Keywords (3-5 keywords)
+- Acknowledgments text
+- Research questions (1-3)
+- Institution name
+
+---
+
+**Additional Templates (Planned)**
+
+- Doctoral dissertation (~thesis-doc~) - Extended thesis structure
+- Grant proposal (~grant-proposal~) - Funding application format
+- Technical report (~technical-report~) - Industry research format
+- Case study (~case-study~) - Qualitative research format
+- Lab report (~lab-report~) - Experimental documentation
+
+* Usage
+
+**Enable YASnippet**
+
+#+BEGIN_SRC elisp
+;; Enable globally
+(yas-global-mode 1)
+
+;; Or enable only in org buffers
+(add-hook 'org-mode-hook #'(lambda () (yas-minor-mode 1)))
+#+END_SRC
+
+**Use Templates**
+
+*Method 1: Expand via key binding*
+1. Open new org file in scientific-document-directory
+2. Type template key (e.g., ~ra~ for research article)
+3. Fill in prompted fields
+4. Template expands with placeholders
+
+*Method 2: Interactive expansion*
+1. ~M-x yas-new-snippet~
+2. Browse and select template
+3. Fill in required fields
+
+*Method 3: Menu completion*
+1. Type template name
+2. ~M-x yas-expand-snippet~
+3. Select template if multiple match
+
+**Placeholders**
+
+Placeholders follow the pattern ~${number:description}~:
+
+- ~${1:...}~ - Primary information (title, author, etc.)
+- ~${2:...}~ - Secondary information (DOI, date, etc.)
+- ~${3:...}~ - Tertiary information
+- And so on...
+
+*Navigation between placeholders*:
+- ~TAB~ - Jump to next placeholder
+- ~S-TAB~ - Jump to previous placeholder
+
+* Integration with Scientific Page View
+
+Templates automatically integrate with scientific-page-view:
+
+#+BEGIN_SRC elisp
+;; After using a template:
+M-x scientific-page-view-check-abstract-length  ; Validate word count
+M-x scientific-page-view-number-figures   ; Auto-number figures
+M-x scientific-page-view-number-tables    ; Auto-number tables
+M-x scientific-page-view-check-references  ; Validate formatting
+#+END_SRC
+
+Templates automatically:
+- Set correct paper type
+- Apply word count limits
+- Include proper section structure
+- Enforce citation formatting
+- Match journal requirements
+
+* Configuration
+
+**Snippet Directory**
+
+Templates are located in:
+#+BEGIN_EXAMPLE
+scientific-mapping/scientific-yasnippet/snippets/
+#+END_EXAMPLE
+
+**Customization**
+
+You can create custom templates by adding new files to the snippets directory:
+
+*File naming*: ~template-name-mode~
+
+*Example custom template*:
+#+BEGIN_SRC yaml
+# name: my-custom-template
+# key: mct
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# --
+** ${1:Document Title}
+:PROPERTIES:
+:READING_STATUS: unread
+:END:
+#+TITLE: $1
+
+* Introduction
+Custom introduction...
+
+* Methods
+Your methods...
+
+* Results
+Your results...
+#+END_SRC
+
+**Template Variables**
+
+Template variables can be defined for common values:
+
+#+BEGIN_SRC elisp
+;; Define common variables
+(setq yas-snippet-dirs '("~/scientific-mapping/scientific-yasnippet/snippets"))
+
+;; Set default values
+(setq yas/prompt-functions
+      '((identity . (lambda (field)
+                        (cond ((string= field "Author Name")
+                               user-full-name))
+                              ((string= field "Institution")
+                               "My University")
+                              (t nil))))))
+#+END_SRC
+
+* Workflow Integration
+
+**Combined with Document Creation**
+
+#+BEGIN_SRC elisp
+;; 1. Create document with template
+M-x yas-new-snippet
+;; Select "research-article"
+;; Fill in template fields
+
+;; 2. The document is automatically:
+;; - Added to citation-database
+;; - Indexed with proper metadata
+;; - Ready for citation and concept linking
+#+END_SRC
+
+**Combined with Research Timeline**
+
+#+BEGIN_SRC elisp
+;; 1. Create document with template
+M-x yas-new-snippet
+
+;; 2. Add timeline dates
+M-x scientific-research-timeline-add-date
+
+;; 3. View in timeline
+M-x scientific-research-timeline-show-node
+#+END_SRC
+
+* Advanced Features
+
+**Conditional Templates**
+
+Templates can include conditions:
+
+#+BEGIN_SRC elisp
+# condition: (and (derived-mode-p 'org-mode) (org-at-heading-p))
+# Only expand in org-mode and at heading
+#+END_SRC
+
+**Multi-file Templates**
+
+Some templates can generate multiple files:
+
+#+BEGIN_SRC elisp
+# name: multi-file-project
+# --
+** ${1:Project Name}
+
+Create file: $1.org
+Content for main document...
+
+Create file: $1-appendix.org
+Content for appendix...
+#+END_SRC
+
+**Template Mirroring**
+
+Mirror existing documents to create templates:
+
+#+BEGIN_SRC elisp
+;; Create template from current buffer
+M-x yas-create-snippet-from-selection
+#+END_SRC
+
+* Best Practices
+
+**Template Creation**
+
+1. *Follow conventions*: Use established academic formats
+2. *Include all sections*: Complete document structure
+3. *Use clear descriptions*: Placeholder text should explain what to write
+4. *Number logically*: Use sequential numbers for fields
+5. *Test thoroughly*: Expand template and verify all sections
+
+**Template Usage**
+
+1. *Fill all placeholders*: Don't skip required fields
+2. *Customize as needed*: Adapt template to your requirements
+3. *Update properties*: Set reading status, priority after creation
+4. *Add metadata*: Include DOI, keywords, etc.
+5. *Sync database*: Ensure document is indexed after creation
+
+**Organization**
+
+- *Keep snippets organized*: Group by document type
+- *Use descriptive names*: Template names should be clear
+- *Document custom ones*: Add comments explaining purpose and usage
+- *Version control*: Track changes to templates
+- *Share with team*: Commit to shared repository
+
+* Troubleshooting
+
+**Template Not Found**
+
+*Problem*: Template doesn't expand
+*Solution*:
+- Check snippet directory is in ~yas-snippet-dirs~
+- Verify file name ends with ~-mode~
+- Ensure YASnippet minor mode is active
+- Check if template conditions are met
+
+**Fields Not Prompting**
+
+*Problem*: Placeholders not prompting for input
+*Solution*:
+- Check placeholder syntax: ~${number:description}~
+- Verify YASnippet minor mode is active
+- Check if template conditions are met
+
+**Integration Issues**
+
+*Problem*: Document not syncing with database
+*Solution*:
+- Ensure file is in ~scientific-document-directory~
+- Verify ~citation-database-autosync-mode~ is enabled
+- Manually sync: ~M-x citation-database-sync~
+
+* Contributing Templates
+
+We welcome contributions! When adding templates:
+
+1. *Follow naming*: ~document-type-mode~
+2. *Use YAML header*: Include name, key, condition
+3. *Add placeholders*: ~${n:description}~ for all required fields
+4. *Include structure*: Complete academic document structure
+5. *Test thoroughly*: Expand and verify all sections
+6. *Document*: Add comments explaining usage and purpose
+
+* Resources
+
+**YASnippet Documentation**
+- https://joaotavora.github.io/yasnippet/
+
+**Academic Writing Guides**
+- See ~academic-documentation-types.org~
+
+**Citation Styles**
+- APA, MLA, Chicago, IEEE, Vancouver
+
+---
+
+This comprehensive template system accelerates academic writing while maintaining consistency with scientific workflows and standards.

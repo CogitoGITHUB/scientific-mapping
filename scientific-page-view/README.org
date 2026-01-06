@@ -1,0 +1,613 @@
+#+TITLE: Scientific Page View
+#+AUTHOR: Scientific Tools Development Team
+#+DATE: 2025
+#+STARTUP: content
+
+* Overview
+
+Scientific Page View provides a word processor-like interface for writing scientific papers in org-mode, organized chronologically following established academic writing guidelines from official sources (PLOS, Nature, Science, ICMJE, university thesis requirements).
+
+* Chronological Writing Process
+
+The system enforces the official academic writing process order:
+
+**Phase 1: Preparation and Planning**
+- ~scientific-page-view-start-writing-session()~ - Initialize session
+- Set paper type and journal requirements
+- Display word count limits from official standards
+- Configure page layout settings
+
+**Phase 2: Literature Review**
+- Use ~scientific-page-view-insert-section-template("Literature Review")~
+- Follow systematic review structure
+- Track word counts against standards
+- Document search strategy
+
+**Phase 3: Methods and Design**
+- Use ~scientific-page-view-insert-section-template("Methods")~
+- Structure research design clearly
+- Include ethical considerations
+- Add participant/sample descriptions
+
+**Phase 4: Results and Data Presentation**
+- Use ~scientific-page-view-insert-section-template("Results")~
+- Format tables with proper captions
+- Insert figures with placeholders
+- Present statistical findings
+
+**Phase 5: Discussion and Analysis**
+- Use ~scientific-page-view-insert-section-template("Discussion")~
+- Interpret findings in context
+- Compare with literature
+- Discuss limitations
+
+**Phase 6: Conclusion and Implications**
+- Use ~scientific-page-view-insert-section-template("Conclusion")~
+- Summarize key findings
+- State conclusions clearly
+- Highlight contributions
+
+* Academic Standards Compliance
+
+**Official Sources Used**
+
+This system implements standards from:
+
+- *PLOS (Public Library of Science)*:
+  - Abstract word count: 250 words
+  - IMRaD structure enforced
+  - Reference formatting requirements
+
+- *Nature / Science*:
+  - 6-page maximum limit
+  - Abstract: 150 words
+  - Methods and Results sections
+
+- *ICMJE (International Committee of Medical Journal Editors)*:
+  - Structured abstract format
+  - Reporting guidelines
+  - Table and figure standards
+
+- *University Thesis Requirements*:
+  - Master's thesis: 40-80 pages
+  - Doctoral dissertation: 150-300+ pages
+  - IRB approval placeholders
+
+**Word Count Limits by Paper Type**
+
+Built into system:
+
+#+BEGIN_SRC elisp
+;; Built into system:
+(setq scientific-page-view-word-count-limits
+      '((research-article . ((abstract . 250)    ; PLOS standard
+                           (intro . 300)
+                           (methods . 1500)
+                           (results . 1500)
+                           (discussion . 1500)
+                           (conclusion . 300)))
+        (literature-review . ((abstract . 250)    ; Systematic review
+                              (total . 8000)
+                              (introduction . 1000)))
+        (conference-paper . ((abstract . 200)    ; Conference limits
+                              (total . 3000)
+                              (methods . 800)))
+        (thesis-master . ((abstract . 400)    ; Master's thesis
+                              (introduction . 1500)
+                              (total . 40000)))
+        (thesis-doc . ((abstract . 350)    ; Doctoral dissertation
+                           (introduction . 3000)
+                           (total . 100000)))
+        (technical-report . ((abstract . 250)
+                           (total . 5000)))))
+#+END_SRC
+
+* Page Layout Features
+
+**Academic Standards**
+
+- *Font*: Times New Roman, 12pt (academic standard)
+- *Spacing*: 1.5 line spacing (standard for readability)
+- *Margins*: ~1" margins (letter-sized approximation)
+- *Page Width*: 69 characters (Times New Roman 12pt, 1.5 spacing)
+
+**Page Organization**
+
+- *Headers*: Document title, author, date at top of each page
+- *Page Numbers*: Bottom center with "Page X" format
+- *Page Breaks*: Visual separator ("___") following academic conventions
+- *Footnotes*: Automatic numbering and positioning per journal standards
+
+* Citation Formatting
+
+**Supported Citation Styles**
+
+- *APA (7th Edition)*: (Smith, 2020, p. 123)
+- *MLA (9th Edition)*: Smith 123
+- *Chicago (17th Edition)*: Smith (2020) 123
+- *IEEE*: [1] Smith et al.
+- *Vancouver*: Smith et al. 2020;123:456-789
+
+**Citation Enforcement**
+
+- *Consistent formatting* across all citations
+- *Journal-specific requirements* automatically applied
+- *Reference section organization* by citation style
+- *Automatic style switching* based on journal type
+
+* Integration with Scientific Workflow
+
+**With Scientific Document Engine**
+
+#+BEGIN_SRC elisp
+;; 1. Create document with page view
+M-x scientific-page-view-mode
+M-x scientific-page-view-start-writing-session
+
+;; 2. Use scientific-yasnippet templates
+M-x yas-new-snippet
+Select: research-article, literature-review, conference-paper, thesis-master
+
+;; 3. Page view automatically:
+;; - Enforces word count limits
+;; - Validates abstract structure
+;; - Numbers figures and tables automatically
+;; - Formats citations according to journal standards
+#+END_SRC
+
+**With Citation Database**
+
+Citations entered in page view are automatically tracked:
+- Reference metadata extraction
+- Citation type categorization
+- Citation relationship creation
+- Bibliographic consistency checking
+
+**With Concept Relationships**
+
+When writing literature reviews or thesis documents:
+- Link concepts directly from page view
+- Create concept maps for theoretical frameworks
+- Track evidence relationships for claims
+- Organize by chapter or section
+
+* Usage Guide
+
+**Quick Start**
+
+#+BEGIN_SRC elisp
+;; 1. Load system
+(require 'scientific-page-view)
+
+;; 2. Enable for your buffer
+M-x scientific-page-view-mode
+
+;; 3. Start writing session
+M-x scientific-page-view-start-writing-session
+
+;; 4. Begin writing with proper structure
+#+END_SRC
+
+**Writing a Research Article**
+
+#+BEGIN_SRC elisp
+;; 1. Initialize
+M-x scientific-page-view-start-writing-session
+
+;; 2. Write title page
+M-x scientific-page-view-insert-page-break
+
+;; 3. Insert abstract
+M-x scientific-page-view-insert-section-template
+
+;; 4. Check abstract length
+M-x scientific-page-view-check-abstract-length
+
+;; 5. Continue with sections
+M-x scientific-page-view-insert-section-template "Introduction"
+M-x scientific-page-view-insert-section-template "Methods"
+M-x scientific-page-view-insert-section-template "Results"
+M-x scientific-page-view-insert-section-template "Discussion"
+M-x scientific-page-view-insert-section-template "Conclusion"
+M-x scientific-page-view-insert-section-template "References"
+
+;; 6. Check references
+M-x scientific-page-view-check-references
+
+;; 7. Show statistics
+M-x scientific-page-view-show-word-counts
+#+END_SRC
+
+**Writing a Literature Review**
+
+#+BEGIN_SRC elisp
+;; 1. Start with literature review template
+M-x yas-new-snippet
+Select: literature-review
+
+;; 2. Write review following systematic structure
+;; Page view helps maintain organization across multiple papers
+#+END_SRC
+
+**Writing a Thesis**
+
+#+BEGIN_SRC elisp
+;; 1. Start with thesis template
+M-x yas-new-snippet
+Select: thesis-master
+
+;; 2. Write chapters with page breaks between them
+;; Page view provides chapter organization and page numbering
+#+END_SRC
+
+* Key Commands
+
+**Writing Session Management**
+
+- ~M-x scientific-page-view-start-writing-session~ - Begin new writing session
+- ~M-x scientific-page-view-insert-page-break~ - Add page break
+- ~M-x scientific-page-view-goto-page N~ - Go to page N
+- ~M-x scientific-page-view-next-page~ - Next page
+- ~M-x scientific-page-view-previous-page~ - Previous page
+
+**Section Templates**
+
+- ~M-x scientific-page-view-insert-section-template "Section Name"~ - Insert standard section
+- ~M-x scientific-page-view-insert-figure-with-caption "Caption"~ - Add figure
+- ~M-x scientific-page-view-insert-table-with-caption "Caption"~ - Add table
+
+**Word Count Enforcement**
+
+- ~M-x scientific-page-view-check-abstract-length~ - Validate abstract against limits
+- ~M-x scientific-page-view-show-word-counts~ - Display current statistics
+
+**Citation Formatting**
+
+- ~M-x scientific-page-view-format-citation "Smith 2020"~ - Format citation
+- ~M-x scientific-page-view-check-references~ - Validate reference formatting
+
+**Debug and Statistics**
+
+- ~M-x scientific-page-view-toggle-debug~ - Show line heights and page info
+- Automatic statistics tracking when enabled
+
+* Configuration
+
+**Paper Type Settings**
+
+#+BEGIN_SRC elisp
+;; Set paper type (affects word limits)
+(setq scientific-page-view-paper-type 'research-article)
+
+;; Options: research-article, literature-review, conference-paper
+;;            thesis-master, thesis-doc, technical-report
+
+;; Set journal type
+(setq scientific-page-view-journal-type 'apa)
+
+;; Options: general, apa, mla, chicago, ieee, science, nature, plos
+#+END_SRC
+
+**Page Layout Settings**
+
+#+BEGIN_SRC elisp
+;; Adjust page width
+(setq scientific-page-view-page-width 69)  ; Default (Times New Roman 12pt)
+
+;; Adjust lines per page
+(setq scientific-page-view-lines-per-page 36)  ; ~250-300 words per page
+
+;; Adjust line spacing
+(setq scientific-page-view-line-spacing 1.5)  ; Academic standard
+
+;; Change font
+(setq scientific-page-view-font-family "Times New Roman")
+(setq scientific-page-view-font-size 12)
+#+END_SRC
+
+**Academic Features**
+
+#+BEGIN_SRC elisp
+;; Enable word count enforcement
+(setq scientific-page-view-enforce-word-counts t)
+
+;; Auto-number figures and tables
+(setq scientific-page-view-auto-number-figures t)
+(setq scientific-page-view-auto-number-tables t)
+
+;; Show headers and footers
+(setq scientific-page-view-show-headers t)
+(setq scientific-page-view-show-footers t)
+
+;; Track writing statistics
+(setq scientific-page-view-track-changes t)
+#+END_SRC
+
+* Advanced Features
+
+**Academic Standard Enforcement**
+
+The system automatically enforces:
+
+*Abstract Standards*:
+- PLOS: Exactly 250 words, no more
+- Nature/Science: 150 words, structured format
+- Conference: 100-200 words
+- Thesis: 350-400 words (depending on level)
+
+*Structure Requirements*:
+- IMRaD format: Introduction, Methods, Results, Discussion
+- Section word counts enforced where applicable
+- Journal-specific requirements automatically applied
+
+*Citation Standards*:
+- Style-specific formatting (APA, MLA, Chicago, IEEE, Vancouver)
+- Automatic reference section organization
+- Consistent formatting across all citations
+
+*Figure/Table Standards*:
+- Automatic caption numbering
+- Standard caption format: "Figure 1: Description" or "Table 1: Description"
+- Cross-references in text
+
+**Writing Progress Tracking**
+
+When ~scientific-page-view-track-changes~ is enabled:
+
+- Real-time word count display in mode line
+- Progress indicators for each section
+- Word count warnings when approaching limits
+- Section completion tracking
+- Automatic statistics updates
+
+* Integration with Templates
+
+Scientific Page View works seamlessly with Scientific YASnippet templates:
+
+#+BEGIN_SRC elisp
+;; After using a template:
+M-x scientific-page-view-check-abstract-length  ; Validate word count
+M-x scientific-page-view-number-figures   ; Auto-number figures
+M-x scientific-page-view-number-tables    ; Auto-number tables
+M-x scientific-page-view-check-references  ; Validate formatting
+#+END_SRC
+
+Templates automatically:
+- Set correct paper type
+- Apply word count limits
+- Include proper section structure
+- Enforce citation formatting
+- Match journal requirements
+
+* Troubleshooting
+
+**Page Breaks Not Appearing**
+
+*Problem*: Page breaks not showing after inserting
+*Solution*:
+#+BEGIN_SRC elisp
+;; Ensure olivetti-mode is active
+(olivetti-mode 1)
+
+;; Re-apply page breaks
+M-x scientific-page-view-clear
+M-x scientific-page-view-initialize
+#+END_SRC
+
+**Word Count Warnings**
+
+*Problem*: Seeing word count warnings constantly
+*Solution*:
+#+BEGIN_SRC elisp
+;; Adjust limits or disable enforcement
+(setq scientific-page-view-enforce-word-counts nil)
+#+END_SRC
+
+**Citation Formatting Issues**
+
+*Problem*: Citations not matching journal style
+*Solution*:
+#+BEGIN_SRC elisp
+;; Change citation style
+(setq scientific-page-view-citation-style 'ieee)
+
+;; Or set journal-specific
+(setq scientific-page-view-journal-type 'ieee)
+#+END_SRC
+
+* Best Practices
+
+**Academic Writing Workflow**
+
+1. *Plan Before Writing*
+   - Use ~scientific-page-view-start-writing-session~ to set goals
+   - Review word count limits for your paper type
+   - Choose appropriate journal type
+
+2. *Follow Chronological Structure*
+   - Write sections in order: Abstract → Intro → Methods → Results → Discussion → Conclusion
+   - Use page breaks between major sections
+   - Add page numbers for navigation
+
+3. *Use Templates When Possible*
+   - Start with ~M-x yas-new-snippet~
+   - Select appropriate template for your paper type
+   - Templates ensure proper structure
+
+4. *Check Word Counts Regularly*
+   - Use ~M-x scientific-page-view-show-word-counts~
+   - Address sections exceeding limits
+   - Focus on conciseness and clarity
+
+5. *Validate Before Submission*
+   - Use ~M-x scientific-page-view-check-references~
+   - Ensure all citations properly formatted
+   - Check figure and table captions
+   - Verify abstract meets word limit
+
+6. *Use Debug Mode for Layout*
+   - ~M-x scientific-page-view-toggle-debug~ to see page structure
+   - Verify page breaks are in correct positions
+   - Check line counts per page
+
+**Citation Management**
+
+1. *Choose Style Early*: Set citation style before writing
+2. *Be Consistent*: Use same format throughout
+3. *Format as You Write*: Use formatting functions during writing
+4. *Validate at End*: Check all citations match style
+
+**Figure and Table Management**
+
+1. *Use Placeholders*: Insert figures with caption placeholders first
+2. *Fill Captions Later*: Complete descriptions after data is ready
+3. *Auto-Number*: Use ~M-x scientific-page-view-number-figures~ when figures complete
+4. *Keep Captions Descriptive*: Explain what figure/table shows in caption
+
+* Key Bindings
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| ~C-c C-p~ | ~scientific-page-view-insert-page-break~ | Insert page break |
+| ~C-c C-g~ | ~scientific-page-view-goto-page~ | Go to page |
+| ~C-c C-n~ | ~scientific-page-view-next-page~ | Next page |
+| ~C-c C-p~ | ~scientific-page-view-previous-page~ | Previous page |
+| ~C-c C-s~ | ~scientific-page-view-insert-section-template~ | Insert section |
+| ~C-c C-f~ | ~scientific-page-view-insert-figure-with-caption~ | Insert figure |
+| ~C-c C-t~ | ~scientific-page-view-insert-table-with-caption~ | Insert table |
+| ~C-c C-c~ | ~scientific-page-view-check-abstract-length~ | Check abstract |
+| ~C-c C-w~ | ~scientific-page-view-show-word-counts~ | Word counts |
+| ~C-c C-r~ | ~scientific-page-view-check-references~ | Check refs |
+| ~C-c C-d~ | ~scientific-page-view-toggle-debug~ | Toggle debug |
+| ~M-s~ | ~scientific-page-view-start-writing-session~ | Start session |
+| ~M-w~ | ~scientific-page-view-show-word-counts~ | Statistics |
+
+* Academic Writing Resources
+
+**Official Guidelines Used**
+
+This system implements guidelines from:
+
+- *PLOS ONE*: https://journals.plos.org/plosone/guidelines/
+- *Nature*: https://www.nature.com/nature/for-authors/finalising-your-submission
+- *Science Magazine*: https://www.science.org/content/page/instructions-preparing-initial-manuscript
+- *ICMJE*: https://www.icmje.org/recommendations/browse/manuscript-preparation
+- *University Thesis Requirements*: Standard institutional guidelines
+
+**Citation Style Guides**
+
+- *APA Style*: https://apastyle.apa.org/
+- *MLA Handbook*: https://style.mla.org/
+- *Chicago Manual*: https://www.chicagomanualofstyle.org/
+- *IEEE Style Guide*: https://ieeeauthorcenter.ieee.org/
+
+**Writing Guides**
+
+- *How to Write a Paper in 15 Steps* (PMC): https://pmc.ncbi.nlm.nih.gov/articles/PMC12459795/
+- *Writing Your First Research Paper* (Nature): https://www.nature.com/articles/d41586-019-01362-9
+- *Toolkit: How to Write a Great Paper*: https://www.nature.com/articles/d41586-019-01362-9
+
+* Comparison with Other Systems
+
+**Scientific Page View vs. Standard Org Mode**
+
+| Feature | Scientific Page View | Standard Org Mode |
+|---------|-------------------|-------------------|
+| Page Layout | Word processor-like, letter-sized pages | Free-form text editor |
+| Word Counts | Enforced by paper type | No enforcement |
+| Citations | Journal-standard formatting | Manual formatting |
+| Figures | Auto-numbered with captions | Manual placement |
+| Headers/Footers | Automatic per page | None by default |
+| Abstract Limits | Paper-type specific limits | No limits |
+| Debug Mode | Layout visualization | None |
+
+**Scientific Page View vs. Microsoft Word**
+
+| Feature | Scientific Page View | Microsoft Word |
+|---------|-------------------|-------------------|
+| Format | Org markup | .docx binary |
+| Portability | Plain text, any editor | Requires Word or viewer |
+| Collaboration | Git-friendly | Track Changes/Comments |
+| Citation Integration | Integrated with citation-database | Manual or add-ons |
+| Mathematical | LaTeX via org-mode | Equation editor |
+| Cost | Free | Paid software |
+
+* Benefits for Researchers
+
+**1. Academic Standards Compliance**
+
+- *Automatic Word Count Enforcement*: Meets journal submission requirements
+- *Citation Style Consistency*: No manual citation formatting errors
+- *Standard Structure*: IMRaD format enforced by templates
+- *Figure/Table Standards*: Proper academic formatting
+
+**2. Writing Efficiency**
+
+- *Chronological Workflow*: Follows proven academic writing process
+- *Real-time Feedback*: Word count warnings, layout visualization
+- *Quick Navigation*: Page-based organization for long documents
+- *Template Integration*: Quick start with proper structure
+
+**3. Quality Assurance**
+
+- *Abstract Validation*: Word count limits enforced automatically
+- *Reference Checking*: Formatting validation before submission
+- *Figure/Table Organization*: Automatic numbering and captions
+- *Debug Mode*: Visualize page structure for layout issues
+
+**4. Scientific Knowledge Integration**
+
+- *Database Tracking*: Citations automatically added to citation-database
+- *Concept Linking*: Direct concept mapping integration
+- *Timeline Integration*: Writing progress tracked over time
+- *Template Compatibility*: Works with scientific-yasnippet templates
+
+* Future Enhancements
+
+**Planned Features**
+
+- [ ] *Enhanced Abstract Templates*: Journal-specific abstract structures
+- [ ] *Bibliography Generation*: Automatic reference list creation
+- [ ] *LaTeX Preview*: Preview mathematical notation
+- [ ] *Export Integration*: Direct export to journal submission format
+- [ ] *Collaboration Features*: Real-time co-authorship support
+- [ ] *Advanced Word Counting*: True word count (vs. whitespace approximation)
+- [ ] *Journal Templates*: Pre-built templates for specific journals
+- [ ] *Writing Suggestions*: AI-powered writing assistance
+- [ ] *Peer Review Templates*: Review submission formatting
+
+* Development Notes
+
+**Extension Points**
+
+The system is designed to be extensible:
+
+*Custom Paper Types*: Add new paper types with word limits
+*Journal Requirements*: Add journal-specific formatting rules
+*Citation Styles*: Add support for additional citation formats
+*Page Layouts*: Custom page formats (double-column, landscape, etc.)
+
+**Integration Hooks**
+
+The system provides hooks for integration:
+
+- ~scientific-page-view-before-page-break-hook~ - Before inserting page break
+- ~scientific-page-view-after-page-break-hook~ - After inserting page break
+- ~scientific-page-view-before-section-hook~ - Before inserting section
+- ~scientific-page-view-after-section-hook~ - After inserting section
+
+* Conclusion
+
+Scientific Page View provides a complete, standards-compliant environment for writing scientific papers in org-mode. It bridges the gap between free-form org-mode and rigid academic submission requirements by:
+
+1. *Enforcing Academic Standards*: Word counts, citation formats, structure
+2. *Providing Word Processor Interface*: Page layout, headers, footers
+3. *Following Chronological Process*: From planning through publication
+4. *Integrating with Scientific Tools*: Database, templates, concept mapping
+5. *Supporting Research Workflow*: Efficient, compliant academic writing
+
+The system is designed to help researchers produce high-quality, compliant manuscripts ready for submission to top journals.
+
+---
+
+*Scientific Page View*: Academic writing, standardized, and integrated.
