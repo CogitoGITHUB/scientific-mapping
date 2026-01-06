@@ -12,3 +12,4 @@
 (depends-on "emacsql-sqlite")
 (depends-on "org")
 (depends-on "yasnippet")
+(depends-on "eaf-browser" :git "https://github.com/emacs-eaf/eaf-browser.git")

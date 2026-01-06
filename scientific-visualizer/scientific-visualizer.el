@@ -48,6 +48,10 @@
 (add-to-list 'load-path (expand-file-name "../citation-database" (file-name-directory load-file-name)))
 (require 'citation-database)
 
+;; Load EAF browser for in-Emacs visualization
+(when (require 'eaf-browser nil t)
+  (require 'eaf-browser))
+
 (defgroup scientific-visualizer ()
   "3D visualization for scientific knowledge networks."
   :group 'files
@@ -388,7 +392,11 @@ Takes _WS and FRAME as arguments."
   "Ensure `scientific-visualizer' is running, then open the interface."
   (interactive)
   (unless scientific-visualizer-mode (scientific-visualizer-mode))
-  (browse-url (format "http://localhost:%d" scientific-visualizer-port)))
+  (if (featurep 'eaf-browser)
+      ;; Use EAF browser for in-Emacs visualization
+      (eaf-open-browser (format "http://localhost:%d" scientific-visualizer-port))
+    ;; Fallback to external browser
+    (browse-url (format "http://localhost:%d" scientific-visualizer-port))))
 
 ;;;###autoload
 (defun scientific-visualizer-paper-zoom (&optional identifier speed padding)

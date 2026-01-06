@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "build": "cp index.html out/ && cp main.js out/ && cp style.css out/",
-    "start": "python3 -m http.server 35901"
+    "start": "python3 -m http.server 35901",
+    "dev": "python3 -m http.server 35901"
   },
   "dependencies": {
     "three": "^0.150.0"
