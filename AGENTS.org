@@ -1,0 +1,56 @@
+* Scientific Knowledge Mapping System - Agent Guidelines
+
+** Build/Lint/Test Commands
+
+*** Testing
+- *Run all tests*: =make test= or =emacs -Q -batch -l ert -l tests/scientific-mapping-tests.el -f ert-run-tests-batch-and-exit=
+- *Run single test*: =emacs -Q -batch -l ert -l tests/<component>-tests.el -f ert-run-tests-batch-and-exit=
+- *Interactive testing*: =M-x ert= then select test pattern
+
+*** Building
+- *Build web components*: =cd viz-engine && npm run build=
+- *Full build*: =make all=
+
+*** Linting
+- *Check syntax*: =emacs -Q -batch -f batch-byte-compile <file>.el=
+- *Package validation*: =cask install && cask build=
+
+** Code Style Guidelines
+
+*** Emacs Lisp Conventions
+- *Naming*: Use =kebab-case= for functions/variables, =PascalCase= for major modes
+- *Prefixes*: Component-specific prefixes (doc-engine-, viz-engine-, etc.)
+- *Documentation*: All functions need docstrings with args and return values
+- *Lexical binding*: Always use =;;; -*- lexical-binding: t -*-=
+
+*** Structure
+- *Components*: Each in separate directory with main =<component>.el= file
+- *Tests*: Corresponding =tests/<component>-tests.el= files
+- *Imports*: =(require 'package)= at top, grouped by standard library then external
+
+*** Error Handling
+- *Condition-case*: Use for user-facing operations
+- *Assert*: Use for internal consistency checks
+- *User errors*: Clear, actionable error messages
+
+*** Types & Safety
+- *Defcustom*: User options with =:type= specifications
+- *Validation*: Input validation for user-provided data
+- *Nil checking*: Safe access to optional properties
+
+*** Formatting
+- *Indentation*: 2 spaces, follow Emacs defaults
+- *Line length*: 80 characters maximum
+- *Comments*: =;;= for line comments, =;;;= for section headers
+- *Grouping*: Related functions grouped with section comments
+
+*** Component Architecture
+- *Modular*: Each component provides single responsibility
+- *Integration*: Components communicate via well-defined APIs
+- *Configuration*: Customizable via defcustom variables
+- *Documentation*: README.org files for complex components
+
+*** Git Workflow
+- *Commits*: Descriptive messages, atomic changes
+- *Branches*: Feature branches for new work
+- *Testing*: All changes must pass existing tests
