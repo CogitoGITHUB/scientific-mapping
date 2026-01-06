@@ -55,6 +55,30 @@ The AGENTS.org file contains the authoritative guidelines for working with this 
 - **Dependencies**: org-agenda (part of org package)
 - **Features**: Custom agenda views, paper review scheduling, research project templates, weekly reviews, deadline tracking
 
+## AI Integration
+
+**LLM-Powered Research Assistant**: Complete AI integration for intelligent research workflows
+- **Why**: Transform basic document management into AI-powered research platform
+- **Benefits**: Automated analysis, intelligent insights, research acceleration
+- **Providers**: Ollama (local), OpenAI, Anthropic, MCP, Agent Shell
+- **Features**: Document summarization, concept extraction, question answering, writing assistance, citation analysis, research gap detection
+
+## Academic API Integrations
+
+**Direct Scholarly Database Access**: Seamless integration with academic ecosystems
+- **Why**: Enable direct import from scholarly databases without manual effort
+- **Benefits**: Stay current with latest research, automated metadata extraction
+- **APIs**: arXiv, PubMed, CrossRef DOI resolution
+- **Features**: Search interfaces, structured import, Org-mode formatting, action checklists
+
+## Reference Manager Integration
+
+**Sync with Existing Workflows**: Connect to popular reference management tools
+- **Why**: Bridge gap between reference managers and research knowledge mapping
+- **Benefits**: Unified workflow, no duplicate data entry, enhanced collaboration
+- **Managers**: Zotero API, BibTeX import
+- **Features**: Collection sync, item import, metadata preservation, batch processing
+
 ## Git Workflow
 
 **Always commit and push changes**: After making any modifications to the codebase
