@@ -197,17 +197,19 @@
   "Create a quick note with just a title - everything else automated."
   (interactive "sNote title: ")
   (let* ((signature (doc-engine-sluggify-title title))
-         (filename (format "%s.org" signature))
+         (display-filename signature)
+         (actual-filename (format "%s.org" signature))
          (target-dir (car (if (listp doc-engine-directory)
                              doc-engine-directory
                            (list doc-engine-directory))))
-         (filepath (expand-file-name filename target-dir)))
+         (filepath (expand-file-name actual-filename target-dir)))
 
     ;; Handle conflicts
     (let ((counter 1))
       (while (file-exists-p filepath)
-        (setq filename (format "%s-%d.org" signature counter))
-        (setq filepath (expand-file-name filename target-dir))
+        (setq display-filename (format "%s-%d" signature counter))
+        (setq actual-filename (format "%s.org" display-filename))
+        (setq filepath (expand-file-name actual-filename target-dir))
         (setq counter (1+ counter))))
 
     ;; Create minimal document
@@ -223,7 +225,7 @@
 
     ;; Open file
     (find-file filepath)
-    (message "Created quick note: %s" title)))
+    (message "Created quick note: %s" display-filename)))
 
 ;;;###autoload
 (defun doc-engine-smart-import (source)
@@ -416,21 +418,20 @@ When called interactively, prompt for information based on
     
     (let* ((identifier (doc-engine-generate-identifier doi date))
            (signature (doc-engine-sluggify-title title))
-           (filename (doc-engine-format-filename signature keywords file-type))
-           (filepath (expand-file-name filename target-dir))
+           (display-filename (doc-engine-format-filename signature keywords file-type))
+           (actual-filename (format "%s.%s" display-filename (doc-engine-file-extension file-type)))
+           (filepath (expand-file-name actual-filename target-dir))
            (front-matter (doc-engine-format-front-matter
                           title doi keywords identifier date
                           citation abstract methodology results file-type)))
 
       ;; Handle filename conflicts by adding number suffix
       (let ((counter 1)
-            (base-filename filename))
+            (base-display-filename display-filename))
         (while (file-exists-p filepath)
-          (setq filename (format "%s-%d.%s"
-                                (file-name-sans-extension base-filename)
-                                counter
-                                (file-name-extension base-filename)))
-          (setq filepath (expand-file-name filename target-dir))
+          (setq display-filename (format "%s-%d" base-display-filename counter))
+          (setq actual-filename (format "%s.%s" display-filename (doc-engine-file-extension file-type)))
+          (setq filepath (expand-file-name actual-filename target-dir))
           (setq counter (1+ counter))))
 
       (with-temp-file filepath
@@ -447,7 +448,7 @@ When called interactively, prompt for information based on
       (doc-engine-register-file identifier filepath)
 
       (find-file filepath)
-      (message "Created scientific document: %s" (file-name-nondirectory filepath))
+      (message "Created scientific document: %s" display-filename)
       filepath)))
 
 (defun doc-engine-read-prompt (prompt)
@@ -488,16 +489,15 @@ If DOI is provided, use DOI-based identifier. Otherwise use timestamp format."
 ;;;; Scientific Document Filenames
 
 (defun doc-engine-format-filename (signature keywords file-type)
-  "Format clean filename for scientific document.
-Format: SIGNATURE__KEYWORDS.EXTENSION (no visible IDs)"
+  "Format ultra-clean filename for scientific document.
+Format: SIGNATURE__KEYWORDS (no extension, no visible IDs)"
   (let ((keyword-str (if keywords
                         (concat "__"
                                 (mapconcat 'downcase keywords "-"))
                       "")))
-    (format "%s%s.%s"
+    (format "%s%s"
             (downcase signature)
-            keyword-str
-            (doc-engine-file-extension file-type))))
+            keyword-str)))
 
 (defun doc-engine-sluggify-title (title)
   "Convert TITLE to a filesystem-safe signature."

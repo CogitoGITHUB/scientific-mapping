@@ -1,0 +1,290 @@
+#+TITLE: Org File Manager — Structured Org Document Management
+#+AUTHOR: Scientific Tools Development Team
+#+OPTIONS: toc:nil num:nil
+#+PROPERTY: header-args:emacs-lisp :mkdirp yes
+
+* Introduction
+
+** About Org File Manager
+Org File Manager provides a structured, Org-mode-aware interface for managing scientific documents and research files. Unlike plain file managers, it displays Org files with their titles, properties, content structure, and research status, making it easy to navigate and manage complex research projects.
+
+Org File Manager shows your documents as structured Org content:
+- Document titles and metadata
+- Research status indicators (analyzed, published, conceptualized)
+- Top-level headings and structure
+- Word counts and statistics
+- Properties and tags
+- Seamless integration with scientific mapping workflow
+
+** Why make this?
+Traditional file managers show files as plain lists, but scientific research involves complex relationships between documents, concepts, citations, and research status. Org File Manager bridges this gap by providing a structured view that reflects the semantic content of your research documents, not just their filenames.
+
+This tool is specifically designed for researchers who need to:
+- Quickly navigate large collections of research documents
+- Understand document status and relationships at a glance
+- Manage research workflows with visual indicators
+- Maintain overview of complex research projects
+
+* Installation
+
+Clone this repo and add to your load path:
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/path/to/org-file-manager")
+(require 'org-file-manager)
+#+end_src
+
+* Configuration
+
+** Minimal Config
+Basic configuration for Org File Manager:
+
+#+begin_src emacs-lisp
+(use-package org-file-manager
+  :load-path "~/path/to/org-file-manager"
+  :commands (org-file-manager)
+  :config
+  ;; Basic settings
+  (setq org-file-manager-directory "~/research/")
+  (setq org-file-manager-show-properties t)
+  (setq org-file-manager-show-headings t))
+#+end_src
+
+** Full Config Example
+Complete configuration with all options:
+
+#+begin_src emacs-lisp
+(use-package org-file-manager
+  :load-path "~/path/to/org-file-manager"
+  :commands (org-file-manager)
+  :init
+  ;; Directory settings
+  (setq org-file-manager-directory "~/research/")  ; Default directory
+  (setq org-file-manager-show-properties t)        ; Show Org properties
+  (setq org-file-manager-show-headings t)          ; Show top headings
+  (setq org-file-manager-max-preview-lines 20)     ; Preview length
+
+  ;; Sorting options
+  (setq org-file-manager-sort-method 'title)       ; Sort by title
+  ;; Available methods:
+  ;;   'title  - By Org title (default)
+  ;;   'date   - By file modification date
+  ;;   'name   - By filename
+  ;;   'status - By document status (analyzed, cited, etc.)
+  )
+#+end_src
+
+** Integration with Scientific Mapping
+Org File Manager works seamlessly with the scientific mapping system:
+
+#+begin_src emacs-lisp
+;; Add to scientific mapping keybindings
+(with-eval-after-load 'keybindings
+  (define-key scientific-mapping-mode-map (kbd "C-c s f") 'org-file-manager))
+#+end_src
+
+* Usage
+
+** Opening Org File Manager
+Open a directory with Org files:
+
+#+begin_src emacs-lisp
+M-x org-file-manager RET ~/research/
+#+end_src
+
+This creates a structured Org buffer showing your documents with titles, status, and metadata.
+
+** Navigation and Operations
+- *RET* :: Open the Org file at point
+- *o* :: Open file in other window
+- *v* :: Preview file contents
+- *g* :: Refresh file listing
+- *s* :: Change sort method
+- *f* :: Filter files by criteria
+- *c* :: Create new Org file
+- *d* :: Delete file at point
+- *r* :: Rename file at point
+- *q* :: Quit Org File Manager
+
+** Document Status Indicators
+Org File Manager shows visual status indicators:
+- 🧠 :: AI-analyzed documents
+- 📄 :: Published documents (with DOI)
+- 💡 :: Documents with concepts extracted
+- 📝 :: Draft documents
+
+** Sorting Options
+Change how documents are displayed:
+
+| Key | Sort Method | Description |
+|-----|-------------|-------------|
+| title | By Org title | Alphabetical by document title |
+| date | By modification date | Newest/oldest first |
+| name | By filename | Alphabetical by filename |
+| status | By document status | Analyzed, published, etc. |
+
+** Example Display
+
+#+begin_example
+* File Overview
+
+- Total files: 15
+- Analyzed: 8
+- Published: 3
+- Total words: 45,230
+
+* Files
+
+** Machine Learning in Science 🧠 [2450w] | DOI: 10.1000/ml-2024 | 2024-01-15
+   :PROPERTIES:
+   :FILE: machine-learning-in-science.org
+   :END:
+   Top headings:
+   - Introduction
+   - Methodology
+   - Results
+   - Discussion
+
+** Neural Networks Overview 📄 [1890w] | DOI: 10.1000/nn-2023 | 2023-11-22
+   :PROPERTIES:
+   :FILE: neural-networks-overview.org
+   :END:
+   Top headings:
+   - Background
+   - Architecture Types
+   - Applications
+   - Future Directions
+#+end_example
+
+** Workflow Integration
+Org File Manager integrates with the scientific mapping workflow:
+- Shows AI analysis status
+- Displays citation information
+- Indicates concept extraction status
+- Provides quick access to document properties
+- Supports research project organization
+
+* Commands
+
+** Entry Points
+- ~M-x org-file-manager~ :: Open Org File Manager for a directory.
+
+** File Operations
+- ~M-x org-file-manager-open-file~ :: Open the Org file at point.
+- ~M-x org-file-manager-open-file-other-window~ :: Open file in other window.
+- ~M-x org-file-manager-preview-file~ :: Preview file contents.
+- ~M-x org-file-manager-refresh~ :: Refresh file listing.
+- ~M-x org-file-manager-create-file~ :: Create new Org file.
+- ~M-x org-file-manager-delete-file~ :: Delete file at point.
+- ~M-x org-file-manager-rename-file~ :: Rename file at point.
+
+** View Options
+- ~M-x org-file-manager-sort~ :: Change sort method.
+- ~M-x org-file-manager-filter~ :: Filter files by criteria.
+
+** Scientific Integration
+- Integrates with AI analysis status
+- Shows citation and DOI information
+- Displays concept extraction status
+- Supports research project organization
+
+* Key Bindings
+
+** Default Key Bindings
+Inside ~org-file-manager-mode~:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| RET | Open file | Open the Org file at point |
+| o | Open in other window | Open file in split window |
+| v | Preview file | Show file contents preview |
+| g | Refresh | Reload file listing |
+| s | Sort | Change sort method |
+| f | Filter | Filter files by criteria |
+| c | Create | Create new Org file |
+| d | Delete | Delete file at point |
+| r | Rename | Rename file at point |
+| q | Quit | Close Org File Manager |
+
+** Integration with Scientific Mapping
+Org File Manager integrates with the broader scientific mapping system:
+
+#+begin_src emacs-lisp
+;; Add to scientific mapping keybindings
+(with-eval-after-load 'keybindings
+  (define-key scientific-mapping-mode-map (kbd "C-c s f") 'org-file-manager))
+#+end_src
+
+This adds ~C-c s f~ as a shortcut to open Org File Manager from scientific mapping mode.
+
+
+* Configuration Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ~org-file-manager-directory~ | ~nil~ | Default directory to manage |
+| ~org-file-manager-show-properties~ | ~t~ | Show Org properties in listings |
+| ~org-file-manager-show-headings~ | ~t~ | Show top-level headings |
+| ~org-file-manager-max-preview-lines~ | ~20~ | Lines to show in preview |
+| ~org-file-manager-sort-method~ | ~'title~ | Default sorting method |
+
+* Features
+
+** Org-Aware Display
+- [X] Document titles instead of filenames
+- [X] Status indicators (analyzed, published, etc.)
+- [X] Word counts and statistics
+- [X] Properties and metadata display
+- [X] Top-level heading previews
+
+** Scientific Integration
+- [X] AI analysis status indicators
+- [X] Citation and DOI information
+- [X] Concept extraction status
+- [X] Research project organization
+- [X] Workflow integration
+
+** File Management
+- [X] Create, rename, delete Org files
+- [X] Preview file contents
+- [X] Sort by title, date, status
+- [X] Filter by criteria
+- [X] Quick navigation
+
+** User Experience
+- [X] Clean, structured Org display
+- [X] Visual status indicators
+- [X] Keyboard-only navigation
+- [X] Integration with scientific mapping
+
+* Integration with Scientific Mapping
+
+Org File Manager is designed to work seamlessly with the scientific mapping system:
+
+1. **Status Indicators**: Shows AI analysis, citation, and concept status
+2. **Quick Actions**: Direct integration with research workflows
+3. **Unified Interface**: Consistent with scientific mapping key bindings
+4. **Data Flow**: Automatic updates from analysis and processing tools
+
+* Usage Examples
+
+** Daily Research Workflow
+1. Open Org File Manager: ~C-c s f~
+2. See document status at a glance
+3. Identify unanalyzed documents (📝)
+4. Preview content before opening
+5. Sort by status to prioritize work
+
+** Project Organization
+1. Sort by title for alphabetical overview
+2. Filter by status to find specific document types
+3. Use previews to understand document structure
+4. Quick navigation between related documents
+
+* Future Enhancements
+
+- Bulk operations on multiple documents
+- Advanced filtering and search
+- Custom status indicators
+- Integration with version control
+- Collaborative features

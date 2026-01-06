@@ -40,6 +40,7 @@
     (define-key map (kbd "C-c s b") 'scientific-mapping-backup)
     (define-key map (kbd "C-c s t") 'timeline-engine-open)
     (define-key map (kbd "C-c s e") 'concept-tree-toggle-section)
+    (define-key map (kbd "C-c s f") 'org-file-manager)
 
     ;; Org agenda integration
     (define-key map (kbd "C-c s a") 'scientific-mapping-agenda)
