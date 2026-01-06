@@ -67,11 +67,11 @@
 - *Researcher Matching*: Find collaborators with complementary expertise
 - *Grant Opportunities*: Match research to funding opportunities
 
-*** Mobile & Web Access
-- *Web Interface*: Browser-based access to the knowledge base
-- *Mobile App*: iOS/Android apps for on-the-go research
-- *API Endpoints*: REST API for external integrations
-- *Progressive Web App*: Offline-capable web interface
+*** Emacs Mobile Integration
+- *Termux Support*: Ensure compatibility with Android Emacs (Termux)
+- *Touch Optimization*: Touch-friendly interfaces for mobile Emacs
+- *Offline Synchronization*: Sync capabilities for mobile research workflows
+- *Emacs Anywhere*: Seamless experience across desktop and mobile Emacs
 
 ** Phase 4: Enterprise & Scale (Q4 2026)
 
@@ -113,36 +113,38 @@
 - *Video Tutorials*: Screencasts demonstrating key features
 - *Community Building*: Forums, Discord, and contribution guidelines
 
-** AI Implementation Strategy
+** AI Implementation Strategy (Emacs-Native)
 
 *** Phase 1 AI Features (Immediate Priority)
 1. *Document Summarization*
-   - Integrate with Ollama for local LLM processing
-   - Generate abstracts from full papers
-   - Extract key findings and methodologies
+   - Integrate with Ollama for local LLM processing within Emacs
+   - Generate abstracts from full papers using Emacs buffers
+   - Extract key findings and methodologies with Org mode integration
 
 2. *Question Answering System*
-   - Vector embeddings for semantic search
-   - RAG (Retrieval-Augmented Generation) implementation
-   - Context-aware answers from document collections
+   - Vector embeddings for semantic search in Emacs
+   - RAG (Retrieval-Augmented Generation) with Emacs completion
+   - Context-aware answers displayed in dedicated Emacs buffers
 
 3. *Smart Concept Extraction*
-   - AI-powered keyword identification
-   - Automatic concept relationship discovery
-   - Ontology building from document collections
+   - AI-powered keyword identification in Org documents
+   - Automatic concept relationship discovery with Org properties
+   - Ontology building integrated with existing concept mapping
 
-*** AI Architecture Decisions
-- *Local vs Cloud*: Start with local Ollama for privacy, add cloud options later
-- *Model Selection*: Use general-purpose models initially, domain-specific fine-tuning later
-- *Data Privacy*: Ensure all processing can be done locally
+*** Emacs AI Architecture Decisions
+- *Emacs Integration First*: All AI features work through Emacs interfaces
+- *Local Processing Priority*: Ollama integration for privacy and offline capability
+- *Org Mode Integration*: AI results formatted as Org content
+- *Buffer-Based UI*: AI interactions through dedicated Emacs buffers
+- *Completion Integration*: AI suggestions via company-mode or similar
 - *Fallback Options*: Graceful degradation when AI services unavailable
 
-*** AI Integration Points
-- *Document Ingestion*: Auto-summarize on import
-- *Search Interface*: Natural language queries
-- *Writing Workflow*: AI-assisted content generation
-- *Concept Mapping*: Automated relationship discovery
-- *Literature Review*: Automated synthesis and gap analysis
+*** Emacs AI Integration Points
+- *Document Ingestion*: Auto-summarize on import with Org property storage
+- *Search Interface*: Natural language queries via Emacs completion
+- *Writing Workflow*: AI-assisted content generation in Org mode
+- *Concept Mapping*: Automated relationship discovery with Org links
+- *Literature Review*: Automated synthesis in Org format with citations
 
 ** Success Metrics
 
