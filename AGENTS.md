@@ -175,6 +175,21 @@
 - **Managers**: Zotero API, BibTeX import
 - **Features**: Collection sync, item import, metadata preservation, batch processing
 
+## UX Enhancements & Tutorials
+
+**Frictionless User Experience**: Comprehensive onboarding and guidance
+- **Why**: Transform complex research platform into accessible, learnable system
+- **Benefits**: Zero-friction onboarding, contextual help, progressive learning, professional polish
+- **Features**: Welcome screen, interactive tutorials, smart notifications, visual themes, error recovery
+
+**Interactive Tutorial System**: 6 comprehensive guided tutorials
+- **Getting Started**: Basic setup and first document creation
+- **Document Management**: File organization and metadata handling
+- **AI Integration**: AI-powered analysis and research assistance
+- **3D Visualization**: Interactive knowledge graph navigation
+- **Research Workflows**: Complete project management and automation
+- **Advanced Features**: API integrations and customization
+
 ## Git Workflow
 
 **Always commit and push changes**: After making any modifications to the codebase
