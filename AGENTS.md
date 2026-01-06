@@ -10,6 +10,20 @@ This repository uses Org mode for all documentation. Please refer to [AGENTS.org
 
 The AGENTS.org file contains the authoritative guidelines for working with this codebase.
 
+## Nushell Environment
+
+**Shell Syntax**: This project uses Nushell - adjust commands accordingly
+- **Sequential commands**: Use `;` instead of `&&` (e.g., `cd dir; make test`)
+- **Error handling**: Use `try` instead of `||` (e.g., `try { command }`)
+- **Piping**: `|` works the same as bash
+- **Directory navigation**: `cd` works the same
+
+**Nushell Integration Ideas**:
+- **Data Processing**: Use Nushell pipelines to process citation databases and generate reports
+- **Build Automation**: Create Nushell scripts for automated testing and deployment
+- **Research Workflows**: Automate literature review processes with Nushell data manipulation
+- **Export/Import**: Use Nushell to interface with external data sources and APIs
+
 ## Testing Issues & Fixes
 
 **Missing Dependencies**: Tests fail due to missing packages (emacsql, simple-httpd, etc.)

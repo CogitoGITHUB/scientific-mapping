@@ -6,6 +6,31 @@
 - *Emacs Native*: Prefer Emacs built-in formats and tools over external alternatives
 - *Consistency*: All documentation follows Org mode conventions
 
+** Nushell Environment
+- *Shell Syntax*: This project uses Nushell - adjust commands accordingly
+  - Sequential commands: Use =;= instead of =&&= (e.g., =cd dir; make test=)
+  - Error handling: Use =try= instead of =||= (e.g., =try { command }=)
+  - Piping: =|= works the same as bash
+  - Directory navigation: =cd= works the same
+
+- *Nushell Integration Ideas*:
+  - Data Processing: Use Nushell pipelines to process citation databases and generate reports
+  - Build Automation: Create Nushell scripts for automated testing and deployment
+  - Research Workflows: Automate literature review processes with Nushell data manipulation
+  - Export/Import: Use Nushell to interface with external data sources and APIs
+
+- *Available Nushell Scripts*:
+  - =research-stats.nu=: Generate comprehensive research statistics and analytics
+  - =citation-export.nu=: Export citation data in CSV, JSON, or BibTeX formats
+  - =literature-review.nu=: Automate literature review generation with topic analysis
+  - See =nushell-integration.org= for complete documentation and examples
+
+- *Integration Benefits*:
+  - Type-safe data processing prevents research data corruption
+  - Pipeline-based workflows for seamless research automation
+  - Cross-platform compatibility with scientific mapping system
+  - Structured error handling for robust research data operations
+
 ** Build/Lint/Test Commands
 
 *** Testing

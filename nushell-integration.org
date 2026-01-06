@@ -1,0 +1,160 @@
+# Scientific Mapping - Nushell Integration Examples
+
+## Overview
+This directory contains Nushell scripts that integrate with the scientific mapping system for enhanced research workflows.
+
+## Available Scripts
+
+### research-stats.nu
+Generate comprehensive research statistics from the scientific mapping database.
+
+```nushell
+# Generate research statistics
+./research-stats.nu
+```
+
+Features:
+- Citation network analysis
+- Paper publication trends
+- Concept relationship metrics
+- Research productivity reports
+
+### citation-export.nu
+Export citation data in various formats for external analysis.
+
+```nushell
+# Export citations to CSV
+./citation-export.nu --format csv --output citations.csv
+
+# Export to JSON for web visualization
+./citation-export.nu --format json --output citations.json
+```
+
+### literature-review.nu
+Automate literature review processes using citation database.
+
+```nushell
+# Generate literature review for topic
+./literature-review.nu "machine learning" --max-papers 50
+
+# Create review with specific date range
+./literature-review.nu "neural networks" --since 2020-01-01 --until 2024-12-31
+```
+
+### build-deploy.nu
+Complete build and deployment pipeline using Nushell.
+
+```nushell
+# Full build and test cycle
+./build-deploy.nu --test --deploy
+
+# Quick build without tests
+./build-deploy.nu --quick
+```
+
+### data-sync.nu
+Synchronize data between different research databases and formats.
+
+```nushell
+# Sync with Zotero database
+./data-sync.nu --source zotero --target scientific-mapping
+
+# Sync with Mendeley
+./data-sync.nu --source mendeley --target scientific-mapping
+```
+
+## Integration Points
+
+### 1. Data Processing Pipelines
+```nushell
+# Process citation data through multiple stages
+open citations.json |
+  where year > 2020 |
+  group-by author |
+  sort-by count |
+  reverse |
+  first 10
+```
+
+### 2. Automated Research Workflows
+```nushell
+# Weekly research summary
+./research-stats.nu |
+  ./generate-report.nu --format pdf --title "Weekly Research Summary"
+```
+
+### 3. API Integration
+```nushell
+# Fetch papers from arXiv API
+./arxiv-fetch.nu "quantum computing" --max 100 |
+  ./citation-import.nu --database scientific-mapping
+```
+
+### 4. Build System Integration
+```nushell
+# Run tests with detailed reporting
+./run-tests.nu |
+  ./parse-results.nu |
+  ./generate-coverage.nu
+```
+
+## Usage Examples
+
+### Daily Research Workflow
+```nushell
+# Morning: Check new papers
+./arxiv-fetch.nu --topic "my-research-area" --days 1 |
+  ./email-notifications.nu
+
+# Afternoon: Process and analyze
+./citation-import.nu --file new-papers.json
+./research-stats.nu --output daily-stats.json
+
+# Evening: Generate reports
+./generate-report.nu --input daily-stats.json --template weekly-review
+```
+
+### Conference Preparation
+```nushell
+# Analyze submission trends
+./citation-export.nu --format csv |
+  ./analyze-trends.nu --field venue --timeframe "5 years" |
+  ./visualize.nu --type timeline --output submission-trends.html
+```
+
+### Collaboration Management
+```nushell
+# Track co-authorship networks
+./citation-export.nu --format json |
+  ./build-collaboration-network.nu |
+  ./analyze-centrality.nu |
+  ./export-graph.nu --format gephi
+```
+
+## Benefits of Nushell Integration
+
+1. **Type Safety**: Nushell's type system prevents data processing errors
+2. **Pipeline Processing**: Natural data flow through research workflows
+3. **Cross-Platform**: Works on all platforms where scientific mapping runs
+4. **Extensible**: Easy to add new research data processing functions
+5. **Interactive**: Can be used both in scripts and interactively
+6. **Data Format Agnostic**: Handles JSON, CSV, XML, and custom formats
+7. **Error Handling**: Structured error handling for research data processing
+8. **Performance**: Efficient data processing for large citation databases
+
+## Getting Started
+
+1. Ensure Nushell is installed on your system
+2. Copy scripts to your scientific mapping directory
+3. Make scripts executable: `chmod +x *.nu`
+4. Run `./research-stats.nu` to test the integration
+5. Customize scripts for your specific research workflows
+
+## Contributing
+
+When adding new Nushell scripts:
+1. Follow the existing naming conventions
+2. Include comprehensive help text with `--help`
+3. Add error handling for edge cases
+4. Document input/output formats
+5. Test with sample data before committing
