@@ -1,0 +1,445 @@
+* Scientific Knowledge Mapping System
+
+#+TITLE: Scientific Knowledge Mapping System
+#+AUTHOR: Scientific Tools Development Team
+#+DATE: 2025
+#+STARTUP: content
+
+** Overview
+
+The Scientific Knowledge Mapping System is a comprehensive Emacs-based platform for scientific research, literature management, and knowledge mapping. It integrates document creation, citation tracking, concept relationships, and 3D visualization to provide researchers with a complete academic workflow.
+
+The system is designed for academics, scientists, and researchers who need to:
+- Manage scientific literature efficiently
+- Track citations and bibliographic information
+- Build concept maps of theoretical frameworks
+- Visualize research networks and relationships
+- Extract insights from large literature collections
+- Follow academic writing standards and workflows
+
+** Features
+
+*** Academic Document Management
+- DOI-based document identification and naming
+- Multi-format support (Org, Markdown, plain text)
+- Automatic metadata extraction and indexing
+- Reading status and priority tracking
+- PDF attachment handling
+
+*** Citation Database
+- SQLite backend for efficient citation storage
+- Author, journal, and concept indexing
+- Citation network analysis
+- Impact factor and citation count tracking
+- Real-time synchronization
+
+*** Concept Relationships
+- Multiple relationship types (parent-child, sibling, friend, evidence, method, evolution)
+- Visual concept mapping
+- Bidirectional relationships
+- Hierarchical knowledge organization
+- Cross-disciplinary connections
+
+*** 3D Visualization
+- Web-based interactive graphs
+- Force-directed layouts
+- Citation, concept, and author networks
+- Real-time synchronization with Emacs
+- Multiple visualization modes
+
+*** Academic Writing Standards
+- Template library for research articles, reviews, conference papers, theses
+- Citation formatting (APA, MLA, Chicago, IEEE, Vancouver)
+- Word count enforcement based on journal requirements
+- Page layout with academic standards (Times New Roman, 1.5 spacing)
+- Chronological writing process workflow
+
+*** Research Timeline
+- Visual timeline of research chronology
+- Publication date tracking
+- Reading progress visualization
+- Filter by research domains and tags
+
+*** YASnippet Templates
+- Academic document templates
+- Automatic metadata insertion
+- Citation style support
+- Template variable system
+
+** Installation
+
+*** Prerequisites
+- Emacs 28.1 or later
+- SQLite3
+- Node.js (for 3D visualizer)
+- YASnippet (included)
+
+*** Installation Steps
+
+1. Clone the repository:
+   #+begin_src bash
+   git clone https://github.com/scientific-mapping/scientific-mapping.git
+   cd scientific-mapping
+   #+end_src
+
+2. Add to your Emacs configuration (~/.emacs or init.el):
+   #+begin_src elisp
+   (add-to-list 'load-path "~/scientific-mapping")
+   (require 'scientific-mapping)
+   (scientific-mapping-mode 1)
+   #+end_src
+
+3. Install Node.js dependencies for the visualizer:
+   #+begin_src bash
+   cd scientific-visualizer
+   npm install
+   npm run build
+   #+end_src
+
+4. Configure document directory:
+   #+begin_src elisp
+   (setq scientific-document-directory "~/scientific-documents/")
+   #+end_src
+
+** Quick Start
+
+1. Start the system:
+   #+begin_src elisp
+   M-x scientific-mapping-start
+   #+end_src
+
+2. Create your first scientific document:
+   #+begin_src elisp
+   M-x scientific-document-create
+   #+end_src
+   - Enter title, DOI, keywords
+   - Document is automatically indexed
+
+3. Import a paper from DOI:
+   #+begin_src elisp
+   M-x scientific-mapping-import-paper
+   #+end_src
+
+4. Create a concept map:
+   #+begin_src elisp
+   M-x scientific-mapping-create-concept-map
+   #+end_src
+
+5. Open the 3D visualizer:
+   #+begin_src elisp
+   M-x scientific-visualizer-open
+   #+end_src
+
+** Components
+
+*** scientific-document-engine
+*Purpose*: Scientific paper and note management with DOI-based identification
+
+*Key Functions*:
+- =scientific-document-create=: Create new scientific documents
+- =scientific-document-search=: Search documents
+- =scientific-document-set-reading-status=: Track reading progress
+- =scientific-document-add-concept=: Extract and link concepts
+
+*** citation-database
+*Purpose*: Bibliographic SQLite backend for citation management
+
+*Key Functions*:
+- =citation-database-search-papers=: Search papers
+- =citation-database-add-citation=: Add citation relationships
+- =citation-database-stats=: View database statistics
+- =citation-database-sync=: Synchronize with files
+
+*** scientific-visualizer
+*Purpose*: 3D web-based visualization of knowledge networks
+
+*Key Functions*:
+- =scientific-visualizer-open=: Open visualization interface
+- =scientific-visualizer-set-mode=: Change visualization mode
+- =scientific-visualizer-paper-zoom=: Focus on specific paper
+
+*** concept-relationships
+*Purpose*: Concept mapping and theoretical relationships
+
+*Key Functions*:
+- =concept-relationships-create-entry=: Create new concept
+- =concept-relationships-visualize=: View concept relationships
+- =concept-relationships-add-child=: Add hierarchical relationships
+- =concept-relationships-add-friendship=: Add cross-disciplinary links
+
+*** scientific-research-timeline
+*Purpose*: Visual timeline for research chronology
+
+*Key Functions*:
+- =scientific-research-timeline-open=: Open timeline view
+- =scientific-research-timeline-add-date=: Add timeline entries
+
+*** scientific-yasnippet
+*Purpose*: Academic document templates
+
+*Key Functions*:
+- =yas-new-snippet=: Create documents from templates
+- Templates: research-article, literature-review, conference-paper, thesis-master
+
+** Usage
+
+*** Document Creation Workflow
+
+1. Create a new document:
+   #+begin_src elisp
+   M-x scientific-document-create
+   #+end_src
+
+2. Fill in metadata (title, DOI, keywords, etc.)
+
+3. Document is automatically:
+   - Saved with DOI-based filename
+   - Indexed in citation database
+   - Ready for concept linking
+
+*** Citation Management
+
+1. Add citations while writing:
+   #+begin_src elisp
+   M-x scientific-document-create-link
+   #+end_src
+
+2. Citations are automatically tracked in database
+
+3. View citation networks in visualizer
+
+*** Concept Mapping
+
+1. Create concept entries:
+   #+begin_src elisp
+   M-x concept-relationships-create-entry
+   #+end_src
+
+2. Add relationships:
+   - =M-x concept-relationships-add-child= (hierarchical)
+   - =M-x concept-relationships-add-friendship= (cross-disciplinary)
+   - =M-x concept-relationships-add-evidence= (empirical links)
+
+3. Visualize relationships:
+   #+begin_src elisp
+   M-x concept-relationships-visualize
+   #+end_src
+
+*** Research Timeline
+
+1. Open timeline:
+   #+begin_src elisp
+   M-x scientific-research-timeline-open
+   #+end_src
+
+2. View research chronology and progress
+
+3. Add custom milestones
+
+*** 3D Visualization
+
+1. Start visualizer:
+   #+begin_src elisp
+   M-x scientific-visualizer-open
+   #+end_src
+
+2. Switch between modes:
+   - Citation network
+   - Concept map
+   - Author collaboration
+   - Journal landscape
+
+3. Interactive exploration with mouse/keyboard
+
+** Key Bindings
+
+When =scientific-mapping-mode= is active:
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| =C-c s s= | =scientific-mapping-start= | Start the system |
+| =C-c s S= | =scientific-mapping-stop= | Stop the system |
+| =C-c s i= | =scientific-mapping-import-paper= | Import paper from DOI |
+| =C-c s c= | =concept-relationships-create-entry= | Create concept |
+| =C-c s v= | =scientific-visualizer-open= | Open visualizer |
+| =C-c s n= | =scientific-visualizer-set-mode= | Set visualization mode |
+| =C-c s r= | =scientific-mapping-literature-review= | Generate literature review |
+| =C-c s b= | =scientific-mapping-backup= | Create backup |
+| =C-c s t= | =scientific-research-timeline-open= | Open research timeline |
+| =C-c s ?= | =scientific-mapping-help= | Show help |
+
+** Academic Writing Workflows
+
+*** Research Article Workflow
+
+1. Use template: =M-x yas-expand-snippet= → research-article
+2. Fill IMRaD structure (Introduction, Methods, Results, Discussion)
+3. Add citations and concepts
+4. Track in research timeline
+5. Submit to journal
+
+*** Literature Review Workflow
+
+1. Use template: =M-x yas-expand-snippet= → literature-review
+2. Define search strategy and inclusion criteria
+3. Add papers to database
+4. Build concept map of themes
+5. Synthesize findings
+6. Visualize in 3D
+
+*** Conference Paper Workflow
+
+1. Use template: =M-x yas-expand-snippet= → conference-paper
+2. Focus on methodology and results
+3. Limited references (typically <20)
+4. Prepare presentation
+
+*** Thesis Writing Workflow
+
+1. Use template: =M-x yas-expand-snippet= → thesis-master
+2. Follow 6-chapter structure
+3. Track progress in timeline
+4. Build comprehensive citation database
+5. Create concept maps for each chapter
+
+** Configuration
+
+*** Basic Configuration
+
+#+begin_src elisp
+;; Load the system
+(require 'scientific-mapping)
+(scientific-mapping-mode 1)
+
+;; Configure document directory
+(setq scientific-document-directory "~/scientific-documents/")
+
+;; Enable autosync
+(setq citation-database-autosync t)
+
+;; Configure visualizer
+(setq scientific-visualizer-visualization-mode 'citation)
+(setq scientific-visualizer-follow t)
+#+end_src
+
+*** Advanced Configuration
+
+#+begin_src elisp
+;; Custom document prompts
+(setq scientific-document-prompts '(title doi keywords abstract))
+
+;; Citation database location
+(setq citation-database-location "~/.emacs.d/citation-db.sqlite")
+
+;; Concept relationships path
+(setq concept-relationships-path "~/concepts/")
+
+;; Research timeline settings
+(setq scientific-research-timeline-follow-mode-on-start t)
+
+;; YASnippet integration
+(yas-global-mode 1)
+(setq yas-snippet-dirs '("~/scientific-mapping/scientific-yasnippet/snippets"))
+#+end_src
+
+** Academic Standards Compliance
+
+The system enforces academic standards:
+
+*** Citation Styles
+- APA (American Psychological Association)
+- MLA (Modern Language Association)
+- Chicago/Turabian
+- IEEE
+- Vancouver
+
+*** Document Types
+- Research Articles (5,000-8,000 words)
+- Review Articles (6,000-12,000 words)
+- Conference Papers (4-12 pages)
+- Theses/Dissertations (40,000-100,000+ words)
+
+*** Writing Standards
+- IMRaD structure for research articles
+- Word count enforcement
+- Academic formatting (Times New Roman, double-spaced)
+- Reference validation
+
+** Troubleshooting
+
+*** Common Issues
+
+1. *Visualizer not loading*: Ensure Node.js dependencies are installed
+   #+begin_src bash
+   cd scientific-visualizer
+   npm install
+   npm run build
+   #+end_src
+
+2. *Database errors*: Check SQLite installation and permissions
+
+3. *Template not expanding*: Ensure YASnippet is loaded
+   #+begin_src elisp
+   (yas-global-mode 1)
+   #+end_src
+
+4. *Documents not syncing*: Run manual sync
+   #+begin_src elisp
+   M-x citation-database-sync
+   #+end_src
+
+*** Getting Help
+
+- Check system status: =M-x scientific-mapping-status=
+- View logs in =*Messages*= buffer
+- Report issues on GitHub
+
+** Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+*** Development Setup
+
+1. Clone and setup:
+   #+begin_src bash
+   git clone https://github.com/scientific-mapping/scientific-mapping.git
+   cd scientific-mapping
+   #+end_src
+
+2. Install development dependencies
+
+3. Run tests:
+   #+begin_src elisp
+   M-x ert-run-tests-interactively
+   #+end_src
+
+*** Code Style
+
+- Follow Emacs Lisp conventions
+- Use lexical binding
+- Add docstrings to functions
+- Test your changes
+
+** License
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+See [[https://www.gnu.org/licenses/][GNU General Public License]] for details.
+
+** Acknowledgments
+
+This system builds upon and integrates several excellent Emacs packages:
+
+- Org mode for document management
+- YASnippet for templates
+- EmacSQL for database operations
+- Simple-HTTPD for web serving
+- WebSocket for real-time communication
+
+Special thanks to the Emacs and academic communities for their contributions and inspiration.

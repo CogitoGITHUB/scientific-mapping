@@ -1,0 +1,565 @@
+# Academic Scientific Documentation Types
+
+A comprehensive guide to types of academic and scientific documents, their purposes, structures, and appropriate use cases.
+
+## Primary Document Types
+
+### 1. Research Articles (Journal Papers)
+
+**Purpose**: Report original research findings to the scientific community
+
+**Characteristics**:
+- Peer-reviewed publication
+- 5,000-8,000 words (varies by journal)
+- Structured abstract (150-250 words)
+- IMRaD structure (Introduction, Methods, Results, and Discussion)
+- Includes figures, tables, and references
+
+**Typical Structure**:
+```
+Title
+Authors and Affiliations
+Abstract
+Keywords
+Introduction (Background, Problem Statement, Objectives)
+Literature Review (Brief, integrated into introduction)
+Methods (Participants, Materials, Procedures, Analysis)
+Results (Findings with statistical analysis)
+Discussion (Interpretation, Limitations, Implications)
+Conclusion
+Acknowledgments
+References
+Supplementary Materials
+```
+
+**Journals Examples**: Nature, Science, PNAS, IEEE Transactions, ACM
+
+**Use When**: You have conducted original research with novel findings
+
+---
+
+### 2. Review Articles
+
+**Purpose**: Synthesize and evaluate existing literature on a specific topic
+
+**Characteristics**:
+- Comprehensive literature coverage (50-200+ sources)
+- 6,000-12,000 words
+- No new original research
+- Critical analysis of current knowledge
+- Identifies gaps and future directions
+
+**Subtypes**:
+
+#### A. Narrative Reviews
+- Traditional literature review
+- Qualitative synthesis
+- Can be biased (author's perspective)
+- Easier for beginners
+
+#### B. Systematic Reviews
+- Predefined protocol
+- Comprehensive search strategy
+- Explicit inclusion/exclusion criteria
+- Transparent methodology
+- PRISMA reporting
+
+#### C. Meta-Analyses
+- Quantitative synthesis of studies
+- Statistical pooling of results
+- Forest plots and effect sizes
+- Highest level of evidence
+
+**Typical Structure**:
+```
+Title
+Abstract
+Introduction (Purpose, Rationale)
+Methods (Search strategy, Selection criteria, Data extraction)
+Results (Study characteristics, Synthesis findings)
+Discussion (Interpretation, Strengths/Limitations, Conclusions)
+References
+```
+
+**Use When**: Summarizing field knowledge, establishing research gaps
+
+---
+
+### 3. Conference Papers
+
+**Purpose**: Present preliminary or cutting-edge research at academic conferences
+
+**Characteristics**:
+- Shorter than journal papers (4-6 pages for IEEE, 8-12 pages for ACM)
+- Faster publication cycle (months vs years)
+- Focus on innovation and timeliness
+- Often work-in-progress
+- Opportunity for networking and feedback
+
+**Types**:
+- **Full papers**: Complete research presentation
+- **Short papers**: Preliminary or focused results
+- **Poster presentations**: Visual summary with discussion
+- **Work-in-progress**: Early-stage research
+
+**Typical Structure**:
+```
+Title
+Authors
+Abstract (100-200 words)
+Introduction
+Related Work
+Methodology
+Experiments/Results
+Discussion/Conclusion
+References (limited number)
+```
+
+**Use When**: Early career, rapid dissemination, conference attendance
+
+---
+
+### 4. Thesis and Dissertations
+
+**Purpose**: Demonstrate mastery of field and contribution to knowledge for degree completion
+
+**Characteristics**:
+
+#### A. Master's Thesis
+- 40-80 pages (varies by discipline)
+- Original research or comprehensive review
+- Single advisor committee
+- Focus on demonstrating research competence
+
+#### B. Doctoral Dissertation
+- 150-300+ pages
+- Novel, substantial contribution to field
+- Multiple committee members
+- Public defense required
+- Often multiple studies/chapters
+
+**Typical Structure**:
+```
+Title Page
+Abstract
+Acknowledgments
+Table of Contents
+List of Tables/Figures
+
+Chapter 1: Introduction
+- Background
+- Problem Statement
+- Research Questions/Hypotheses
+- Significance of Study
+
+Chapter 2: Literature Review
+- Comprehensive theoretical framework
+- Previous studies
+- Gap analysis
+
+Chapter 3: Methodology
+- Research Design
+- Participants/Subjects
+- Instruments
+- Procedures
+- Data Analysis Plan
+
+Chapter 4: Results
+- Descriptive Statistics
+- Inferential Statistics
+- Findings organized by research questions
+
+Chapter 5: Discussion
+- Interpretation of Results
+- Implications for Theory/Practice
+- Limitations
+- Future Research Directions
+
+Chapter 6: Conclusion
+- Summary of Findings
+- Conclusions
+- Theoretical/Practical Contributions
+
+References
+Appendices (Instruments, Raw Data, Additional Analyses)
+```
+
+**Use When**: Graduate degree requirements, establishing research identity
+
+---
+
+### 5. Technical Reports
+
+**Purpose**: Document research findings for funding agencies, internal stakeholders, or technical audiences
+
+**Characteristics**:
+- Detailed methodology
+- Less formal than journal articles
+- Comprehensive appendices
+- Often proprietary or restricted access
+- Focus on practical applications
+
+**Types**:
+- **Research project reports**: Grant deliverables
+- **Internal reports**: Company/organization documentation
+- **Progress reports**: Periodic updates to stakeholders
+- **Final reports**: Project completion summary
+
+**Typical Structure**:
+```
+Title
+Prepared for: (Agency/Organization)
+Author(s)
+Date
+Executive Summary (1-2 pages)
+Introduction
+Project Objectives
+Methodology
+Findings/Results
+Discussion/Recommendations
+Conclusions
+References
+Appendices (Detailed data, code, supplementary materials)
+```
+
+**Use When**: Grant reporting, industry research, internal documentation
+
+---
+
+### 6. Case Studies
+
+**Purpose**: In-depth analysis of single or multiple cases in real-world contexts
+
+**Characteristics**:
+- Qualitative or mixed-methods
+- Rich description and analysis
+- Focus on context and nuance
+- Limited generalizability
+- Often longitudinal
+
+**Types**:
+- **Single case**: Detailed analysis of one entity
+- **Multiple case**: Comparative analysis of 2-10 cases
+- **Longitudinal case**: Tracking changes over time
+
+**Typical Structure**:
+```
+Title
+Abstract
+Introduction (Background, Rationale)
+Case Selection Criteria
+Case Description
+  - Context/Background
+  - Data Collection Methods
+  - Analysis Methods
+Findings
+Discussion (Implications, Limitations)
+Conclusion
+References
+```
+
+**Use When**: Exploring complex phenomena, applied research, qualitative studies
+
+---
+
+### 7. Lab Reports
+
+**Purpose**: Document experiments and findings in laboratory courses or research
+
+**Characteristics**:
+- Systematic documentation of procedures
+- Focus on methodology and accuracy
+- Includes error analysis
+- Often includes calculations
+- Learning objective focus
+
+**Typical Structure**:
+```
+Title
+Course/Instructor
+Date
+Student Name
+Partners
+Objective
+Theory/Background
+Materials/Equipment
+Procedure
+Data/Results
+  - Raw Data
+  - Calculations
+  - Tables/Graphs
+Discussion
+  - Interpretation
+  - Sources of Error
+  - Comparison with Expected Results
+Conclusion
+References
+```
+
+**Use When**: Coursework, experimental documentation, method validation
+
+---
+
+### 8. White Papers
+
+**Purpose**: Authoritative report or guide that informs readers concisely about a complex issue
+
+**Characteristics**:
+- Industry or policy focus
+- Problem-solution structure
+- Advocates specific position
+- Market research and data
+- Persuasive tone
+
+**Typical Structure**:
+```
+Title
+Executive Summary
+Introduction (Problem Statement)
+Current Situation Analysis
+Proposed Solution
+Benefits and Advantages
+Implementation Considerations
+Case Studies/Examples
+Conclusion
+Call to Action
+References
+```
+
+**Use When**: Industry research, policy recommendations, marketing
+
+---
+
+### 9. Grant Proposals
+
+**Purpose**: Secure funding for research projects
+
+**Characteristics**:
+- Persuasive and compelling
+- Detailed budget justification
+- Significance and innovation emphasis
+- Feasibility demonstration
+- Team qualifications focus
+
+**Typical Structure**:
+```
+Title
+Project Summary (Abstract)
+Specific Aims
+Background and Significance
+Preliminary Studies/Progress
+Research Design and Methods
+Expected Outcomes/Impact
+Timeline/Project Period
+Budget Justification
+Personnel and Facilities
+References
+Appendices (CV, Letters of Support, Detailed Budget)
+```
+
+**Use When**: Applying for research funding
+
+---
+
+### 10. Book Chapters
+
+**Purpose**: Contribute to edited volumes or textbooks
+
+**Characteristics**:
+- Part of larger work
+- Educational or synthesizing focus
+- Often invited submissions
+- Self-contained but connected to book theme
+
+**Typical Structure**:
+```
+Chapter Title
+Author
+Abstract/Introduction
+Main Content (Sections, subsections)
+Conclusion/Summary
+Key Terms/Review Questions
+References
+Suggested Readings
+```
+
+**Use When**: Invited contributions, educational materials
+
+---
+
+## Citation Styles
+
+### Common Academic Citation Formats
+
+#### APA (American Psychological Association)
+**Fields**: Psychology, Education, Social Sciences
+**Format**: Author, A. A. (Year). Title. *Journal*, *Volume*(Issue), pages.
+**Example**: Smith, J. D. (2020). New methods in machine learning. *Journal of Artificial Intelligence*, *15*(2), 123-145.
+
+#### MLA (Modern Language Association)
+**Fields**: Humanities, Literature, Arts
+**Format**: Author. "Title." *Journal*, vol. no., year, pp. pages.
+**Example**: Johnson, M. "The Evolution of Neural Networks." *AI Quarterly*, vol. 28, no. 4, 2019, pp. 89-102.
+
+#### Chicago/Turabian
+**Fields**: History, Business, Fine Arts
+**Format**: Author. Title. *Journal* Volume (Year): Pages.
+**Example**: Williams, R. "Deep Learning Architectures." *Computer Science Journal* 42 (2021): 567-589.
+
+#### IEEE
+**Fields**: Engineering, Computer Science, Technology
+**Format**: [1] A. Author, "Title of paper," *Journal*, vol. no., pp. pages, Year.
+**Example**: [1] J. Brown and L. Lee, "Attention mechanisms in NLP," *IEEE Transactions*, vol. 33, no. 2, pp. 45-52, 2022.
+
+#### Vancouver
+**Fields**: Medicine, Biomedical Sciences
+**Format**: Author AA. Title. *Journal*. Year;Volume(Issue):Pages.
+**Example**: Chen AA. Novel approaches to protein folding. *Nature Biotechnology*. 2023;45(3):678-685.
+
+---
+
+## Document Sections by Type
+
+### Abstract Types
+
+**Structured Abstract**: Separate sections for Background, Methods, Results, Conclusions
+**Unstructured Abstract**: Single paragraph (150-250 words)
+**Graphical Abstract**: Visual summary of key findings
+
+### Introduction Elements
+
+- Hook/Attention-grabber
+- Background information
+- Problem statement
+- Gap in literature
+- Research questions/hypotheses
+- Significance/importance
+- Roadmap of paper
+
+### Literature Review Approaches
+
+- **Chronological**: Historical development
+- **Thematic**: Organized by themes/topics
+- **Methodological**: By research approaches
+- **Theoretical**: By theoretical frameworks
+
+### Methodology Components
+
+- Research design
+- Participants/Sample
+- Materials/Instruments
+- Procedures
+- Data collection
+- Data analysis
+- Ethical considerations
+
+### Results Organization
+
+- Descriptive statistics
+- Inferential statistics
+- Tables and figures
+- Textual description
+- Statistical significance
+
+### Discussion Elements
+
+- Interpretation of findings
+- Relationship to literature
+- Theoretical implications
+- Practical applications
+- Limitations
+- Future research
+
+---
+
+## Academic Writing Guidelines
+
+### Style Guidelines
+
+#### Clarity
+- Use active voice when appropriate
+- Avoid jargon or define terms
+- Use precise language
+- Eliminate wordiness
+
+#### Objectivity
+- Avoid bias and inflammatory language
+- Present balanced view of conflicting evidence
+- Use hedging language cautiously
+- Acknowledge limitations
+
+#### Structure
+- Logical flow of ideas
+- Clear topic sentences
+- Effective transitions
+- Paragraph unity
+
+### Common Mistakes to Avoid
+
+1. **Plagiarism**: Always cite sources properly
+2. **Vagueness**: Be specific and precise
+3. **Overstatement**: Don't overclaim significance
+4. **Poor organization**: Use clear structure
+5. **Grammar/spelling errors**: Proofread carefully
+6. **Inconsistent citation style**: Follow one style guide
+7. **Missing limitations**: Every study has them
+
+---
+
+## Digital Academic Documentation
+
+### Preprints
+- **arXiv**: Physics, Math, CS
+- **bioRxiv**: Biology
+- **medRxiv**: Medical Sciences
+- **SSRN**: Social Sciences
+
+### Data Sharing
+- **Figshare**: General research data
+- **Dryad**: Life sciences
+- **Zenodo**: Multi-disciplinary
+- **GitHub**: Code and software
+
+### Open Access
+- **Gold OA**: Journal-hosted (PLOS ONE, Nature Communications)
+- **Green OA**: Institutional repositories
+- **Hybrid OA**: Traditional + open access option
+
+---
+
+## Template Selection Guide
+
+| Document Type | Length | Review Process | Primary Audience | Time to Publication |
+|--------------|-------|-----------------|-------------------|----------------------|
+| Journal Article | 5-8K words | Peer review (2-6 months) | Academic community | 6-18 months |
+| Conference Paper | 4-12 pages | Peer review (1-2 months) | Conference attendees | 3-6 months |
+| Review Article | 6-12K words | Peer review (3-6 months) | Academic community | 9-12 months |
+| Master's Thesis | 40-80 pages | Committee review (1-2 semesters) | Committee | 1-2 years |
+| Doctoral Dissertation | 150-300+ pages | Committee review (2-4 years) | Academic community | 3-5 years |
+| Technical Report | Varies | Internal review | Stakeholders | 1-3 months |
+| Grant Proposal | Varies | Agency review (3-6 months) | Review panel | 6-12 months |
+
+---
+
+## Resources
+
+### Writing Guides
+- **Purdue OWL**: https://owl.purdue.edu/
+- **APA Style**: https://apastyle.apa.org/
+- **Chicago Manual**: https://www.chicagomanualofstyle.org/
+- **IEEE Reference Guide**: https://ieeeauthorcenter.ieee.org/
+
+### Research Tools
+- **Mendeley**: Reference management
+- **Zotero**: Citation management
+- **EndNote**: Bibliographic software
+- **LaTeX**: Document preparation
+
+### Ethics and Integrity
+- **Committee on Publication Ethics (COPE)**: https://publicationethics.org/
+- **Plagiarism detection**: Turnitin, iThenticate
+- **Open Science**: https://www.openscience.org/
+
+---
+
+This guide provides comprehensive coverage of academic documentation types, their structures, and appropriate usage scenarios. Use it as a reference when creating scientific documents within the Scientific Knowledge Mapping System.
