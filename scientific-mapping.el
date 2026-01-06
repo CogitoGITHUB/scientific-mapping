@@ -72,6 +72,9 @@
 ;; Load reference managers (optional)
 (require 'reference-managers nil t)
 
+;; Load centralized key bindings
+(require 'keybindings)
+
 (defconst scientific-mapping-version "1.0.0"
   "Version of the scientific-mapping system.")
 
@@ -659,47 +662,8 @@
 
 ;;;; Key Bindings
 
-(defvar scientific-mapping-prefix-map
-   (let ((map (make-sparse-keymap)))
-     (define-key map "s" 'scientific-mapping-start)
-     (define-key map "S" 'scientific-mapping-stop)
-     (define-key map "i" 'scientific-mapping-import-paper)
-     (define-key map "c" 'concept-relationships-create-entry)
-     (define-key map "v" 'viz-engine-open)
-     (define-key map "n" 'viz-engine-set-mode)
-     (define-key map "r" 'scientific-mapping-literature-review)
-     (define-key map "b" 'scientific-mapping-backup)
-     (define-key map "t" 'timeline-engine-open)
-     (define-key map "e" 'concept-tree-toggle-section)
-     ;; Agenda commands
-     (define-key map "a" 'scientific-mapping-agenda)
-     (define-key map "p" 'scientific-mapping-schedule-paper-review)
-     (define-key map "d" 'scientific-mapping-schedule-deadline)
-     (define-key map "P" 'scientific-mapping-create-research-project)
-     (define-key map "w" 'scientific-mapping-weekly-review)
-     (define-key map "A" 'scientific-mapping-agenda-from-document)
-     ;; Academic API commands
-     (define-key map "X" 'academic-apis-search-arxiv)
-     (define-key map "M" 'academic-apis-search-pubmed)
-     (define-key map "D" 'academic-apis-resolve-doi)
-     (define-key map "I" 'academic-apis-import-to-scientific-mapping)
-     ;; Reference manager commands
-     (define-key map "Z" 'reference-managers-zotero-get-collections)
-     (define-key map "B" 'reference-managers-import-bibtex)
-     (define-key map "R" 'reference-managers-import-to-scientific-mapping)
-     ;; AI integration commands
-     (define-key map "I" 'ai-integration-analyze-document)
-     (define-key map "q" 'ai-integration-ask-question)
-     (define-key map "h" 'ai-integration-research-assistance)
-     (define-key map "?" 'scientific-mapping-help)
-     map)
-   "Prefix keymap for scientific-mapping commands.")
-
-(defvar-keymap scientific-mapping-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c s") scientific-mapping-prefix-map)
-    map)
-  "Keymap for scientific-mapping-mode.")
+;; Key bindings are now centralized in keybindings.el
+;; See keybindings.el for all key binding definitions
 
 (provide 'scientific-mapping)
 

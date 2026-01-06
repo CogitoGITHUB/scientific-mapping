@@ -90,7 +90,7 @@
 - **Org Integration**: Components should work seamlessly with Org mode features
 
 ## Key Bindings Reference
-**See KEYBINDINGS.md for complete command reference and bindings**
+**See keybindings.el for complete command definitions and keybindings.el for reference**
 
 ## Testing Issues & Fixes
 
