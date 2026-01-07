@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Concept Network - 3D Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        #container { width: 100vw; height: 100vh; position: relative; }
+        #3d-graph { width: 100%; height: 100%; }
+        
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 300px;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0) 100%);
+            z-index: 100;
+        }
+        #ui h1 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #4a90e2;
+        }
+        #controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #mode-select {
+            padding: 8px 12px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        #status {
+            padding: 6px 12px;
+            background: #252540;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #888;
+        }
+        #layer-info {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background: rgba(30, 30, 50, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        #layer-info h3 {
+            color: #8b5cf6;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .layer-stat {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #aaa;
+        }
+        .layer-stat span {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 30, 50, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            width: 260px;
+        }
+        #legend h3 {
+            color: #f59e0b;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        .color-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        
+        #stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        .stat-box {
+            background: rgba(30, 30, 50, 0.9);
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        .stat-box span {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        
+        #help-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 30, 50, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            font-size: 11px;
+            color: #888;
+            max-width: 250px;
+        }
+        #help-panel h4 {
+            color: #f59e0b;
+            margin-bottom: 8px;
+        }
+        #help-panel kbd {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="3d-graph"></div>
+        
+        <div id="ui">
+            <h1>Scientific Concept Network</h1>
+            <div id="controls">
+                <select id="mode-select">
+                    <option value="concept">Concept Map</option>
+                    <option value="hierarchy">Hierarchy View</option>
+                    <option value="combined">Combined View</option>
+                </select>
+                <div id="status">Connected - Test Data Loaded</div>
+            </div>
+        </div>
+        
+        <div id="layer-info">
+            <h3>Dual-Layer System</h3>
+            <div class="layer-stat">Inner-Page Nodes: <span id="inner-nodes">0</span></div>
+            <div class="layer-stat">Inner-Page Edges: <span id="inner-edges">0</span></div>
+            <div class="layer-stat">Inter-Page Nodes: <span id="inter-nodes">0</span></div>
+            <div class="layer-stat">Inter-Page Edges: <span id="inter-edges">0</span></div>
+        </div>
+        
+        <div id="legend">
+            <h3>Relationship Types</h3>
+            <div class="legend-item"><div class="color-box" style="background: #3b82f6;"></div><span>Parent</span></div>
+            <div class="legend-item"><div class="color-box" style="background: #22c55e;"></div><span>Child</span></div>
+            <div class="legend-item"><div class="color-box" style="background: #f59e0b;"></div><span>Related</span></div>
+            <div class="legend-item"><div class="color-box" style="background: #8b5cf6;"></div><span>Friend</span></div>
+            <div class="legend-item"><div class="color-box" style="background: #ef4444;"></div><span>Evidence</span></div>
+            <div class="legend-item"><div class="color-box" style="background: #06b6d4;"></div><span>Method</span></div>
+        </div>
+        
+        <div id="stats">
+            <div class="stat-box">Nodes: <span id="node-count">0</span></div>
+            <div class="stat-box">Edges: <span id="edge-count">0</span></div>
+        </div>
+        
+        <div id="help-panel">
+            <h4>Keyboard Controls</h4>
+            <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move camera</div>
+            <div><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> Rotate</div>
+            <div><kbd>U</kbd><kbd>O</kbd> Zoom</div>
+            <div><kbd>R</kbd> Reset view</div>
+            <div><kbd>F</kbd> Fit to screen</div>
+            <div><kbd>H</kbd> Show help</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/3d-force-graph@1.70.17/dist/3d-force-graph.min.js"></script>
+    <script>
+        // Test data from concept-relationships system
+        const testData = {
+            nodes: [
+                // Artificial Intelligence file
+                { id: 'concept-ai-001', title: 'Artificial Intelligence', type: 'concept', group: 'ai', file: 'artificial-intelligence.org' },
+                { id: 'concept-cs-001', title: 'Computer Science', type: 'concept', group: 'cs', file: 'computer-science.org' },
+                { id: 'concept-ml-001', title: 'Machine Learning', type: 'concept', group: 'ml', file: 'artificial-intelligence.org' },
+                { id: 'concept-nlp-001', title: 'Natural Language Processing', type: 'concept', group: 'nlp', file: 'artificial-intelligence.org' },
+                { id: 'concept-algorithms-001', title: 'Algorithms', type: 'concept', group: 'algorithms', file: 'computer-science.org' },
+                { id: 'concept-supervised-001', title: 'Supervised Learning', type: 'concept', group: 'ml', file: 'machine-learning.org' },
+                { id: 'concept-deep-learning-001', title: 'Deep Learning', type: 'concept', group: 'ml', file: 'machine-learning.org' },
+                { id: 'concept-neural-networks-001', title: 'Neural Networks', type: 'concept', group: 'ml', file: 'machine-learning.org' },
+                { id: 'concept-cognitive-science-001', title: 'Cognitive Science', type: 'concept', group: 'cognitive', file: 'artificial-intelligence.org' },
+                { id: 'concept-mathematics-001', title: 'Mathematics', type: 'concept', group: 'math', file: 'computer-science.org' },
+                { id: 'concept-statistics-001', title: 'Statistics', type: 'concept', group: 'stats', file: 'machine-learning.org' },
+                { id: 'concept-biology-001', title: 'Biology', type: 'concept', group: 'bio', file: 'machine-learning.org' }
+            ],
+            links: [
+                // AI → ML, NLP (parents)
+                { source: 'concept-ml-001', target: 'concept-ai-001', type: 'parent' },
+                { source: 'concept-nlp-001', target: 'concept-ai-001', type: 'parent' },
+                // AI → CS (parent)
+                { source: 'concept-ai-001', target: 'concept-cs-001', type: 'parent' },
+                // CS → Algorithms, AI (children)
+                { source: 'concept-algorithms-001', target: 'concept-cs-001', type: 'parent' },
+                // ML → Supervised, Deep Learning, Neural Networks (children)
+                { source: 'concept-supervised-001', target: 'concept-ml-001', type: 'parent' },
+                { source: 'concept-deep-learning-001', target: 'concept-ml-001', type: 'parent' },
+                { source: 'concept-neural-networks-001', target: 'concept-ml-001', type: 'parent' },
+                // ML related to Statistics, Algorithms
+                { source: 'concept-ml-001', target: 'concept-statistics-001', type: 'related' },
+                { source: 'concept-ml-001', target: 'concept-algorithms-001', type: 'related' },
+                // Neural Networks related to Biology
+                { source: 'concept-neural-networks-001', target: 'concept-biology-001', type: 'related' },
+                // AI related to Cognitive Science (friend/cross-discipline)
+                { source: 'concept-ai-001', target: 'concept-cognitive-science-001', type: 'friend' },
+                // CS related to Mathematics
+                { source: 'concept-cs-001', target: 'concept-mathematics-001', type: 'related' },
+                // Deep Learning builds on Neural Networks
+                { source: 'concept-deep-learning-001', target: 'concept-neural-networks-001', type: 'builds-on' }
+            ]
+        };
+
+        class ConceptVisualizer {
+            constructor() {
+                this.graph = null;
+                this.currentMode = 'concept';
+                this.nodes = [];
+                this.links = [];
+                
+                this.init();
+                this.loadTestData();
+                this.setupControls();
+            }
+
+            init() {
+                this.graph = ForceGraph3D({
+                    controlType: false,
+                    rendererConfig: { antialias: true, alpha: true }
+                })(document.getElementById('3d-graph'))
+                    .nodeLabel(node => `${node.title}<br/><span style="color:#888">${node.group}</span>`)
+                    .nodeColor(node => this.getNodeColor(node))
+                    .nodeVal(node => Math.sqrt(node.weight || 1) * 3)
+                    .nodeResolution(16)
+                    .linkColor(link => this.getLinkColor(link))
+                    .linkWidth(link => Math.max(1, (link.weight || 1) * 1.5))
+                    .linkDirectionalArrowLength(4)
+                    .linkDirectionalArrowRelPos(1)
+                    .linkOpacity(0.8)
+                    .onNodeClick(node => {
+                        const distance = 50;
+                        const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+                        this.graph.cameraPosition(
+                            { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
+                            node, 2000
+                        );
+                        console.log('Selected:', node.title);
+                    });
+
+                this.setupKeyboardControls();
+            }
+
+            loadTestData() {
+                // Convert nodes
+                this.nodes = testData.nodes.map(node => ({
+                    id: node.id,
+                    title: node.title,
+                    type: node.type,
+                    group: node.group,
+                    file: node.file,
+                    weight: 1
+                }));
+
+                // Convert links
+                this.links = testData.links.map(link => ({
+                    source: link.source,
+                    target: link.target,
+                    type: link.type,
+                    weight: this.getLinkWeight(link.type)
+                }));
+
+                // Update graph
+                this.graph.graphData({ nodes: this.nodes, links: this.links });
+
+                // Update stats
+                document.getElementById('node-count').textContent = this.nodes.length;
+                document.getElementById('edge-count').textContent = this.links.length;
+                document.getElementById('inner-nodes').textContent = this.nodes.length;
+                document.getElementById('inner-edges').textContent = this.links.length;
+
+                // Auto-fit
+                setTimeout(() => this.graph.zoomToFit(1000, 50), 1000);
+            }
+
+            getNodeColor(node) {
+                const colors = {
+                    'ai': '#3b82f6',
+                    'cs': '#22c55e',
+                    'ml': '#f59e0b',
+                    'nlp': '#8b5cf6',
+                    'algorithms': '#ef4444',
+                    'cognitive': '#ec4899',
+                    'math': '#06b6d4',
+                    'stats': '#14b8a6',
+                    'bio': '#84cc16'
+                };
+                return colors[node.group] || '#64748b';
+            }
+
+            getLinkColor(link) {
+                const colors = {
+                    'parent': '#3b82f6',
+                    'child': '#22c55e',
+                    'related': '#f59e0b',
+                    'friend': '#8b5cf6',
+                    'evidence': '#ef4444',
+                    'method': '#06b6d4',
+                    'builds-on': '#ec4899'
+                };
+                return colors[link.type] || '#64748b';
+            }
+
+            getLinkWeight(type) {
+                const weights = {
+                    'parent': 2,
+                    'child': 2,
+                    'related': 1,
+                    'friend': 1,
+                    'evidence': 3,
+                    'method': 2,
+                    'builds-on': 2
+                };
+                return weights[type] || 1;
+            }
+
+            setupControls() {
+                document.getElementById('mode-select').addEventListener('change', (e) => {
+                    this.currentMode = e.target.value;
+                    this.updateVisualization();
+                });
+            }
+
+            updateVisualization() {
+                let nodes = this.nodes;
+                let links = this.links;
+
+                if (this.currentMode === 'hierarchy') {
+                    // Filter to show only parent-child relationships
+                    links = links.filter(l => l.type === 'parent' || l.type === 'child');
+                }
+
+                this.graph.graphData({ nodes, links });
+            }
+
+            setupKeyboardControls() {
+                const keys = { w: false, a: false, s: false, d: false, i: false, j: false, k: false, l: false, u: false, o: false };
+                let cameraPos = { x: 0, y: 0, z: 300 };
+                
+                const update = () => {
+                    const speed = 2;
+                    if (keys.w) cameraPos.z -= speed;
+                    if (keys.s) cameraPos.z += speed;
+                    if (keys.a) cameraPos.x -= speed;
+                    if (keys.d) cameraPos.x += speed;
+                    if (keys.q) cameraPos.y += speed;
+                    if (keys.e) cameraPos.y -= speed;
+                    
+                    const cam = this.graph.camera();
+                    if (keys.i) cam.rotation.x += 0.02;
+                    if (keys.k) cam.rotation.x -= 0.02;
+                    if (keys.j) cam.rotation.y += 0.02;
+                    if (keys.l) cam.rotation.y -= 0.02;
+                    if (keys.u) {
+                        cam.position.x *= 0.98;
+                        cam.position.y *= 0.98;
+                        cam.position.z *= 0.98;
+                    }
+                    if (keys.o) {
+                        cam.position.x *= 1.02;
+                        cam.position.y *= 1.02;
+                        cam.position.z *= 1.02;
+                    }
+                    
+                    requestAnimationFrame(update);
+                };
+                update();
+
+                document.addEventListener('keydown', e => {
+                    const k = e.key.toLowerCase();
+                    if (keys.hasOwnProperty(k)) keys[k] = true;
+                    if (k === 'r') this.graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 1000);
+                    if (k === 'f') this.graph.zoomToFit(1000, 50);
+                    if (k === 'h') this.showHelp();
+                });
+                document.addEventListener('keyup', e => {
+                    const k = e.key.toLowerCase();
+                    if (keys.hasOwnProperty(k)) keys[k] = false;
+                });
+            }
+
+            showHelp() {
+                alert(`Keyboard Controls:
+W/S/A/D - Move camera
+Q/E - Up/Down
+I/J/K/L - Rotate
+U/O - Zoom
+R - Reset view
+F - Fit to screen
+H - Show this help`);
+            }
+        }
+
+        // Initialize
+        new ConceptVisualizer();
+    </script>
+</body>
+</html>

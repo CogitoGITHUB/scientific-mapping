@@ -3,6 +3,7 @@
 **Run tests**: `make test` or `emacs -Q -batch -L . -l ert -l tests/scientific-mapping-tests.el -f ert-run-tests-batch-and-exit`
 **Run single test**: `emacs -Q -batch -L . -l ert -l tests/scientific-mapping-tests.el -f ert-run-tests-batch-and-exit -t test-name`
 **Build web**: `cd scientific-mapping/viz/viz-engine && npm run build`
+**Start viz server**: `node test-concepts/server.js` (then open http://localhost:8080/visualization.html)
 **Check syntax**: `emacs -Q -batch -f batch-byte-compile <file>.el`
 **Install deps**: `cask install`
 
@@ -30,6 +31,18 @@
 - `concept-relationships/inter-page.el`: Extracts cross-document relationships, citation networks, similarity calculation
 - `concept-relationships/DUAL-LAYER-DESIGN.md`: Complete design spec for inner-page/inter-page layers
 - Both modules provide `get-nodes` and `get-edges` functions for 3D visualization integration
+
+**Relationship Strength System** (COMPLETED):
+- `concept-relationships/strength-calculator.el`: Configurable weights for 20+ relationship types
+- `concept-relationships/semantic-zoom.el`: Layer switching (inner-page/inter-page/combined) with zoom thresholds
+- Inner-page and inter-page modules now annotate edges with strength, color, and category
+
+**Test Visualization** (COMPLETED):
+- `test-concepts/visualization.html`: 3D force-directed graph with 12 concept nodes and 13 edges
+- `test-concepts/server.js`: Node.js HTTP server for local development
+- `test-concepts/artificial-intelligence.org`: AI, ML, NLP concept hierarchy
+- `test-concepts/computer-science.org`: CS and Algorithms relationships
+- `test-concepts/machine-learning.org`: ML subfields with builds-on relationships
 
 **Known remaining issues**:
 - tutorial-system.el: Minimal placeholder, needs full implementation restored
