@@ -1,0 +1,29 @@
+* Machine Learning
+  :PROPERTIES:
+  :ID: concept-ml-001
+  :CONCEPT_PARENTS: concept-ai-001
+  :CONCEPT_RELATED: concept-statistics-001, concept-algorithms-001
+  :CONCEPT_EVIDENCE: deep-learning-survey-2024
+  :CREATED: [2025-01-07 Tue 11:00]
+  :END:
+
+** Supervised Learning
+:PROPERTIES:
+:ID: concept-supervised-001
+:CONCEPT_PARENTS: concept-ml-001
+:CONCEPT_METHODS: gradient-descent-001
+:END:
+
+** Deep Learning
+:PROPERTIES:
+:ID: concept-deep-learning-001
+:CONCEPT_PARENTS: concept-ml-001
+:CONCEPT_BUILDS_ON: concept-neural-networks-001
+:END:
+
+** Neural Networks
+:PROPERTIES:
+:ID: concept-neural-networks-001
+:CONCEPT_CHILDREN: concept-deep-learning-001
+:CONCEPT_RELATED: concept-biology-001
+:END:

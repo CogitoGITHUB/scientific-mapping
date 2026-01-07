@@ -123,7 +123,26 @@
                (length rels)
                (plist-get graph :file)))))
 
-;;; Visualization Helpers
+;;; Visualization Helpers with Strength
+
+(defun inner-page-annotate-edge (edge)
+  "Annotate EDGE with strength and visualization properties."
+  (require 'strength-calculator nil t)
+  (let* ((type (plist-get edge :type))
+         (source (plist-get edge :source))
+         (strength (if (featurep 'strength-calculator)
+                       (relationship-strength-calculate edge)
+                     0.5))
+         (strength-category (if (featurep 'strength-calculator)
+                                (relationship-strength-classify strength)
+                              'moderate))
+         (color (if (featurep 'strength-calculator)
+                    (relationship-strength-color strength)
+                  "#64748b")))
+    (plist-put edge :strength strength)
+    (plist-put edge :strength-category strength-category)
+    (plist-put edge :color color)
+    edge))
 
 (defun inner-page-get-nodes (&optional file)
   "Get nodes for 3D visualization from FILE."
@@ -131,17 +150,31 @@
             (list :id (plist-get h :id)
                   :label (plist-get h :title)
                   :type 'heading
-                  :level (plist-get h :level)))
+                  :level (plist-get h :level)
+                  :layer 'inner-page
+                  :group (plist-get h :file)))
           (plist-get (inner-page-build-graph file) :headings)))
 
 (defun inner-page-get-edges (&optional file)
   "Get edges for 3D visualization from FILE."
-  (mapcar (lambda (r)
-            (list :from (plist-get r :from)
-                  :to (plist-get r :to)
-                  :type (plist-get r :type)
-                  :source 'inner-page))
-          (plist-get (inner-page-build-graph file) :relationships)))
+  (let* ((graph (inner-page-build-graph file))
+         (rels (plist-get graph :relationships)))
+    (mapcar #'inner-page-annotate-edge
+            (mapcar (lambda (r)
+                      (list :from (plist-get r :from)
+                            :to (plist-get r :to)
+                            :type (plist-get r :type)
+                            :source 'inner-page
+                            :label (plist-get r :type)))
+                    rels))))
+
+(defun inner-page-get-stats (&optional file)
+  "Get statistics for inner-page relationships in FILE."
+  (let* ((graph (inner-page-build-graph file))
+         (edges (inner-page-get-edges file)))
+    (list :nodes (plist-get graph :node-count)
+          :edges (length edges)
+          :layer 'inner-page)))
 
 (provide 'inner-page)
 ;;; inner-page.el ends here

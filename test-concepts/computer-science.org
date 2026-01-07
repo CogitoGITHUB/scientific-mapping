@@ -1,0 +1,14 @@
+* Computer Science
+  :PROPERTIES:
+  :ID: concept-cs-001
+  :CONCEPT_CHILDREN: concept-ai-001, concept-algorithms-001
+  :CONCEPT_FRIENDS: concept-mathematics-001
+  :CREATED: [2025-01-07 Tue 09:00]
+  :END:
+
+** Algorithms
+:PROPERTIES:
+:ID: concept-algorithms-001
+:CONCEPT_PARENTS: concept-cs-001
+:CONCEPT_RELATED: concept-mathematics-001
+:END:

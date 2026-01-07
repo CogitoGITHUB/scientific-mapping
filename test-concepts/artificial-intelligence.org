@@ -1,0 +1,26 @@
+* Artificial Intelligence
+  :PROPERTIES:
+  :ID: concept-ai-001
+  :CONCEPT_PARENTS: concept-cs-001
+  :CONCEPT_CHILDREN: concept-ml-001, concept-nlp-001
+  :CONCEPT_FRIENDS: concept-cognitive-science-001
+  :CREATED: [2025-01-07 Tue 10:00]
+  :END:
+
+** Definition
+AI is the simulation of human intelligence processes by machines.
+
+** Subfields
+*** Machine Learning
+:PROPERTIES:
+:ID: concept-ml-001
+:CONCEPT_PARENTS: concept-ai-001
+:CONCEPT_RELATED: concept-statistics-001
+:END:
+
+*** Natural Language Processing
+:PROPERTIES:
+:ID: concept-nlp-001
+:CONCEPT_PARENTS: concept-ai-001
+:CONCEPT_RELATED: concept-linguistics-001
+:END:

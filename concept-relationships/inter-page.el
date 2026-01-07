@@ -26,6 +26,12 @@
   :group 'inter-page-relationships
   :type 'directory)
 
+(defcustom inter-page-concept-directory
+  (expand-file-name "test-concepts/" user-emacs-directory)
+  "Directory containing concept org files."
+  :group 'inter-page-relationships
+  :type 'directory)
+
 (defcustom inter-page-relationship-types
   '(("cites" "This document cites another")
     ("cited-by" "Document is cited by another")
@@ -43,7 +49,7 @@
 
 (defun inter-page-index-documents (&optional directory)
   "Index all org documents in DIRECTORY."
-  (let* ((dir (or directory inter-page-directory))
+  (let* ((dir (or directory inter-page-concept-directory))
          (files (and (file-directory-p dir)
                      (directory-files dir t "\\.org$"))))
     (mapcar #'inter-page-extract-document-metadata files)))
@@ -53,7 +59,7 @@
   (when (file-exists-p file)
     (with-current-buffer (find-file-noselect file)
       (let* ((title (org-entry-get (point-min) "TITLE"))
-             (id (org-id-get-create))
+             (id (or (org-id-get) (org-id-get-create)))
              (keywords (org-entry-get (point-min) "KEYWORDS"))
              (doi (org-entry-get (point-min) "DOI"))
              (citations (org-entry-get (point-min) "CITES"))
@@ -195,7 +201,26 @@
                                  similarities))))
     (nreverse similarities)))
 
-;;; Visualization Helpers
+;;; Visualization Helpers with Strength
+
+(defun inter-page-annotate-edge (edge)
+  "Annotate EDGE with strength and visualization properties."
+  (require 'strength-calculator nil t)
+  (let* ((type (plist-get edge :type))
+         (source (plist-get edge :source))
+         (strength (if (featurep 'strength-calculator)
+                       (relationship-strength-calculate edge)
+                     0.5))
+         (strength-category (if (featurep 'strength-calculator)
+                                (relationship-strength-classify strength)
+                              'moderate))
+         (color (if (featurep 'strength-calculator)
+                    (relationship-strength-color strength)
+                  "#64748b")))
+    (plist-put edge :strength strength)
+    (plist-put edge :strength-category strength-category)
+    (plist-put edge :color color)
+    edge))
 
 (defun inter-page-get-nodes (&optional directory)
   "Get nodes for 3D visualization from DIRECTORY."
@@ -203,17 +228,39 @@
             (list :id (plist-get doc :id)
                   :label (plist-get doc :title)
                   :type 'document
-                  :keywords (plist-get doc :keywords)))
+                  :keywords (plist-get doc :keywords)
+                  :layer 'inter-page
+                  :group "concepts"))
           (plist-get (inter-page-build-graph directory) :documents)))
 
 (defun inter-page-get-edges (&optional directory)
   "Get edges for 3D visualization from DIRECTORY."
-  (mapcar (lambda (r)
-            (list :from (plist-get r :from)
-                  :to (plist-get r :to)
-                  :type (plist-get r :type)
-                  :source 'inter-page))
-          (plist-get (inter-page-build-graph directory) :relationships)))
+  (let* ((graph (inter-page-build-graph directory))
+         (rels (plist-get graph :relationships)))
+    (mapcar #'inter-page-annotate-edge
+            (mapcar (lambda (r)
+                      (list :from (plist-get r :from)
+                            :to (plist-get r :to)
+                            :type (plist-get r :type)
+                            :source 'inter-page
+                            :label (plist-get r :type)))
+                    rels))))
+
+(defun inter-page-get-stats (&optional directory)
+  "Get statistics for inter-page relationships in DIRECTORY."
+  (let* ((graph (inter-page-build-graph directory))
+         (edges (inter-page-get-edges directory)))
+    (list :nodes (plist-get graph :doc-count)
+          :edges (length edges)
+          :layer 'inter-page)))
+
+(defun inter-page-merge-with-inner (inner-nodes inner-edges &optional directory)
+  "Merge INNER-NODES and INNER-EDGES with inter-page data from DIRECTORY."
+  (let* ((inter-nodes (inter-page-get-nodes directory))
+         (inter-edges (inter-page-get-edges directory)))
+    (list :nodes (append inner-nodes inter-nodes)
+          :edges (append inner-edges inter-edges)
+          :layer 'combined)))
 
 (provide 'inter-page)
 ;;; inter-page.el ends here
