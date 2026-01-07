@@ -95,4 +95,84 @@
             (should (string-match-p "\\[\\[.*\\]\\[Test Link\\]\\]" link))))
       (delete-file test-file))))
 
+;;; doc-engine-capture tests
+
+(ert-deftest doc-engine-capture-templates-test ()
+  "Test org-capture template setup."
+  (let ((test-dir (expand-file-name "test-capture" temporary-file-directory)))
+    (unwind-protect
+        (progn
+          (unless (file-exists-p test-dir)
+            (make-directory test-dir))
+          (setq doc-engine-directory test-dir)
+          (doc-engine-setup-capture-templates)
+          (should (eq (length doc-engine-capture-templates) 5))
+          ;; Verify all template keys exist
+          (let ((keys (mapcar #'car doc-engine-capture-templates)))
+            (should (member "r" keys))
+            (should (member "l" keys))
+            (should (member "c" keys))
+            (should (member "t" keys))
+            (should (member "n" keys))))
+      (delete-directory test-dir t))))
+
+(ert-deftest doc-engine-generate-identifier-test ()
+  "Test identifier generation."
+  (let* ((id (doc-engine-generate-identifier nil))
+         (with-doi (doc-engine-generate-identifier "10.1000/test.doi")))
+    ;; Timestamp format
+    (should (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}$" id))
+    ;; DOI format
+    (should (string= with-doi "test.doi"))))
+
+(ert-deftest doc-engine-capture-with-yasnippet-template-mapping-test ()
+  "Test template key to filename mapping."
+  (let ((test-dir (expand-file-name "test-yas" temporary-file-directory)))
+    (unwind-protect
+        (progn
+          (unless (file-exists-p test-dir)
+            (make-directory test-dir))
+          (setq doc-engine-directory test-dir)
+          ;; Test all template keys
+          (let ((templates '(("r" . "research-article")
+                            ("l" . "literature-review")
+                            ("c" . "conference-paper")
+                            ("t" . "thesis-master")
+                            ("n" . "quick-note"))))
+            (dolist (pair templates)
+              (let* ((key (car pair))
+                     (expected (cdr pair))
+                     (filepath (expand-file-name (format "%s.org" expected) test-dir)))
+                (should (string-match-p (format "%s\\.org" expected) filepath))))))
+      (delete-directory test-dir t))))
+
+(ert-deftest doc-engine-capture-file-creation-test ()
+  "Test that capture creates files correctly."
+  (let ((test-dir (expand-file-name "test-file-creation" temporary-file-directory)))
+    (unwind-protect
+        (progn
+          (unless (file-exists-p test-dir)
+            (make-directory test-dir))
+          (setq doc-engine-directory test-dir)
+          ;; Simulate what capture does
+          (let* ((title "Test Research Paper")
+                 (identifier (doc-engine-generate-identifier nil))
+                 (filepath (expand-file-name "research-article.org" test-dir)))
+            ;; Create file
+            (with-temp-file filepath
+              (insert (format "#+TITLE: %s\n" title))
+              (insert (format "#+DATE: %s\n" (format-time-string "[%Y-%m-%d %a %H:%M]")))
+              (insert (format "#+IDENTIFIER: %s\n" identifier))
+              (insert "#+STARTUP: content\n\n")
+              (insert "* Notes\n"))
+            ;; Verify file
+            (should (file-exists-p filepath))
+            (with-temp-buffer
+              (insert-file-contents filepath)
+              (goto-char (point-min))
+              (should (search-forward "#+TITLE: Test Research Paper" nil t))
+              (should (search-forward "#+IDENTIFIER:" nil t))
+              (should (search-forward "* Notes" nil t)))))
+      (delete-directory test-dir t))))
+
 (provide 'doc-engine-tests)

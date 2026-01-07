@@ -27,6 +27,28 @@
 ;; scientific papers in org-mode, following established academic writing
 ;; standards from official sources (PLOS, Nature, Science, ICMJE, etc.).
 ;;
+;; == INTEGRATED TIMELINE VIEW ==
+;;
+;; page-view integrates with timeline-engine to show connecting research
+;; files alongside your writing workflow. When you start a writing session
+;; (M-x page-view-start-writing-session), the window splits:
+;;
+;;   +-------------------+----------------+
+;;   |                   |                |
+;;   |   YOUR DOCUMENT   |   TIMELINE     |
+;;   |   (80% width)     |   (20% width)  |
+;;   |                   |                |
+;;   +-------------------+----------------+
+;;
+;; The timeline shows:
+;; - Research chronology across your papers
+;; - Connecting/cited documents
+;; - Publication dates and progress
+;; - Related concepts and citations
+;;
+;; Press M-q to close the timeline and return to normal view.
+;; Press C-c s L to toggle the timeline on/off.
+;;
 ;; == SCIENTIFIC WRITING STANDARDS ==
 ;; 
 ;; This system follows established academic writing guidelines:
@@ -90,6 +112,7 @@
 
 (require 'org)
 (require 'olivetti)  ;; For word processor-like display
+(require 'timeline-engine nil t)  ;; Optional: timeline integration
 
 ;; ==============================================================================
 ;; CONFIGURATION AND CUSTOMIZATION
@@ -538,12 +561,58 @@ Table captions follow standard academic format: 'Table 1: Description'."
 ;; based on official sources (PLOS, Nature, Science, ICMJE)
 
 (defun page-view-start-writing-session()
-  "Phase 1: Start new scientific writing session.
-Prepares buffer for academic writing with proper formatting."
+  "Phase 1: Start new scientific writing session with integrated timeline.
+Prepares buffer for academic writing with proper formatting and shows
+connecting research files in a side timeline view."
   (interactive)
-  (message "=== Starting Scientific Writing Session ===")
+  (message "=== Starting Integrated Scientific Writing Session ===")
   
-  ;; Initialize page view
+  ;; Save current window configuration
+  (setq page-view--original-window-config (current-window-configuration))
+  
+  ;; Split window: main area for writing (80%), side panel for timeline (20%)
+  (delete-other-windows)
+  (split-window-right (floor (* (window-width) 0.2)) nil)  ; 20% for timeline
+  (other-window 1)
+  
+  ;; Set fixed width for timeline window
+  (setq window-size-fixed t)
+  (when (fboundp 'window-body-size)
+    (setq window-body-width (floor (* (window-width) 0.25))))
+  
+  ;; Start timeline engine if not already running
+  (condition-case nil
+      (progn
+        (require 'timeline-engine nil t)
+        (unless (and (boundp 'httpd-port) httpd-port)
+          (setq httpd-root (expand-file-name "html" timeline-engine-root))
+          (httpd-start)
+          (message "Timeline engine web server started")))
+    (error (message "Timeline engine not available")))
+  
+  ;; Open timeline in side window using EAF or browse-url
+  (condition-case err
+      (progn
+        (require 'eaf nil t)
+        (when (featurep 'eaf)
+          (eaf-open-browser (format "http://localhost:%d" httpd-port))))
+    (error
+     (browse-url (format "http://localhost:%d" httpd-port))))
+  
+  ;; Focus current research node if applicable
+  (let* ((file (buffer-file-name))
+         (identifier (when (and file doc-engine-directory
+                               (string-match-p doc-engine-directory file))
+                       (with-current-buffer (find-file-noselect file)
+                         (org-entry-get (point-min) "IDENTIFIER")))))
+    (when identifier
+      (setq timeline-engine--explicit-focus-id identifier)
+      (message "Timeline focused on: %s" identifier)))
+  
+  ;; Return to main window for writing
+  (other-window -1)
+  
+  ;; Initialize page-view
   (page-view-initialize)
   
   ;; Show word count limits
@@ -560,8 +629,7 @@ Prepares buffer for academic writing with proper formatting."
     (message "Writing statistics tracking enabled."))
   
   (message "=== Session Ready ===")
-  (message "Use: M-x page-view-insert-page-break to add sections")
-  (message "      M-x page-view-goto-page to navigate pages"))
+  (message "Left: Writing (80%%) | Right: Timeline (20%%) | M-q to close timeline"))
 
 (defun page-view-insert-section-template(section-name &optional heading-level)
   "Insert standard academic section template at current point.
@@ -732,6 +800,96 @@ Provides word processor-like layout following academic writing standards."
           (setq line-count (1+ line-count)))))))
 
 ;; ==============================================================================
+;; PAGE-VIEW + TIMELINE INTEGRATION
+;; ==============================================================================
+
+(defun page-view-with-timeline ()
+  "Toggle integrated timeline view alongside page-view.
+Shows connecting research files in a side panel (20% width).
+If timeline-engine is unavailable, shows error message and continues without timeline."
+  (interactive)
+  (condition-case err
+      (progn
+        (require 'timeline-engine nil t)
+        (unless (featurep 'timeline-engine)
+          (user-error "timeline-engine not available. Install simple-httpd for timeline functionality.")))
+    (error
+     (message "Warning: Could not load timeline-engine: %s" (error-message-string err))
+     (setq timeline-engine-available nil)))
+
+  (message "=== Starting Integrated Writing + Timeline Session ===")
+
+  ;; Save current window configuration if not already saved
+  (unless (boundp 'page-view--original-window-config)
+    (setq page-view--original-window-config (current-window-configuration)))
+
+  ;; Check if timeline is already open
+  (if (get-buffer "*dashboard*")
+      ;; Timeline exists - close it
+      (progn
+        (delete-other-windows)
+        (set-window-configuration page-view--original-window-config)
+        (setq page-view--original-window-config nil)
+        (message "Timeline closed. Restored normal view."))
+    ;; No timeline - open it
+    (progn
+      (delete-other-windows)
+      (split-window-right (floor (* (window-width) 0.2)) nil)  ; 20% for timeline
+      (other-window 1)
+
+      ;; Set fixed width for timeline window
+      (setq window-size-fixed t)
+
+      ;; Start timeline engine if available and not already running
+      (when (and (featurep 'timeline-engine)
+                 (not (and (boundp 'httpd-port) httpd-port)))
+        (condition-case nil
+            (progn
+              (setq httpd-root (expand-file-name "html" timeline-engine-root))
+              (httpd-start)
+              (message "Timeline engine web server started"))
+          (error
+           (message "Warning: Could not start timeline engine server"))))
+
+      ;; Open timeline in side window using EAF or browse-url
+      (condition-case open-err
+          (progn
+            (require 'eaf nil t)
+            (when (featurep 'eaf)
+              (eaf-open-browser (format "http://localhost:%d" httpd-port))))
+        (error
+         (browse-url (format "http://localhost:%d" httpd-port))))
+
+      ;; Focus current research node if applicable
+      (let* ((file (buffer-file-name))
+             (identifier (when (and file doc-engine-directory
+                                   (string-match-p doc-engine-directory file))
+                           (with-current-buffer (find-file-noselect file)
+                             (org-entry-get (point-min) "IDENTIFIER")))))
+        (when identifier
+          (setq timeline-engine--explicit-focus-id identifier)
+          (message "Timeline focused on: %s" identifier)))
+
+      ;; Return to main window for writing
+      (other-window -1)
+
+      ;; Initialize page-view
+      (page-view-initialize)
+
+      ;; Show status
+      (message "=== Integrated Session Ready ===")
+      (message "Writing (80%%) | Timeline (20%%) | M-q to close"))))
+
+(defun page-view-without-timeline ()
+  "End integrated session and restore previous window configuration."
+  (interactive)
+  (when (and (boundp 'page-view--original-window-config)
+             page-view--original-window-config)
+    (set-window-configuration page-view--original-window-config)
+    (setq page-view--original-window-config nil)
+    (message "Restored previous window configuration")))
+
+;; ==============================================================================
 ;; KEY BINDINGS
 ;; ==============================================================================
 
@@ -753,6 +911,8 @@ Provides word processor-like layout following academic writing standards."
 
 ;; Add key bindings to mode map
 (define-key page-view-mode-map (kbd "M-s") 'page-view-start-writing-session)
+(define-key page-view-mode-map (kbd "M-S") 'page-view-with-timeline)
+(define-key page-view-mode-map (kbd "M-q") 'page-view-without-timeline)
 (define-key page-view-mode-map (kbd "M-w") 'page-view-show-word-counts)
 (define-key page-view-mode-map (kbd "M-n") 'page-view-number-figures)
 (define-key page-view-mode-map (kbd "M-t") 'page-view-number-tables)

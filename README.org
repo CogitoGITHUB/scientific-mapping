@@ -7,7 +7,7 @@
 
 ** Overview
 
-The Scientific Knowledge Mapping System is a comprehensive Emacs-based platform for scientific research, literature management, and knowledge mapping. It integrates document creation, citation tracking, concept relationships, and 3D visualization to provide researchers with a complete academic workflow.
+The Scientific Knowledge Mapping System is a comprehensive Emacs-based platform for scientific research, literature management, and knowledge mapping. It integrates document creation, citation tracking, concept relationships, 3D visualization, AI assistance, and academic APIs to provide researchers with a complete academic workflow.
 
 The system is designed for academics, scientists, and researchers who need to:
 - Manage scientific literature efficiently
@@ -16,6 +16,23 @@ The system is designed for academics, scientists, and researchers who need to:
 - Visualize research networks and relationships
 - Extract insights from large literature collections
 - Follow academic writing standards and workflows
+- Leverage AI for research assistance and automation
+- Integrate with academic databases and reference managers
+- Use interactive tutorials and minimal distraction interface
+
+** Recent Updates
+
+*** Version 1.0.0 (January 2026)
+- *Modular Architecture*: Restructured into focused submodules for better maintainability
+- *AI Integration*: Full support for Ollama, OpenAI, Anthropic, MCP, and Agent Shell
+- *Interactive Tutorials*: Real-action walkthroughs for onboarding
+- *Git Integration*: Native Git workflows with auto-commits and research branching
+- *Minimal UX*: Distraction-free interface with Modus theme and clean Org appearance
+- *Academic APIs*: Direct integration with arXiv, PubMed, CrossRef, and DOI resolution
+- *Reference Managers*: Sync with Zotero and BibTeX libraries
+- *Specialized Dashboard*: Research-focused startup screen with scientific widgets
+- *Nushell Integration*: Data processing scripts for research analytics
+- *Failsafes & Optimization*: Error handling and performance tuning for large collections
 
 ** Features
 
@@ -39,6 +56,7 @@ The system is designed for academics, scientists, and researchers who need to:
 - Bidirectional relationships
 - Hierarchical knowledge organization
 - Cross-disciplinary connections
+- *Dual-Layer System*: Intra-document (heading-level) and inter-document (citation/network) relationship extraction
 
 *** Visualization Engine
 - Interactive 3D graphs with Three.js and force-directed layouts
@@ -56,6 +74,7 @@ The system is designed for academics, scientists, and researchers who need to:
 - Word count enforcement based on journal requirements
 - Page layout with academic standards (Times New Roman, 1.5 spacing)
 - Chronological writing process workflow
+- *Integrated Timeline View*: Stay aware of connecting research while writing
 
 *** Research Timeline
 - Visual timeline of research chronology
@@ -69,6 +88,55 @@ The system is designed for academics, scientists, and researchers who need to:
 - Citation style support
 - Template variable system
 
+*** AI Integration
+- Document summarization and analysis
+- Concept extraction from papers
+- Question answering on research content
+- Writing assistance and editing
+- Citation analysis and gap detection
+- Research workflow automation
+
+*** Academic API Integrations
+- Direct import from arXiv, PubMed, CrossRef
+- DOI resolution and metadata extraction
+- Duplicate detection and merging
+- Structured import with Org formatting
+- Action checklists for research tasks
+
+*** Reference Manager Integration
+- Zotero API synchronization
+- BibTeX import and export
+- Collection management
+- Metadata preservation
+- Batch processing capabilities
+
+*** Interactive Tutorial System
+- 6 comprehensive guided tutorials
+- Real-action learning (actually creates documents)
+- Progressive skill building
+- Contextual help and onboarding
+
+*** Git Integration
+- Auto-commit after changes
+- Research branching strategies
+- Milestone commits
+- Version history for documents
+- Collaborative research workflows
+
+*** Minimal UX Enhancements
+- Distraction-free interface
+- Modus theme integration
+- Clean Org appearance
+- Keyboard-only workflows
+- Progress indicators and notifications
+
+*** Specialized Dashboard
+- Research-focused startup screen
+- Recent documents widget
+- Citation statistics display
+- Concept relationships overview
+- Quick access to key functions
+
 ** Installation
 
 *** Prerequisites
@@ -79,12 +147,27 @@ The system is designed for academics, scientists, and researchers who need to:
 - EAF Browser (recommended for in-Emacs visualization)
 - org-mcp (for AI-powered Org mode interactions)
 - agent-shell (for AI agent interactions)
+- Straight.el (for package management)
+- Leaf (for configuration macros)
 
-*** Installation Steps
+*** Installation Methods
+
+**** Method 1: Straight.el + Leaf (Recommended)
+
+Use the provided =install-config.el= file for automated setup:
+
+#+begin_src elisp
+;; Load install-config.el from the project root
+(load-file "~/scientific-mapping/install-config.el")
+#+end_src
+
+This installs all dependencies and configures the system automatically.
+
+**** Method 2: Manual Installation
 
 1. Clone the repository:
    #+begin_src bash
-   git clone https://github.com/scientific-mapping/scientific-mapping.git
+   git clone https://github.com/sst/scientific-mapping.git
    cd scientific-mapping
    #+end_src
 
@@ -109,15 +192,19 @@ The system is designed for academics, scientists, and researchers who need to:
    (require 'agent-shell)
    ;; (agent-shell-start) ;; uncomment for auto-start
 
-   ;; Scientific Mapping System
-   (add-to-list 'load-path "~/scientific-mapping")
-   (require 'scientific-mapping)
-   (scientific-mapping-mode 1)
+    ;; Scientific Mapping System
+    (add-to-list 'load-path "~/scientific-mapping")
+    (require 'scientific-mapping)
+    (scientific-mapping-mode 1)
+
+    ;; Optional: Enable specialized dashboard
+    (require 'scientific-dashboard)
+    (scientific-dashboard-setup-startup-hook)
    #+end_src
 
 3. Install Node.js dependencies for the visualizer:
    #+begin_src bash
-   cd scientific-visualizer
+   cd viz-engine
    npm install
    npm run build
    #+end_src
@@ -136,7 +223,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 2. Create your first scientific document:
    #+begin_src elisp
-   M-x scientific-document-create
+   M-x doc-engine-create
    #+end_src
    - Enter title, DOI, keywords
    - Document is automatically indexed
@@ -148,7 +235,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 4. Create a concept map:
    #+begin_src elisp
-   M-x scientific-mapping-create-concept-map
+   M-x concept-relationships-create-entry
    #+end_src
 
 5. Open the 3D visualizer:
@@ -184,6 +271,36 @@ The system is designed for academics, scientists, and researchers who need to:
 - =viz-engine-set-mode=: Change visualization mode
 - =viz-engine-paper-zoom=: Focus on specific paper
 
+*** scientific-dashboard
+*Purpose*: Specialized startup screen for research activities
+
+*Key Functions*:
+- =scientific-dashboard-open=: Open research dashboard
+- Displays recent documents, citation stats, concept relationships
+
+*** tutorial-system
+*Purpose*: Interactive onboarding and skill building
+
+*Key Functions*:
+- =tutorial-system-start=: Begin guided tutorials
+- Real-action learning for document creation, AI analysis, visualization
+
+*** git-integration
+*Purpose*: Native Git workflows for research versioning
+
+*Key Functions*:
+- Auto-commits after document changes
+- =git-integration-branch-create=: Create research branches
+- Milestone tracking and version history
+
+*** minimal-ux
+*Purpose*: Distraction-free research interface
+
+*Key Functions*:
+- Clean Org appearance with Modus theme
+- Keyboard-only workflows
+- Progress indicators and contextual tips
+
 *** concept-relationships
 *Purpose*: Concept mapping and theoretical relationships
 
@@ -193,12 +310,17 @@ The system is designed for academics, scientists, and researchers who need to:
 - =concept-relationships-add-child=: Add hierarchical relationships
 - =concept-relationships-add-friendship=: Add cross-disciplinary links
 
-*** scientific-research-timeline
+*Dual-Layer Architecture*:
+- =inner-page=: Extracts intra-document relationships (org properties, internal links)
+- =inter-page=: Extracts inter-document relationships (citations, cross-references, similarity)
+- Both provide =get-nodes= and =get-edges= for 3D visualization integration
+
+*** timeline-engine
 *Purpose*: Visual timeline for research chronology
 
 *Key Functions*:
-- =scientific-research-timeline-open=: Open timeline view
-- =scientific-research-timeline-add-date=: Add timeline entries
+- =timeline-engine-open=: Open timeline view
+- =timeline-engine-add-date=: Add timeline entries
 
 *** scientific-yasnippet
 *Purpose*: Academic document templates
@@ -211,12 +333,36 @@ The system is designed for academics, scientists, and researchers who need to:
 
 *** Document Creation Workflow
 
-1. Create a new document:
+**** Method 1: Quick Note (Minimal Friction)
+
+1. Create a quick note with just a title:
    #+begin_src elisp
-   M-x doc-engine-create
+   M-x doc-engine-quick-note
+   #+end_src
+   - Enter note title
+   - Document created instantly with auto-generated ID
+
+**** Method 2: Org-Capture with YASnippets (Recommended)
+
+1. Capture a new document using yasnippet templates:
+   #+begin_src elisp
+   M-x doc-engine-capture-with-yasnippet
+   #+end_src
+   - Choose template: r=research, l=review, c=conference, t=thesis, n=note
+   - Enter title
+   - YASnippet expands template with proper formatting
+
+2. Or use standard org-capture:
+   #+begin_src elisp
+   M-x doc-engine-capture
    #+end_src
 
-2. Fill in metadata (title, DOI, keywords, etc.)
+**** Template Keys:
+   - =r= :: Research Article (5,000-8,000 words, IMRaD structure)
+   - =l= :: Literature Review (6,000-12,000 words, thematic structure)
+   - =c= :: Conference Paper (4-12 pages, methodology focus)
+   - =t= :: Thesis/Dissertation (40,000+ words, 6-chapter structure)
+   - =n= :: Quick Note (minimal template)
 
 3. Document is automatically:
    - Saved with DOI-based filename
@@ -227,7 +373,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 1. Add citations while writing:
    #+begin_src elisp
-   M-x scientific-document-create-link
+   M-x doc-engine-add-citation
    #+end_src
 
 2. Citations are automatically tracked in database
@@ -255,7 +401,7 @@ The system is designed for academics, scientists, and researchers who need to:
 
 1. Open timeline:
    #+begin_src elisp
-   M-x scientific-research-timeline-open
+   M-x timeline-engine-open
    #+end_src
 
 2. View research chronology and progress
@@ -277,6 +423,32 @@ The system is designed for academics, scientists, and researchers who need to:
 
 3. Interactive exploration with mouse/keyboard
 
+*** Integrated Writing + Timeline View
+
+When writing scientific documents, you can open an integrated view that shows
+the timeline alongside your document, helping you stay aware of connecting files
+and research chronology:
+
+#+begin_example
++-------------------+----------------+
+|                   |                |
+|   YOUR DOCUMENT   |   TIMELINE     |
+|   (80% width)     |   (20% width)  |
+|                   |                |
++-------------------+----------------+
+#+end_example
+
+To start integrated writing session:
+- =C-c s l= :: Start writing with timeline view (default)
+- =C-c s L= :: Toggle timeline on/off
+- =M-q= :: Close timeline, return to normal view
+
+The timeline shows:
+- Research chronology across your papers
+- Connecting/cited documents
+- Publication dates and progress
+- Related concepts and citations
+
 ** Key Bindings
 
 When =scientific-mapping-mode= is active:
@@ -285,14 +457,83 @@ When =scientific-mapping-mode= is active:
 |-----|---------|-------------|
 | =C-c s s= | =scientific-mapping-start= | Start the system |
 | =C-c s S= | =scientific-mapping-stop= | Stop the system |
+| =C-c s ?= | =scientific-mapping-help= | Show help |
+| =C-c s h= | =scientific-mapping-status= | Show system status |
 | =C-c s i= | =scientific-mapping-import-paper= | Import paper from DOI |
-| =C-c s c= | =concept-relationships-create-entry= | Create concept |
-| =C-c s v= | =viz-engine-open= | Open visualizer |
+| =C-c s q= | =doc-engine-quick-note= | Quick note (title only) |
+| =C-c s C= | =doc-engine-capture= | Capture via org-capture |
+| =C-c s y= | =doc-engine-capture-with-yasnippet= | Capture with yasnippet template |
+| =C-c s c= | =concept-relationships-create-entry= | Create concept entry |
+| =C-c s c= | =concept-relationships-create-entry= | Create concept entry |
+| =C-c s v= | =viz-engine-open= | Open 3D visualization |
 | =C-c s n= | =viz-engine-set-mode= | Set visualization mode |
 | =C-c s r= | =scientific-mapping-literature-review= | Generate literature review |
 | =C-c s b= | =scientific-mapping-backup= | Create backup |
-| =C-c s t= | =scientific-research-timeline-open= | Open research timeline |
-| =C-c s ?= | =scientific-mapping-help= | Show help |
+| =C-c s t= | =timeline-engine-open= | Open research timeline |
+| =C-c s e= | =concept-tree-toggle-section= | Toggle concept tree |
+| =C-c s f= | =org-file-manager= | Open org-file-manager |
+| =C-c s H= | =scientific-dashboard-open= | Open research dashboard |
+| =C-c s l= | =page-view-start-writing-session= | Writing + Timeline (default) |
+| =C-c s L= | =page-view-with-timeline= | Toggle timeline view |
+| =C-c s M-l= | =page-view-without-timeline= | Close timeline view |
+| =C-c s u= | =tutorial-system-interactive-walkthrough= | Start tutorials |
+| =C-c s a= | =scientific-mapping-agenda= | Open research agenda |
+| =C-c s p= | =scientific-mapping-schedule-paper-review= | Schedule paper review |
+| =C-c s d= | =scientific-mapping-schedule-deadline= | Schedule deadline |
+| =C-c s += | =scientific-mapping-create-research-project= | Create research project |
+| =C-c s w= | =scientific-mapping-weekly-review= | Weekly progress review |
+| =C-c s A= | =scientific-mapping-agenda-from-document= | Create agenda from document |
+| =C-c s X= | =academic-apis-search-arxiv= | Search arXiv |
+| =C-c s M= | =academic-apis-search-pubmed= | Search PubMed |
+| =C-c s D= | =academic-apis-resolve-doi= | Resolve DOI |
+| =C-c s I= | =academic-apis-import-to-scientific-mapping= | Import from APIs |
+| =C-c s y= | =doc-engine-capture-with-yasnippet= | Capture with yasnippet |
+| =C-c s Z= | =reference-managers-zotero-get-collections= | Sync Zotero |
+| =C-c s B= | =reference-managers-import-bibtex= | Import BibTeX |
+| =C-c s r= | =reference-managers-import-to-scientific-mapping= | Import from managers |
+| =C-c s W= | =workflow-integration-show-workflow-status= | Show workflow status |
+| =C-c s U= | =workflow-integration-unified-search= | Unified search |
+| =C-c s F= | =workflow-integration-import-paper-complete= | Import paper complete |
+| =C-c s J= | =workflow-integration-frictionless-research-session= | Frictionless session |
+| =C-c s j= | =workflow-integration-smart-process-buffer= | Smart process buffer |
+| =C-c s Y= | =data-synchronization-full-sync= | Full sync |
+| =C-c s C= | =data-synchronization-consistency-check= | Check consistency |
+| =C-c s S= | =context-awareness-show-suggestions= | Show suggestions |
+| =C-c s Q= | =context-awareness-quick-actions= | Quick actions |
+| =C-c s != | =ux-enhancements-welcome-screen= | Welcome screen |
+| =C-c s K= | =ux-enhancements-keyboard-help= | Keyboard help |
+| =C-c s T= | =ux-enhancements-show-contextual-tip= | Contextual tip |
+| =C-c s G= | =git-integration-smart-commit= | Smart Git commit |
+| =C-c s V= | =git-integration-research-history= | Research history |
+| =C-c s N= | =git-integration-create-research-branch= | Create branch |
+| =C-c s O= | =git-integration-commit-research-milestone= | Commit milestone |
+| =C-c s A a= | =ai-integration-analyze-document= | AI analyze document |
+| =C-c s A s= | =ai-integration-summarize-document= | AI summarize document |
+| =C-c s A q= | =ai-integration-ask-question= | AI ask question |
+| =C-c s A c= | =ai-integration-extract-concepts= | AI extract concepts |
+| =C-c s A g= | =ai-integration-detect-research-gaps= | AI detect gaps |
+| =C-c s A r= | =ai-integration-research-assistance= | AI research assistance |
+| =C-c s A w= | =ai-integration-writing-assistance= | AI writing assistance |
+| =C-c s A i= | =ai-integration-analyze-citations= | AI analyze citations |
+| =C-c s A e= | =ai-integration-semantic-search= | AI semantic search |
+| =C-c s A b= | =ai-integration-batch-analyze= | AI batch analyze |
+
+*** Page-View Mode Keybindings
+
+When =page-view-mode= is active:
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| =M-s= | =page-view-start-writing-session= | Start writing session |
+| =M-S= | =page-view-with-timeline= | Toggle timeline |
+| =M-q= | =page-view-without-timeline= | Close timeline |
+| =M-w= | =page-view-show-word-counts= | Show word counts |
+| =M-n= | =page-view-number-figures= | Number figures |
+| =M-t= | =page-view-number-tables= | Number tables |
+| =C-c C-p= | =page-view-insert-page-break= | Insert page break |
+| =C-c C-g= | =page-view-goto-page= | Go to page |
+| =C-c C-n= | =page-view-next-page= | Next page |
+| =C-c C-p= | =page-view-previous-page= | Previous page |
 
 ** Academic Writing Workflows
 
@@ -338,21 +579,21 @@ When =scientific-mapping-mode= is active:
 (scientific-mapping-mode 1)
 
 ;; Configure document directory
-(setq scientific-document-directory "~/scientific-documents/")
+(setq doc-engine-directory "~/scientific-documents/")
 
 ;; Enable autosync
-(setq citation-database-autosync t)
+(setq citation-database-autosync-mode t)
 
 ;; Configure visualizer
-(setq scientific-visualizer-visualization-mode 'citation)
-(setq scientific-visualizer-follow t)
+(setq viz-engine-visualization-mode 'citation)
+(setq viz-engine-follow-mode t)
 #+end_src
 
 *** Advanced Configuration
 
 #+begin_src elisp
 ;; Custom document prompts
-(setq scientific-document-prompts '(title doi keywords abstract))
+(setq doc-engine-prompts '(title doi keywords abstract))
 
 ;; Citation database location
 (setq citation-database-location "~/.emacs.d/citation-db.sqlite")
@@ -360,12 +601,12 @@ When =scientific-mapping-mode= is active:
 ;; Concept relationships path
 (setq concept-relationships-path "~/concepts/")
 
-;; Research timeline settings
-(setq scientific-research-timeline-follow-mode-on-start t)
+ ;; Research timeline settings
+ (setq timeline-engine-follow-mode-on-start t)
 
 ;; YASnippet integration
 (yas-global-mode 1)
-(setq yas-snippet-dirs '("~/scientific-mapping/scientific-yasnippet/snippets"))
+(setq yas-snippet-dirs '("~/scientific-mapping/snippet-engine/snippets"))
 #+end_src
 
 ** Academic Standards Compliance
@@ -421,6 +662,17 @@ The system enforces academic standards:
 - View logs in =*Messages*= buffer
 - Report issues on GitHub
 
+** Development Guidelines
+
+See =AGENTS.md= for comprehensive development guidelines, including:
+
+- Agent-based development workflow
+- Nushell integration for data processing
+- Build/lint/test commands
+- Code style conventions
+- Component architecture patterns
+- Git workflow with auto-commits
+
 ** Contributing
 
 We welcome contributions! Please:
@@ -435,11 +687,14 @@ We welcome contributions! Please:
 
 1. Clone and setup:
    #+begin_src bash
-   git clone https://github.com/scientific-mapping/scientific-mapping.git
+   git clone https://github.com/sst/scientific-mapping.git
    cd scientific-mapping
    #+end_src
 
-2. Install development dependencies
+2. Install development dependencies with Cask:
+   #+begin_src bash
+   cask install
+   #+end_src
 
 3. Run tests:
    #+begin_src elisp
@@ -448,10 +703,11 @@ We welcome contributions! Please:
 
 *** Code Style
 
-- Follow Emacs Lisp conventions
-- Use lexical binding
-- Add docstrings to functions
-- Test your changes
+- Follow Emacs Lisp conventions with kebab-case naming
+- Use lexical binding (;;; -*- lexical-binding: t -*-)
+- Add comprehensive docstrings to all functions
+- Follow modular architecture with focused files
+- Test your changes and ensure linting passes
 
 ** License
 

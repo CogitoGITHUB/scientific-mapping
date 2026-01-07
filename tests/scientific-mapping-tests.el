@@ -8,9 +8,11 @@
 (require 'ert)
 (require 'scientific-mapping)
 (require 'doc-engine)
-(require 'citation-database)
-(require 'viz-engine)
-(require 'concept-relationships)
+(require 'cite/index)
+;; (require 'citation-database)
+;; (require 'viz-engine)
+(require 'viz/viz-engine nil t)
+;; (require 'concept-relationships)
 
 (defvar scientific-mapping-test-dir (expand-file-name "test-data" (file-name-directory load-file-name))
   "Directory for test data.")
@@ -64,6 +66,44 @@
         (scientific-mapping-mode 1)
         ;; This would require mocking user input
         (should t)) ; Placeholder
+    (scientific-mapping-test-teardown)))
+
+;;; Keybinding tests
+
+(ert-deftest scientific-mapping-keybindings-test ()
+  "Test that keybindings are properly defined."
+  (scientific-mapping-test-setup)
+  (unwind-protect
+      (progn
+        (scientific-mapping-mode 1)
+        ;; Test that keymap exists
+        (should (boundp 'scientific-mapping-mode-map))
+        ;; Test specific keybindings
+        (should (commandp 'doc-engine-capture))
+        (should (commandp 'doc-engine-capture-with-yasnippet))
+        (should (commandp 'doc-engine-quick-note))
+        ;; Verify keybindings are bound
+        (let ((map scientific-mapping-mode-map))
+          (should (eq (lookup-key map (kbd "C-c s C")) 'doc-engine-capture))
+          (should (eq (lookup-key map (kbd "C-c s y")) 'doc-engine-capture-with-yasnippet))))
+    (scientific-mapping-test-teardown)))
+
+(ert-deftest scientific-mapping-org-capture-integration-test ()
+  "Test org-capture integration."
+  (scientific-mapping-test-setup)
+  (unwind-protect
+      (progn
+        (require 'org-capture)
+        (should (featurep 'org-capture))
+        ;; Test that capture templates can be set up
+        (let ((test-dir (expand-file-name "test-capture" temporary-file-directory)))
+          (unless (file-exists-p test-dir)
+            (make-directory test-dir))
+          (setq doc-engine-directory test-dir)
+          (doc-engine-setup-capture-templates)
+          (should doc-engine-capture-templates)
+          (should (= (length doc-engine-capture-templates) 5))
+          (delete-directory test-dir t)))
     (scientific-mapping-test-teardown)))
 
 (provide 'scientific-mapping-tests)

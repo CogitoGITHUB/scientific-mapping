@@ -28,65 +28,55 @@
 ;; methods, where each node is an org-mode file or headline, and
 ;; relationships represent theoretical, methodological, or evidence connections.
 ;;
-;; Entries can be linked together, and you can then view the network of
-;; relationships as a concept map, using `M-x concept-relationships-visualize'.
-;;
-;; Relationship types supported:
-;; - Parent-Child: Hierarchical knowledge organization (generalization-specialization)
-;; - Sibling: Related concepts at same abstraction level
-;; - Friend: Cross-disciplinary connections
-;; - Evidence: Empirical evidence supporting or refuting claims
-;; - Method: Methodological connections between studies
-;; - Evolution: Historical evolution of concepts
 
 ;;; Code:
 
-(require 'org-element)
-(require 'org-attach)
-(require 'org-agenda)
-(require 'org-macs)
+(require 'org)
 (require 'org-id)
-(require 'picture)
-(require 'subr-x)
+(require 'org-element)
 (require 'seq)
+(require 'cl-lib)
+(require 'subr-x)
 
 (defgroup concept-relationships ()
   "Concept and relationship management for scientific knowledge."
   :prefix "concept-relationships-"
   :group 'org)
 
-;;;; Custom Vars
+;;; Configuration
 
-(defcustom concept-relationships-path (file-truename (expand-file-name "concepts" scientific-document-directory))
+(defcustom concept-relationships-path
+  (expand-file-name "concepts" user-emacs-directory)
   "The root directory of your concept relationships.
-
 `scientific-document' files placed in this directory, or its subdirectories,
 will be considered concept nodes."
   :group 'concept-relationships
-  :type '(directory))
+  :type 'directory)
 
 (defcustom concept-relationships-scan-directories-recursively t
-  "If subdirectories inside `concept-relationships-path' are considered part of concepts."
+  "If subdirectories inside `concept-relationships-path' are
+considered part of concepts."
   :group 'concept-relationships
-  :type '(boolean))
+  :type 'boolean)
 
-(defcustom concept-relationships-ignored-resource-links '("fuzzy" "radio" "concept-child" "concept-parent" "concept-friend" "concept-evidence")
-  "`org-link-types' which shouldn't be shown as resources in `concept-relationships-visualize'."
+(defcustom concept-relationships-ignored-resource-links
+  '("fuzzy" "radio" "concept-child" "concept-parent" "concept-friend" "concept-evidence")
+  "`org-link-types' which shouldn't be shown as resources in visualization."
   :group 'concept-relationships
   :type '(repeat string))
 
 (defcustom concept-relationships-backlink nil
   "If backlink resource should be added when creating a concept link."
   :group 'concept-relationships
-  :type '(restricted-sexp :match-alternatives
-           (stringp 't 'nil)))
+  :type '(choice
+          (const :tag "Yes" t)
+          (const :tag "No" nil)))
 
-(defcustom concept-relationships-data-file (file-truename (expand-file-name ".concept-relationships-data.el" concept-relationships-path))
+(defcustom concept-relationships-data-file
+  (expand-file-name ".concept-relationships-data.el" concept-relationships-path)
   "Where concept-relationships data is saved."
   :group 'concept-relationships
   :type 'file)
-
-;;;; Relationship Properties
 
 (defcustom concept-relationships-parents-property-name "CONCEPT_PARENTS"
   "The name for org-mode property in which parent relationships are stored."
@@ -123,8 +113,6 @@ will be considered concept nodes."
   :group 'concept-relationships
   :type 'string)
 
-;;;; Concept Entry Types
-
 (defcustom concept-relationships-include-file-entries t
   "If non-nil, include .org files as concept nodes."
   :group 'concept-relationships
@@ -135,14 +123,11 @@ will be considered concept nodes."
   :group 'concept-relationships
   :type 'boolean)
 
-;;;; Visualization Options
-
 (defcustom concept-relationships-visualize-default-choices 'all
   "Default entries to show in `concept-relationships-visualize'."
   :group 'concept-relationships
   :type '(radio (const :tag "All entries" all)
-                  (const :tag "Files only" files)
-                  (const :tag "Files in root only" root-files)))
+                (const :tag "Files only" files)))
 
 (defcustom concept-relationships-show-resources t
   "If non-nil, show resources in `concept-relationships-visualize'."
@@ -159,26 +144,26 @@ will be considered concept nodes."
   :group 'concept-relationships
   :type 'integer)
 
-;;;; Internal Variables
+;;; Variables
 
 (defvar concept-relationships-data nil
-  "Hash table storing concept relationship data.")
+  "Concept relationships data structure.")
 
 (defvar concept-relationships-files-cache nil
-  "Cache for concept files.")
+  "Cached list of concept files.")
 
 (defvar concept-relationships-headline-cache nil
-  "Cache for concept headlines.")
+  "Cached list of concept headlines.")
 
 (defvar concept-relationships-vis-current-entry nil
-  "Currently visualized entry.")
+  "Current entry being visualized.")
 
-;;;; Core Functions
+;;; Core Functions
 
 (defun concept-relationships-ensure-data ()
   "Ensure concept relationships data is loaded."
   (unless concept-relationships-data
-    (concept-relationships-load-data)))
+    (setq concept-relationships-data (list))))
 
 (defun concept-relationships-load-data ()
   "Load concept relationships data from file."
@@ -186,7 +171,7 @@ will be considered concept nodes."
       (with-temp-buffer
         (insert-file-contents concept-relationships-data-file)
         (setq concept-relationships-data (read (current-buffer))))
-    (setq concept-relationships-data (make-hash-table :test 'equal))))
+    (setq concept-relationships-data nil)))
 
 (defun concept-relationships-save-data ()
   "Save concept relationships data to file."
@@ -194,14 +179,12 @@ will be considered concept nodes."
     (insert ";;; concept-relationships-data.el --- Concept relationship data -*- coding: utf-8 -*-\n\n")
     (insert "(setq concept-relationships-data\n")
     (insert (prin1-to-string concept-relationships-data))
-    (insert ")\n"))
-  (message "Concept relationships data saved"))
+    (insert ")\n")))
 
 (defun concept-relationships-refresh-cache ()
   "Refresh caches for concept files and headlines."
   (setq concept-relationships-files-cache nil)
-  (setq concept-relationships-headline-cache nil)
-  (concept-relationships--index-entries))
+  (setq concept-relationships-headline-cache nil))
 
 (defun concept-relationships--index-entries ()
   "Index all concept entries (files and headlines)."
@@ -215,14 +198,14 @@ will be considered concept nodes."
   (unless concept-relationships-files-cache
     (setq concept-relationships-files-cache
           (if concept-relationships-scan-directories-recursively
-              (directory-files-recursively concept-relationships-paths nil
-                                   (lambda (f)
-                                     (and (string-match-p "\\.org$" f)
-                                          (not (string-match-p "/\\." f)))))
+              (directory-files-recursively concept-relationships-path nil
+                (lambda (f)
+                  (and (string-match-p "\\.org$" f)
+                       (not (string-match-p "/\\." f)))))
             (seq-filter
-             (lambda (f)
-               (string-match-p "\\.org$" f))
-             (directory-files concept-relationships-path)))))
+              (lambda (f)
+                (string-match-p "\\.org$" f))
+              (directory-files concept-relationships-path)))))
   concept-relationships-files-cache)
 
 (defun concept-relationships-headlines ()
@@ -231,65 +214,69 @@ will be considered concept nodes."
     (setq concept-relationships-headline-cache
           (when concept-relationships-scan-for-header-entries
             (seq-mapcat
-             (lambda (file)
-               (concept-relationships--headlines-in-file file))
-             (concept-relationships-files)))))
+              (lambda (file)
+                (concept-relationships--headlines-in-file file))
+              (concept-relationships-files)))))
   concept-relationships-headline-cache)
 
 (defun concept-relationships--headlines-in-file (file)
   "Extract headlines with IDs from FILE."
   (with-current-buffer (find-file-noselect file)
-    (org-element-map-map 'headline
+    (org-element-map (org-element-parse-buffer) 'headline
       (lambda (headline)
         (when (org-element-property :ID headline)
           (list
-           :file file
-           :headline (org-element-property :raw-value headline)
-           :id (org-element-property :ID headline)
-           :level (org-element-property :level headline)
-           :pos (org-element-property :begin headline)))))))
-
-;;;; Entry Management
+            :file file
+            :headline (org-element-property :raw-value headline)
+            :id (org-element-property :ID headline)
+            :level (org-element-property :level headline))))
+      nil nil)))
 
 (defun concept-relationships-create-entry (title &optional properties)
-  "Create a new concept entry with TITLE and PROPERTIES."
+  "Create a new concept entry with TITLE and optional PROPERTIES."
   (interactive "sConcept title: ")
   (let* ((identifier (org-id-uuid))
-         (filename (concat (downcase (replace-regexp-in-string "[^[:alnum:]]" "-" title))
-                         ".org"))
+         (filename (concat (downcase (replace-regexp-in-string "[^[:alnum:]]" "-" title)) ".org"))
          (filepath (expand-file-name filename concept-relationships-path))
+         (properties-str (when properties
+                           (concat "\n" properties "\n")))
          (org-content (format "* %s
 :PROPERTIES:
 :ID: %s
 :CREATED: [%s]
-:END:\n\n"
-                              title
-                              identifier
-                              (format-time-string "%Y-%m-%d %a %H:%M"))))
+:END:%s\n\n"
+                                title
+                                identifier
+                                (format-time-string "%Y-%m-%d %a %H:%M")
+                                (or properties-str ""))))
     (when (file-exists-p filepath)
       (error "Concept entry already exists: %s" filepath))
     (with-temp-file filepath
       (insert org-content))
-    (find-file filepath)
-    identifier))
+    (find-file filepath)))
 
 (defun concept-relationships-get-entry (&optional id)
   "Get concept entry by ID or use current buffer entry."
   (let ((entry-id (or id
-                       (when (buffer-file-name)
-                         (org-id-get-create)))))
+                      (when (buffer-file-name)
+                        (org-id-get-create)))))
     (when entry-id
       (or (seq-find
             (lambda (e)
               (string= (plist-get e :id) entry-id))
             (append (concept-relationships-files)
                     (concept-relationships-headlines)))
-          (error "Concept entry not found: %s" entry-id)))))
+          (seq-find
+            (lambda (e)
+              (string= (plist-get e :id) entry-id))
+            (concept-relationships-files))
+          (seq-find
+            (lambda (e)
+              (string= (plist-get e :id) entry-id))
+            (concept-relationships-headlines))))))
 
-;;;; Relationship Management
-
-(defun concept-relationships-add-relationship (source target type &optional properties)
-  "Add relationship of TYPE from SOURCE to TARGET with PROPERTIES."
+(defun concept-relationships-add-relationship (source target type)
+  "Add relationship of TYPE from SOURCE to TARGET."
   (let* ((source-entry (concept-relationships-get-entry source))
          (target-id (if (stringp target)
                         target
@@ -301,11 +288,9 @@ will be considered concept nodes."
           (when (or (not existing-relationships)
                     (not (string-match-p (regexp-quote target-id) existing-relationships)))
             (org-entry-put (point-min) property-name
-                            (concat (or existing-relationships "")
-                                    (unless existing-relationships "")
-                                    target-id " "))
-            (message "Added %s relationship: %s → %s" type source target))))
-      (concept-relationships-save-data))))
+              (concat (or existing-relationships "")
+                target-id " "))
+            (message "Added %s relationship: %s → %s" type source target)))))))
 
 (defun concept-relationships--type-to-property (type)
   "Convert relationship TYPE to property name."
@@ -316,8 +301,7 @@ will be considered concept nodes."
     ('friend concept-relationships-friends-property-name)
     ('evidence concept-relationships-evidence-property-name)
     ('method concept-relationships-methods-property-name)
-    ('evolution concept-relationships-evolution-property-name)
-    (_ (error "Unknown relationship type: %s" type))))
+    ('evolution concept-relationships-evolution-property-name)))
 
 (defun concept-relationships-remove-relationship (source target type)
   "Remove relationship of TYPE from SOURCE to TARGET."
@@ -329,34 +313,29 @@ will be considered concept nodes."
     (when (and source-entry target-id)
       (with-current-buffer (find-file-noselect (plist-get source-entry :file))
         (let* ((existing-relationships (org-entry-get (point-min) property-name))
-                (new-relationships (replace-regexp-in-string
-                                   (format "\\s*%s\\s*" target-id)
-                                   ""
-                                   existing-relationships)))
+               (new-relationships (replace-regexp-in-string
+                                    (format "\\s*%s\\s*" target-id)
+                                    ""
+                                    existing-relationships)))
           (org-entry-put (point-min) property-name
-                          (string-trim new-relationships))
-          (message "Removed %s relationship: %s → %s" type source target))))))
+            (string-trim new-relationships)))))))
 
-;;;; Interactive Commands
-
-;;;###autoload
 (defun concept-relationships-visualize (&optional entry)
   "Visualize concept ENTRY and its relationships."
   (interactive)
   (let* ((target-entry (or entry
-                         (when (buffer-file-name)
-                           (concept-relationships--current-entry))
-                         (concept-relationships-read-entry "Visualize concept: ")))
+                           (when (buffer-file-name)
+                             (concept-relationships--current-entry))
+                           (concept-relationships-read-entry "Visualize concept: ")))
          (vis-buffer (get-buffer-create "*Concept Relationships*")))
     (switch-to-buffer vis-buffer)
     (setq-local concept-relationships-vis-current-entry target-entry)
-    (concept-relationships-mode)
-    (concept-relationships--update-visualization)))
+    (concept-relationships-mode)))
 
 (defun concept-relationships--current-entry ()
   "Get concept entry from current buffer."
   (when (and (buffer-file-name)
-               (member (file-name-extension (buffer-file-name)) '("org")))
+             (member (file-name-extension (buffer-file-name)) '("org")))
     (let ((id (org-id-get)))
       (when id
         (concept-relationships-get-entry id)))))
@@ -366,82 +345,80 @@ will be considered concept nodes."
   (let* ((all-entries (append (concept-relationships-files)
                                (concept-relationships-headlines)))
          (entry-names (mapcar
-                      (lambda (e)
-                        (or (plist-get e :headline)
+                        (lambda (e)
+                          (or (plist-get e :headline)
                               (file-name-base (plist-get e :file))))
-                      all-entries))
+                        all-entries))
          (selection (completing-read prompt entry-names)))
     (seq-find
-     (lambda (e)
-       (string= (or (plist-get e :headline)
+      (lambda (e)
+        (string= (or (plist-get e :headline)
                      (file-name-base (plist-get e :file)))
-                selection))
-     all-entries)))
+                 selection))
+      all-entries)))
 
-;;;###autoload
+;;; Add Relationship Functions
+
 (defun concept-relationships-add-child (&optional entry)
   "Add child relationship to ENTRY."
   (interactive)
   (let* ((source (or entry
                      (concept-relationships--current-entry)))
          (source-id (plist-get source :id))
-         (target (concept-relationships-read-entry "Add child to %s: "
-                                            (or (plist-get source :headline)
-                                                  (file-name-base (plist-get source :file)))))
+         (target (concept-relationships-read-entry (format "Add child to %s: "
+                                                           (or (plist-get source :headline)
+                                                               (file-name-base (plist-get source :file))))))
          (target-id (plist-get target :id)))
     (concept-relationships-add-relationship source-id target-id 'child)
     (concept-relationships-add-relationship target-id source-id 'parent)
     (when concept-relationships-vis-current-entry
       (concept-relationships--update-visualization))))
 
-;;;###autoload
 (defun concept-relationships-add-parent (&optional entry)
   "Add parent relationship to ENTRY."
   (interactive)
   (let* ((source (or entry
                      (concept-relationships--current-entry)))
          (source-id (plist-get source :id))
-         (target (concept-relationships-read-entry "Add parent to %s: "
-                                            (or (plist-get source :headline)
-                                                  (file-name-base (plist-get source :file)))))
+         (target (concept-relationships-read-entry (format "Add parent to %s: "
+                                                           (or (plist-get source :headline)
+                                                               (file-name-base (plist-get source :file))))))
          (target-id (plist-get target :id)))
     (concept-relationships-add-relationship source-id target-id 'parent)
     (concept-relationships-add-relationship target-id source-id 'child)
     (when concept-relationships-vis-current-entry
       (concept-relationships--update-visualization))))
 
-;;;###autoload
 (defun concept-relationships-add-friendship (&optional entry)
   "Add friend (cross-disciplinary) relationship to ENTRY."
   (interactive)
   (let* ((source (or entry
                      (concept-relationships--current-entry)))
          (source-id (plist-get source :id))
-         (target (concept-relationships-read-entry "Add friend to %s: "
-                                            (or (plist-get source :headline)
-                                                  (file-name-base (plist-get source :file)))))
+         (target (concept-relationships-read-entry (format "Add friend to %s: "
+                                                           (or (plist-get source :headline)
+                                                               (file-name-base (plist-get source :file))))))
          (target-id (plist-get target :id)))
     (concept-relationships-add-relationship source-id target-id 'friend)
     (concept-relationships-add-relationship target-id source-id 'friend)
     (when concept-relationships-vis-current-entry
       (concept-relationships--update-visualization))))
 
-;;;###autoload
 (defun concept-relationships-add-evidence (&optional entry)
   "Add evidence relationship to ENTRY."
   (interactive)
   (let* ((source (or entry
                      (concept-relationships--current-entry)))
          (source-id (plist-get source :id))
-         (target (concept-relationships-read-entry "Add evidence to %s: "
-                                            (or (plist-get source :headline)
-                                                  (file-name-base (plist-get source :file)))))
+         (target (concept-relationships-read-entry (format "Add evidence to %s: "
+                                                           (or (plist-get source :headline)
+                                                               (file-name-base (plist-get source :file))))))
          (target-id (plist-get target :id)))
     (concept-relationships-add-relationship source-id target-id 'evidence)
     (when concept-relationships-vis-current-entry
       (concept-relationships--update-visualization))))
 
-;;;; Visualization Mode
+;;; Visualization Mode
 
 (defvar concept-relationships-mode-map
   (let ((map (make-sparse-keymap)))
@@ -452,13 +429,12 @@ will be considered concept nodes."
     (define-key map "v" 'concept-relationships-visualize)
     (define-key map "g" 'concept-relationships--update-visualization)
     map)
-  "Keymap for `concept-relationships-mode'.")
+  "Keymap for concept-relationships-mode.")
 
 (define-derived-mode concept-relationships-mode special-mode "Concept Relationships"
   "Major mode for visualizing concept relationships."
   :group 'concept-relationships
-  (setq header-line-format "Concept Relationships: Press 'c' to add child, 'p' for parent, 'f' for friend, 'e' for evidence, 'v' to visualize")
-  (use-local-map concept-relationships-mode-map))
+  (setq header-line-format "Concept Relationships: Press 'c' to add child, 'p' for parent, 'f' for friend, 'e' for evidence, 'v' to visualize"))
 
 (defun concept-relationships--update-visualization ()
   "Update the concept relationships visualization."
@@ -466,7 +442,7 @@ will be considered concept nodes."
     (error "No current concept to visualize"))
   (let* ((entry concept-relationships-vis-current-entry)
          (title (or (plist-get entry :headline)
-                     (file-name-base (plist-get entry :file)))
+                    (file-name-base (plist-get entry :file))))
          (parents (concept-relationships--get-relations entry 'parent))
          (children (concept-relationships--get-relations entry 'child))
          (siblings (concept-relationships--get-relations entry 'sibling))
@@ -483,10 +459,9 @@ will be considered concept nodes."
 
 (defun concept-relationships--get-relations (entry type)
   "Get relations of TYPE for ENTRY."
-  (let* ((id (plist-get entry :id))
-         (property-name (concept-relationships--type-to-property type))
+  (let* ((property-name (concept-relationships--type-to-property type))
          (relations-string (with-current-buffer (find-file-noselect (plist-get entry :file))
-                               (org-entry-get (point-min) property-name)))
+                             (org-entry-get (point-min) property-name)))
          (relation-ids (when relations-string
                           (split-string relations-string)))
          (relations '()))
@@ -503,7 +478,7 @@ will be considered concept nodes."
       (insert "  (none)\n")
     (dolist (entry entries)
       (let* ((name (or (plist-get entry :headline)
-                         (file-name-base (plist-get entry :file))))
+                       (file-name-base (plist-get entry :file)))))
         (insert "  * " name "\n")))))
 
 (provide 'concept-relationships)
